@@ -63,10 +63,10 @@ class Facebook(commands.Cog):
             # channel = self.bot.get_channel(1361993681934225548)
             embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
             embed.add_field(name='貼文連結', value=url, inline=False)
-            embed.add_field(name='貼文內容', value=content, inline=False) # type: ignore
+            embed.add_field(name='貼文內容', value=content, inline=False) 
             file = discord.File(f"1.jpg", filename=f"1.jpg")
             embed.set_image(url=f"attachment://1.jpg")
-            await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file) # type: ignore
+            await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file) 
             # await channel.send(embed=embed, file=file)
             os.remove('1.jpg')
             
@@ -128,7 +128,7 @@ class Facebook(commands.Cog):
                 response = requests.get(url, headers=self.headers,allow_redirects=True)
                 pattern = r'"message_preferred_body":(.*?)},"container'
                 match = re.search(pattern, response.text, re.DOTALL)
-                temp = json.loads('{"message_preferred_body":' + match.group(1) + '}}') # type: ignore
+                temp = json.loads('{"message_preferred_body":' + match.group(1) + '}}') 
                 text = temp["message_preferred_body"]['text']
                 title = bytes(text,'utf-8').decode(encoding="utf-8", errors="ignore")
                 response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
@@ -137,8 +137,8 @@ class Facebook(commands.Cog):
             uri = data['styles']['attachment']['all_subattachments']['nodes'][0]["media"]['viewer_image']['uri'].replace('\\','')
             response = requests.get(url, headers=self.headers,cookies=self.cookies, allow_redirects=True)
             soup = BeautifulSoup(response.text, 'html.parser')
-            title = soup.title.string # type: ignore
-        return title, uri, response.url # type: ignore
+            title = soup.title.string 
+        return title, uri, response.url 
 
 def setup(bot: commands.Bot):
     bot.add_cog(Facebook(bot))
