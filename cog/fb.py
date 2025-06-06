@@ -124,7 +124,18 @@ class Facebook(commands.Cog):
                     response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
             else:
                 url = data['styles']['attachment']['media']['url'].replace('\\','')
-                uri = data['styles']['attachment']['media']['placeholder_image']['uri'].replace('\\','')
+                media = data['styles']['attachment']['media']
+                if 'placeholder_image' in media and 'uri' in media['placeholder_image']:
+                    uri = media['placeholder_image']['uri'].replace('\\','')
+                elif 'viewer_image' in media and 'uri' in media['viewer_image']:
+                    uri = media['viewer_image']['uri'].replace('\\','')
+                elif 'image' in media and 'uri' in media['image']:
+                    uri = media['image']['uri'].replace('\\','')
+                elif 'photo_image' in media and 'uri' in media['photo_image']:
+                    uri = media['photo_image']['uri'].replace('\\','')
+                else:
+                    print("Warning: Could not find image URI in expected locations")
+                    uri = url  # フォールバックとしてURLを使用
                 response = requests.get(url, headers=self.headers,allow_redirects=True)
                 pattern = r'"message_preferred_body":(.*?)},"container'
                 match = re.search(pattern, response.text, re.DOTALL)
