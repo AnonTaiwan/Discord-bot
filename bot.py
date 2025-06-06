@@ -11,7 +11,7 @@ for i in os.listdir("./cog"):
 
 @bot.event
 async def on_ready():
-    game = discord.Game("蔚藍檔案")
+    game = discord.Game("Blue Archive")
     print(f'Logged in as {bot.user}')
     await bot.change_presence(status=discord.Status.online, activity=game)
 
