@@ -125,8 +125,8 @@ class Facebook(commands.Cog):
             else:
                 url = data['styles']['attachment']['media']['url'].replace('\\','')
                 media = data['styles']['attachment']['media']
-                if 'placeholder_image' in media and 'uri' in media['placeholder_image']:
-                    uri = media['placeholder_image']['uri'].replace('\\','')
+                if 'photo_image' in media and 'uri' in media['photo_image']:
+                    uri = media['photo_image']['uri'].replace('\\','')
                 elif 'viewer_image' in media and 'uri' in media['viewer_image']:
                     uri = media['viewer_image']['uri'].replace('\\','')
                 elif 'image' in media and 'uri' in media['image']:
