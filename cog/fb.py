@@ -73,12 +73,12 @@ class Facebook(commands.Cog):
             
     @tasks.loop(hours=48)
     async def UpdateCookie(self):
-        await asyncio.sleep(random.randint(1, 5)*3600)
         response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers)
         self.cookies = response.cookies.get_dict()
         self.cookies['dpr'] = '1.5'
         self.cookies['wd'] = '798x847'
         print("Cookies updated:", self.cookies)
+        await asyncio.sleep(random.randint(1, 5)*3600)
             
     def get_data(self):
         response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers,cookies=self.cookies)
