@@ -36,15 +36,16 @@ class Facebook(commands.Cog):
         'sb': 'v4RCaHRXccrV3Nutc30JS9Jo',
         'dpr': '1.5',
         'wd': '798x847',
-    }
+        }
     
     @commands.Cog.listener()
     async def on_ready(self):
         data = self.get_data()
         self.content, self.image, self.latest = self.filte_data(data)
         print(f"Latest post URL: {self.latest}")
-        self.check_data.start()
         self.UpdateCookie.start()
+        self.check_data.start()
+        
         
     @tasks.loop(minutes=4)
     async def check_data(self):
@@ -70,7 +71,7 @@ class Facebook(commands.Cog):
             # await channel.send(embed=embed, file=file)
             os.remove('1.jpg')
             
-    @tasks.loop(hours=72)
+    @tasks.loop(hours=48)
     async def UpdateCookie(self):
         await asyncio.sleep(random.randint(1, 5)*3600)
         response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers)
@@ -124,7 +125,7 @@ class Facebook(commands.Cog):
                     response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
             else:
                 url = data['styles']['attachment']['media']['url'].replace('\\','')
-                uri = data['styles']['attachment']['media']['placeholder_image']['uri'].replace('\\','')
+                uri = data['styles']['attachment']['media']['photo_image']['uri'].replace('\\','')
                 response = requests.get(url, headers=self.headers,allow_redirects=True)
                 pattern = r'"message_preferred_body":(.*?)},"container'
                 match = re.search(pattern, response.text, re.DOTALL)
