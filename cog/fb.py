@@ -67,9 +67,10 @@ class Facebook(commands.Cog):
             embed.add_field(name='貼文內容', value=content, inline=False)
             file = discord.File(f"1.jpg", filename=f"1.jpg")
             embed.set_image(url=f"attachment://1.jpg")
-            await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
+            msg = await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
             # await channel.send(embed=embed, file=file)
             os.remove('1.jpg')
+            await msg.publish()
             
     @tasks.loop(hours=48)
     async def UpdateCookie(self):
