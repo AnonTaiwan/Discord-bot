@@ -1,0 +1,30 @@
+[Unit]
+Description=Facebook Bot Service (py-cord)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/server/fb_update/main
+ExecStart=/usr/bin/python3 /home/ubuntu/server/fb_update/main/bot.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# 環境變數
+Environment=PYTHONUNBUFFERED=1
+
+# py-cord 相關設置
+# 本服務使用 py-cord 而不是 discord.py
+# 支持斜線命令和 Bridge 功能
+
+# 安全設置
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/ubuntu/server/fb_update/main/logs
+
+[Install]
+WantedBy=multi-user.target 

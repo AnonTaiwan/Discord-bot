@@ -1,0 +1,14 @@
+# Facebook Bot 依賴套件
+# 核心套件
+py-cord>=2.4.0
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+
+# 可選套件（提升性能）
+lxml>=4.9.0
+html5lib>=1.1
+
+# 開發套件（可選）
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=5.0.0 

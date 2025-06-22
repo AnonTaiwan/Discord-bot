@@ -8,6 +8,8 @@ import os
 import shutil
 import random
 import asyncio
+import logging
+from datetime import datetime
 
 class Facebook(commands.Cog):
     def __init__(self,bot: commands.Bot):
@@ -15,6 +17,10 @@ class Facebook(commands.Cog):
         self.latest = None
         self.content = None
         self.image = None
+        
+        # 設置日誌
+        self.setup_logging()
+        
         self.headers = {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'accept-language': 'zh-TW,zh;q=0.9',
@@ -38,69 +44,132 @@ class Facebook(commands.Cog):
         'wd': '798x847',
         }
     
+    def setup_logging(self):
+        """設置日誌系統"""
+        # 創建 logs 目錄（如果不存在）
+        if not os.path.exists('logs'):
+            os.makedirs('logs')
+        
+        # 設置日誌文件名（包含日期）
+        log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
+        
+        # 配置日誌格式
+        log_format = '%(asctime)s - %(levelname)s - %(message)s'
+        date_format = '%Y-%m-%d %H:%M:%S'
+        
+        # 配置日誌
+        logging.basicConfig(
+            level=logging.INFO,
+            format=log_format,
+            datefmt=date_format,
+            handlers=[
+                logging.FileHandler(log_filename, encoding='utf-8'),
+                logging.StreamHandler()  # 同時輸出到控制台
+            ]
+        )
+        
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("日誌系統初始化完成")
+    
     @commands.Cog.listener()
     async def on_ready(self):
-        data = self.get_data()
-        self.content, self.image, self.latest = self.filte_data(data)
-        print(f"Latest post URL: {self.latest}")
-        self.UpdateCookie.start()
-        self.check_data.start()
-        
+        try:
+            self.logger.info("開始初始化 Facebook 監控...")
+            data = self.get_data()
+            if data is None:
+                self.logger.warning("無法獲取 Facebook 數據，跳過初始化")
+                return
+            self.content, self.image, self.latest = self.filte_data(data)
+            self.logger.info(f"最新貼文 URL: {self.latest}")
+            self.UpdateCookie.start()
+            self.check_data.start()
+            self.logger.info("Facebook 監控初始化完成")
+        except Exception as e:
+            self.logger.error(f"初始化過程中發生錯誤: {e}")
+            # 即使初始化失敗，也要啟動任務
+            self.UpdateCookie.start()
+            self.check_data.start()
         
     @tasks.loop(minutes=4)
     async def check_data(self):
-        await asyncio.sleep(random.randint(1, 10))
-        data = self.get_data()
-        content, uri, url = self.filte_data(data)
-        if url != self.latest and content != self.content and uri != self.image:
-            print(f"New post detected: {url}")
-            with open('1.jpg', 'wb') as img_file:
-                img_response = requests.get(url = uri, headers=self.headers, allow_redirects=True)
-                img_file.write(img_response.content)
-            self.latest = url
-            self.content = content
-            self.image = uri
-            channel = self.bot.get_channel(1357294484903297127)
-            # channel = self.bot.get_channel(1361993681934225548)
-            embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
-            embed.add_field(name='貼文連結', value=url, inline=False)
-            embed.add_field(name='貼文內容', value=content, inline=False)
-            file = discord.File(f"1.jpg", filename=f"1.jpg")
-            embed.set_image(url=f"attachment://1.jpg")
-            msg = await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
-            # await channel.send(embed=embed, file=file)
-            os.remove('1.jpg')
-            await msg.publish()
+        try:
+            await asyncio.sleep(random.randint(1, 10))
+            data = self.get_data()
+            if data is None:
+                self.logger.warning("在 check_data 中無法獲取 Facebook 數據")
+                return
+            content, uri, url = self.filte_data(data)
+            if url != self.latest and content != self.content and uri != self.image:
+                self.logger.info(f"檢測到新貼文: {url}")
+                with open('1.jpg', 'wb') as img_file:
+                    img_response = requests.get(url = uri, headers=self.headers, allow_redirects=True)
+                    img_file.write(img_response.content)
+                self.latest = url
+                self.content = content
+                self.image = uri
+                channel = self.bot.get_channel(1357294484903297127)
+                # channel = self.bot.get_channel(1361993681934225548)
+                embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
+                embed.add_field(name='貼文連結', value=url, inline=False)
+                embed.add_field(name='貼文內容', value=content, inline=False)
+                file = discord.File(f"1.jpg", filename=f"1.jpg")
+                embed.set_image(url=f"attachment://1.jpg")
+                msg = await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
+                # await channel.send(embed=embed, file=file)
+                os.remove('1.jpg')
+                await msg.publish()
+                self.logger.info("新貼文已成功發送到 Discord")
+        except Exception as e:
+            self.logger.error(f"check_data 中發生錯誤: {e}")
             
     @tasks.loop(hours=48)
     async def UpdateCookie(self):
-        response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers)
-        self.cookies = response.cookies.get_dict()
-        self.cookies['dpr'] = '1.5'
-        self.cookies['wd'] = '798x847'
-        print("Cookies updated:", self.cookies)
-        await asyncio.sleep(random.randint(1, 5)*3600)
+        try:
+            self.logger.info("開始更新 Cookies...")
+            response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers)
+            self.cookies = response.cookies.get_dict()
+            self.cookies['dpr'] = '1.5'
+            self.cookies['wd'] = '798x847'
+            self.logger.info(f"Cookies 已更新: {self.cookies}")
+            await asyncio.sleep(random.randint(1, 5)*3600)
+        except Exception as e:
+            self.logger.error(f"更新 Cookies 時發生錯誤: {e}")
             
     def get_data(self):
-        response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers,cookies=self.cookies)
-        response.encoding = 'utf-8' 
-        pattern = r"\"attachments\":\[{\"styles\"(.*?)}}}"  # 抓取 styles 到 attachments 結尾附近
-        match = re.search(pattern, response.text, re.DOTALL)
-        if match:
-            text = '{"styles"' + match.group(1)
-            cnt = 0
-            for i in range(len(text)):
-                if text[i] == '{':
-                    cnt += 1
-                elif text[i] == '}':
-                    cnt -= 1
-            try:
-                for i in range(cnt):
-                    text += '}'
-                return json.loads(text)
-            except json.JSONDecodeError as e:
-                print("JSON decode error:", e)
+        try:
+            response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers,cookies=self.cookies)
+            response.encoding = 'utf-8' 
+            
+            # 檢查回應狀態
+            if response.status_code != 200:
+                self.logger.warning(f"Facebook 返回狀態碼 {response.status_code}")
                 return None
+                
+            pattern = r"\"attachments\":\[{\"styles\"(.*?)}}}"  # 抓取 styles 到 attachments 結尾附近
+            match = re.search(pattern, response.text, re.DOTALL)
+            if match:
+                text = '{"styles"' + match.group(1)
+                cnt = 0
+                for i in range(len(text)):
+                    if text[i] == '{':
+                        cnt += 1
+                    elif text[i] == '}':
+                        cnt -= 1
+                try:
+                    for i in range(cnt):
+                        text += '}'
+                    return json.loads(text)
+                except json.JSONDecodeError as e:
+                    self.logger.error(f"JSON 解析錯誤: {e}")
+                    return None
+            else:
+                self.logger.warning("在 Facebook 回應中找不到 attachments 模式")
+                # 可以添加調試信息來查看回應內容
+                self.logger.debug(f"回應長度: {len(response.text)}")
+                return None
+        except Exception as e:
+            self.logger.error(f"get_data 中發生錯誤: {e}")
+            return None
     
     def filte_data(self,data):
         if 'media' in data['styles']['attachment']:
@@ -124,22 +193,39 @@ class Facebook(commands.Cog):
                     text = temp['message']['text']
                     title = bytes(text,'utf-8').decode(encoding="utf-8", errors="ignore")
                     response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
+                else:
+                    # 如果找不到匹配，使用預設值
+                    self.logger.warning("找不到影片訊息模式")
+                    title = "無法解析的影片貼文"
+                    response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
             else:
                 url = data['styles']['attachment']['media']['url'].replace('\\','')
                 uri = data['styles']['attachment']['media']['photo_image']['uri'].replace('\\','')
                 response = requests.get(url, headers=self.headers,allow_redirects=True)
                 pattern = r'"message_preferred_body":(.*?)},"container'
                 match = re.search(pattern, response.text, re.DOTALL)
-                temp = json.loads('{"message_preferred_body":' + match.group(1) + '}}')
-                text = temp["message_preferred_body"]['text']
-                title = bytes(text,'utf-8').decode(encoding="utf-8", errors="ignore")
-                response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
+                if match:
+                    temp = json.loads('{"message_preferred_body":' + match.group(1) + '}}')
+                    text = temp["message_preferred_body"]['text']
+                    title = bytes(text,'utf-8').decode(encoding="utf-8", errors="ignore")
+                    response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
+                else:
+                    # 如果找不到匹配，嘗試其他模式或使用預設值
+                    self.logger.warning("找不到 message_preferred_body 模式")
+                    # 嘗試其他可能的模式
+                    alt_pattern = r'"message":{"text":"(.*?)"'
+                    alt_match = re.search(alt_pattern, response.text, re.DOTALL)
+                    if alt_match:
+                        title = alt_match.group(1)
+                    else:
+                        title = "無法解析的圖片貼文"
+                    response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
         else:
             url = data['styles']['attachment']['url'].replace('\\','')
             uri = data['styles']['attachment']['all_subattachments']['nodes'][0]["media"]['viewer_image']['uri'].replace('\\','')
             response = requests.get(url, headers=self.headers,cookies=self.cookies, allow_redirects=True)
             soup = BeautifulSoup(response.text, 'html.parser')
-            title = soup.title.string
+            title = soup.title.string if soup.title else "無法解析的貼文"
         return title, uri, response.url
 
 def setup(bot: commands.Bot):
