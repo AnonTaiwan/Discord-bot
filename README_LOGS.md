@@ -25,57 +25,62 @@ fb_bot_YYYYMMDD.log
 
 ## 日誌查看工具
 
-我們提供了一個專門的日誌查看工具 `view_logs.py`，支持多種操作：
+我們提供了一個專門的日誌查看工具，支持多種操作：
 
-### 1. 列出所有日誌文件
+### 推薦使用管理腳本（簡單方式）
 ```bash
-python view_logs.py list
+# 列出所有日誌文件
+./manage.sh logs list
+
+# 查看日誌文件
+./manage.sh logs view --file fb_bot_20241201.log
+
+# 實時跟蹤日誌
+./manage.sh logs view --file fb_bot_20241201.log --follow
+
+# 搜索日誌
+./manage.sh logs search --file fb_bot_20241201.log --keyword 錯誤
+
+# 清理舊日誌
+./manage.sh logs clean
 ```
 
-### 2. 查看日誌文件
+### 直接使用工具（進階方式）
 ```bash
-# 查看最後 50 行
-python view_logs.py view --file fb_bot_20241201.log
+# 列出所有日誌文件
+python3 scripts/tools/view_logs.py list
 
-# 查看最後 100 行
-python view_logs.py view --file fb_bot_20241201.log --lines 100
+# 查看日誌文件
+python3 scripts/tools/view_logs.py view --file fb_bot_20241201.log
 
 # 實時跟蹤日誌（類似 tail -f）
-python view_logs.py view --file fb_bot_20241201.log --follow
-```
+python3 scripts/tools/view_logs.py view --file fb_bot_20241201.log --follow
 
-### 3. 搜索日誌
-```bash
-# 搜索包含 "錯誤" 的行
-python view_logs.py search --file fb_bot_20241201.log --keyword 錯誤
+# 搜索日誌
+python3 scripts/tools/view_logs.py search --file fb_bot_20241201.log --keyword 錯誤
 
-# 搜索包含 "新貼文" 的行
-python view_logs.py search --file fb_bot_20241201.log --keyword 新貼文
-```
-
-### 4. 清理舊日誌
-```bash
-# 清理 7 天前的日誌（預設）
-python view_logs.py clean
-
-# 清理 30 天前的日誌
-python view_logs.py clean --days 30
+# 清理舊日誌
+python3 scripts/tools/view_logs.py clean
 ```
 
 ## 常用命令示例
 
 ### 查看今天的日誌
 ```bash
-# 獲取今天的日期
+# 使用管理腳本
 TODAY=$(date +%Y%m%d)
-python view_logs.py view --file fb_bot_${TODAY}.log
+./manage.sh logs view --file fb_bot_${TODAY}.log
+
+# 或直接使用工具
+TODAY=$(date +%Y%m%d)
+python3 scripts/tools/view_logs.py view --file fb_bot_${TODAY}.log
 ```
 
 ### 實時監控程式運行
 ```bash
 # 實時跟蹤今天的日誌
 TODAY=$(date +%Y%m%d)
-python view_logs.py view --file fb_bot_${TODAY}.log --follow
+./manage.sh logs view --file fb_bot_${TODAY}.log --follow
 ```
 
 ### 搜索錯誤信息
@@ -83,7 +88,7 @@ python view_logs.py view --file fb_bot_${TODAY}.log --follow
 # 搜索所有日誌文件中的錯誤
 for log in logs/fb_bot_*.log; do
     echo "=== $log ==="
-    python view_logs.py search --file $(basename $log) --keyword 錯誤
+    ./manage.sh logs search --file $(basename $log) --keyword 錯誤
 done
 ```
 
@@ -123,6 +128,11 @@ done
 2. 檢查程式是否正常運行
 3. 查看是否有權限問題
 
+### 如果 Python 命令不工作
+1. 嘗試使用 `python3` 而不是 `python`
+2. 檢查 Python 是否已安裝
+3. 使用管理腳本：`./manage.sh logs`
+
 ## 自動化建議
 
 您可以設置 cron 任務來自動清理舊日誌：
@@ -132,7 +142,7 @@ done
 crontab -e
 
 # 添加以下行（每天凌晨 2 點清理 7 天前的日誌）
-0 2 * * * cd /path/to/your/bot && python view_logs.py clean --days 7
+0 2 * * * cd /path/to/your/bot && ./manage.sh logs clean --days 7
 ```
 
 ## 注意事項
@@ -141,10 +151,12 @@ crontab -e
 2. 日誌包含敏感信息，請妥善保管
 3. 在生產環境中，建議設置日誌輪轉
 4. 如果程式崩潰，日誌文件可能不會正確關閉
+5. 推薦使用 `./manage.sh logs` 命令，它會自動處理 Python 路徑問題
 
 ## 聯繫支持
 
 如果您在使用日誌系統時遇到問題，請檢查：
 1. Python 版本是否支持（建議 3.7+）
 2. 是否有足夠的磁盤空間
-3. 程式是否有適當的權限 
+3. 程式是否有適當的權限
+4. 嘗試使用 `./manage.sh logs` 而不是直接調用 Python 

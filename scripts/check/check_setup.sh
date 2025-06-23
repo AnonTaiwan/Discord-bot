@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 載入 Python 執行器
-source "$(dirname "$0")/python_runner.sh"
+source "$(dirname "$0")/../tools/python_runner.sh"
 
 echo "=== Facebook Bot 設置檢查 ==="
 echo ""
@@ -41,7 +41,7 @@ if [ ${#MISSING_PACKAGES[@]} -gt 0 ]; then
     echo "pip install ${MISSING_PACKAGES[*]}"
     echo ""
     echo "或者運行環境設置腳本："
-    echo "./setup_env.sh"
+    echo "./scripts/setup/setup_env.sh"
     exit 1
 fi
 
@@ -73,7 +73,7 @@ done
 # 檢查腳本權限
 echo ""
 echo "5. 檢查腳本權限..."
-SCRIPTS=("start_bot.sh" "stop_bot.sh" "status_bot.sh" "restart_bot.sh" "python_runner.sh")
+SCRIPTS=("start_bot.sh" "stop_bot.sh" "status_bot.sh" "restart_bot.sh" "manage.sh")
 for script in "${SCRIPTS[@]}"; do
     if [ -f "$script" ]; then
         if [ -x "$script" ]; then
@@ -111,7 +111,8 @@ echo "  ./start_bot.sh    - 啟動 Bot"
 echo "  ./status_bot.sh   - 檢查狀態"
 echo "  ./stop_bot.sh     - 停止 Bot"
 echo "  ./restart_bot.sh  - 重啟 Bot"
+echo "  ./manage.sh       - 管理工具"
 echo ""
 echo "日誌查看："
-echo "  python view_logs.py list                    - 列出日誌文件"
-echo "  python view_logs.py view --file fb_bot_$(date +%Y%m%d).log --follow  - 實時查看日誌" 
+echo "  ./manage.sh logs list                    - 列出日誌文件"
+echo "  ./manage.sh logs view --file fb_bot_\$(date +%Y%m%d).log --follow  - 實時查看日誌" 

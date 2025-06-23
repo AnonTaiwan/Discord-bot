@@ -5,7 +5,7 @@
 # 自動檢測和使用虛擬環境
 
 # 載入 Python 執行器
-source "$(dirname "$0")/python_runner.sh"
+source "$(dirname "$0")/scripts/tools/python_runner.sh"
 
 echo "正在啟動 Facebook Bot..."
 

@@ -5,7 +5,7 @@
 ### 1. 環境設置
 ```bash
 # 運行環境設置腳本（會自動檢測或創建虛擬環境）
-./setup_env.sh
+./manage.sh setup
 ```
 
 這個腳本會：
@@ -17,7 +17,7 @@
 ### 2. 完整環境檢查
 ```bash
 # 運行完整環境檢查（推薦）
-./check_environment.sh
+./manage.sh check
 ```
 
 這個腳本會檢查：
@@ -37,51 +37,57 @@ bot.run('your_discord_token_here')
 ### 4. 檢查設置
 ```bash
 # 檢查基本設置
-./check_setup.sh
+./manage.sh check-env
 
 # 檢查 py-cord 設置
-./check_pycord.sh
+./manage.sh check-py
 ```
 
 ### 5. 啟動 Bot
 ```bash
 # 啟動 Bot（會自動使用虛擬環境）
-./start_bot.sh
+./manage.sh start
 ```
 
 ## 📋 管理命令
 
 ### 基本操作
 ```bash
-./start_bot.sh    # 啟動 Bot
-./status_bot.sh   # 檢查狀態
-./stop_bot.sh     # 停止 Bot
-./restart_bot.sh  # 重啟 Bot
+./manage.sh start     # 啟動 Bot
+./manage.sh status    # 檢查狀態
+./manage.sh stop      # 停止 Bot
+./manage.sh restart   # 重啟 Bot
 ```
 
 ### 環境檢查
 ```bash
-./check_environment.sh  # 完整環境檢查
-./check_setup.sh        # 基本設置檢查
-./check_pycord.sh       # py-cord 專用檢查
+./manage.sh check     # 完整環境檢查
+./manage.sh check-env # 基本設置檢查
+./manage.sh check-py  # py-cord 專用檢查
 ```
 
 ### 專案維護
 ```bash
-./cleanup_project.sh    # 清理專案文件
-./setup_env.sh          # 重新設置環境
+./manage.sh cleanup   # 清理專案文件
+./manage.sh setup     # 重新設置環境
 ```
 
 ### 日誌查看
 ```bash
+# 列出所有日誌文件
+./manage.sh logs list
+
 # 查看今天的日誌
-python view_logs.py view --file fb_bot_$(date +%Y%m%d).log
+./manage.sh logs view --file fb_bot_$(date +%Y%m%d).log
 
 # 實時跟蹤日誌
-python view_logs.py view --file fb_bot_$(date +%Y%m%d).log --follow
+./manage.sh logs view --file fb_bot_$(date +%Y%m%d).log --follow
 
-# 檢查虛擬環境
-python view_logs.py --check-env
+# 搜索日誌
+./manage.sh logs search --file fb_bot_$(date +%Y%m%d).log --keyword 錯誤
+
+# 清理舊日誌
+./manage.sh logs clean
 ```
 
 ## 🔧 虛擬環境支持
@@ -117,13 +123,13 @@ pip install py-cord requests beautifulsoup4 lxml html5lib
    python3 --version
    
    # 或運行環境設置
-   ./setup_env.sh
+   ./manage.sh setup
    ```
 
 2. **缺少套件**
    ```bash
    # 自動安裝
-   ./setup_env.sh
+   ./manage.sh setup
    
    # 或手動安裝（注意使用 py-cord）
    pip install py-cord requests beautifulsoup4 lxml html5lib
@@ -138,16 +144,16 @@ pip install py-cord requests beautifulsoup4 lxml html5lib
 4. **虛擬環境問題**
    ```bash
    # 檢查虛擬環境狀態
-   python view_logs.py --check-env
+   ./manage.sh logs --check-env
    
    # 重新設置環境
-   ./setup_env.sh
+   ./manage.sh setup
    ```
 
 5. **py-cord 相關問題**
    ```bash
    # 檢查 py-cord 版本
-   python -c "import discord; print(discord.__version__)"
+   python3 -c "import discord; print(discord.__version__)"
    
    # 重新安裝 py-cord
    pip uninstall py-cord
@@ -157,7 +163,7 @@ pip install py-cord requests beautifulsoup4 lxml html5lib
 6. **網路連接問題**
    ```bash
    # 運行完整環境檢查
-   ./check_environment.sh
+   ./manage.sh check
    
    # 檢查防火牆設置
    sudo ufw status
@@ -166,13 +172,13 @@ pip install py-cord requests beautifulsoup4 lxml html5lib
 ### 檢查 Bot 狀態
 ```bash
 # 檢查是否運行
-./status_bot.sh
+./manage.sh status
 
 # 查看進程
 ps aux | grep python | grep bot.py
 
 # 查看日誌
-tail -f logs/bot_stdout.log
+./manage.sh logs view --file fb_bot_$(date +%Y%m%d).log --follow
 ```
 
 ## 📝 日誌說明
@@ -194,7 +200,7 @@ tail -f logs/bot_stdout.log
 crontab -e
 
 # 添加以下行（每天凌晨2點清理7天前的日誌）
-0 2 * * * cd /path/to/your/bot && python view_logs.py clean --days 7
+0 2 * * * cd /path/to/your/bot && ./manage.sh logs clean --days 7
 ```
 
 ### 設置開機自啟動
@@ -207,7 +213,7 @@ crontab -e
    - Bot 會在背景持續運行
 
 2. **監控運行狀況**
-   - 定期檢查 `./status_bot.sh`
+   - 定期檢查 `./manage.sh status`
    - 查看日誌了解運行狀況
 
 3. **備份重要文件**
@@ -220,7 +226,7 @@ crontab -e
    - 更好的錯誤處理和調試信息
 
 5. **定期維護**
-   - 使用 `./cleanup_project.sh` 清理專案
+   - 使用 `./manage.sh cleanup` 清理專案
    - 定期更新套件版本
    - 監控系統資源使用
 
@@ -238,19 +244,19 @@ pkill -9 -f "python.*bot.py"
 ### 重新部署
 ```bash
 # 停止 Bot
-./stop_bot.sh
+./manage.sh stop
 
 # 檢查設置
-./check_environment.sh
+./manage.sh check
 
 # 重新啟動
-./start_bot.sh
+./manage.sh start
 ```
 
 ## 📞 需要幫助？
 
 如果遇到問題：
-1. 運行 `./check_environment.sh` 進行完整檢查
+1. 運行 `./manage.sh check` 進行完整檢查
 2. 查看日誌文件了解錯誤
 3. 檢查虛擬環境狀態
 4. 確認 py-cord 版本和安裝
@@ -260,7 +266,7 @@ pkill -9 -f "python.*bot.py"
 
 ### 版本檢查
 ```bash
-python -c "import discord; print(f'py-cord 版本: {discord.__version__}')"
+python3 -c "import discord; print(f'py-cord 版本: {discord.__version__}')"
 ```
 
 ### 特色功能
