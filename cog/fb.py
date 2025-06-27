@@ -69,7 +69,7 @@ class Facebook(commands.Cog):
         )
         
         self.logger = logging.getLogger(__name__)
-        self.logger.info("日誌系統初始化完成")
+        self.logger.info("cog/fb.py: 日誌系統初始化完成")
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -107,8 +107,8 @@ class Facebook(commands.Cog):
                 self.latest = url
                 self.content = content
                 self.image = uri
-                channel = self.bot.get_channel(1357294484903297127)
-                # channel = self.bot.get_channel(1361993681934225548)
+                # channel = self.bot.get_channel(1357294484903297127)
+                channel = self.bot.get_channel(873263562942992395)
                 embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
                 embed.add_field(name='貼文連結', value=url, inline=False)
                 embed.add_field(name='貼文內容', value=content, inline=False)
