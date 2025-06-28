@@ -43,6 +43,22 @@ class Facebook(commands.Cog):
         'dpr': '1.5',
         'wd': '798x847',
         }
+        try:
+            self.UpdateCookie.start()
+            self.logger.info("開始初始化 Facebook 監控...")
+            data = self.get_data()
+            if data is None:
+                self.logger.warning("無法獲取 Facebook 數據，跳過初始化")
+                return
+            self.content, self.image, self.latest = self.filte_data(data)
+            self.logger.info(f"最新貼文 URL: {self.latest}")
+            self.check_data.start()
+            self.logger.info("Facebook 監控初始化完成")
+        except Exception as e:
+            self.logger.error(f"初始化過程中發生錯誤: {e}")
+            # 即使初始化失敗，也要啟動任務
+            self.UpdateCookie.start()
+            self.check_data.start()
     
     def setup_logging(self):
         """設置日誌系統"""
@@ -70,25 +86,6 @@ class Facebook(commands.Cog):
         
         self.logger = logging.getLogger(__name__)
         self.logger.info("cog/fb.py: 日誌系統初始化完成")
-    
-    @commands.Cog.listener()
-    async def on_ready(self):
-        try:
-            self.logger.info("開始初始化 Facebook 監控...")
-            data = self.get_data()
-            if data is None:
-                self.logger.warning("無法獲取 Facebook 數據，跳過初始化")
-                return
-            self.content, self.image, self.latest = self.filte_data(data)
-            self.logger.info(f"最新貼文 URL: {self.latest}")
-            self.UpdateCookie.start()
-            self.check_data.start()
-            self.logger.info("Facebook 監控初始化完成")
-        except Exception as e:
-            self.logger.error(f"初始化過程中發生錯誤: {e}")
-            # 即使初始化失敗，也要啟動任務
-            self.UpdateCookie.start()
-            self.check_data.start()
         
     @tasks.loop(minutes=4)
     async def check_data(self):
