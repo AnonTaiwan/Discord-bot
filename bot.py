@@ -16,14 +16,14 @@ class MyBot(commands.Bot):
         self.initial_extensions = [
             f"cog.{i[:-3]}" for i in os.listdir("./cog") if i.endswith(".py")
         ]
-
+        for ext in self.initial_extensions:
+            self.load_extension(ext)
+            print(f"✅ 已加載擴展: {ext}")
+            
     async def on_ready(self):
         game = discord.Game("Blue Archive")
         print(f"✅ Logged in as {self.user}")
         await self.change_presence(status=discord.Status.online, activity=game)
-        for ext in self.initial_extensions:
-            self.load_extension(ext)
-            print(f"✅ 已加載擴展: {ext}")
         self.remove_command("help")
         await self.sync_commands()
         self.loop.create_task(auto_restart(self))
@@ -43,12 +43,6 @@ async def main():
 
 
 async def auto_restart(bot, delay_sec= 3600 * 3):
-    await asyncio.sleep(delay_sec)
-    logger.info("⏰ 例行重啟機器人...")
-    await bot.close()
-
-
-if __name__ == "__main__":
     """設置日誌系統"""
     # 創建 logs 目錄（如果不存在）
     if not os.path.exists('logs'):
@@ -67,7 +61,13 @@ if __name__ == "__main__":
             logging.FileHandler(log_filename, encoding='utf-8'),
             logging.StreamHandler()  # 同時輸出到控制台
         ])
-
+    global logger
     logger = logging.getLogger(__name__)
     logger.info("bot.py: 日誌系統初始化完成")
+    await asyncio.sleep(delay_sec)
+    logger.info("⏰ 例行重啟機器人...")
+    await bot.close()
+
+
+if __name__ == "__main__":
     asyncio.run(main())
