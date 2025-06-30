@@ -92,7 +92,7 @@ class Facebook(commands.Cog):
         self.logger = logging.getLogger(__name__)
         self.logger.info("cog/fb.py: 日誌系統初始化完成")
         
-    @tasks.loop(minutes=4)
+    @tasks.loop(minutes=10)
     async def check_data(self):
         try:
             await asyncio.sleep(random.randint(1, 10))
@@ -123,6 +123,10 @@ class Facebook(commands.Cog):
                 self.logger.info("新貼文已成功發送到 Discord")
         except Exception as e:
             self.logger.error(f"check_data 中發生錯誤: {e}")
+            
+    @check_data.before_loop
+    async def BeforeCheckData(self):
+        await asyncio.sleep(10*60)
             
     def get_data(self):
         try:

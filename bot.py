@@ -5,7 +5,7 @@ import os
 import logging
 from datetime import datetime
 
-TOKEN = ""
+TOKEN = "OTk3MjAyMzk4NDg3NTE5MzAz.GSH0uw.dHWYigfeu43GUZMD9pM9hozr-hN8UjKlHq6nQ8"
 DEVELOPER = [330256191127289856, 705432231304495205]
 
 
@@ -27,6 +27,7 @@ class MyBot(commands.Bot):
         self.remove_command("help")
         await self.sync_commands()
         self.loop.create_task(auto_restart(self))
+        self.loop.create_task(LogFile_Update())
         
 
 
@@ -41,8 +42,38 @@ async def main():
             break
         logger.info("🔄 Restarting bot...")
 
+async def LogFile_Update():
+    await asyncio.sleep(1800)
+    now = datetime.now().strftime("%Y%m%d")
+    if now != date:
+        if not os.path.exists('logs'):
+            os.makedirs('logs')
+
+        # 設置日誌文件名（包含日期）
+        log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
+
+        # 配置日誌格式
+        log_format = '%(asctime)s - %(levelname)s - %(message)s'
+        date_format = '%Y-%m-%d %H:%M:%S'
+
+        # 配置日誌
+        logging.basicConfig(level=logging.INFO, format=log_format, datefmt=date_format,
+            handlers=[
+                logging.FileHandler(log_filename, encoding='utf-8'),
+                logging.StreamHandler()  # 同時輸出到控制台
+        ])
+        logger = logging.getLogger(__name__)
+        logger.info("bot.py: 日誌時間更新")
 
 async def auto_restart(bot, delay_sec= 3600 * 3):
+    await asyncio.sleep(delay_sec)
+    logger.info("⏰ 例行重啟機器人...")
+    await bot.close()
+
+
+if __name__ == "__main__":
+    global date 
+    date = datetime.now().strftime("%Y%m%d")
     """設置日誌系統"""
     # 創建 logs 目錄（如果不存在）
     if not os.path.exists('logs'):
@@ -64,10 +95,4 @@ async def auto_restart(bot, delay_sec= 3600 * 3):
     global logger
     logger = logging.getLogger(__name__)
     logger.info("bot.py: 日誌系統初始化完成")
-    await asyncio.sleep(delay_sec)
-    logger.info("⏰ 例行重啟機器人...")
-    await bot.close()
-
-
-if __name__ == "__main__":
     asyncio.run(main())
