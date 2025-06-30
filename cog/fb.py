@@ -8,8 +8,9 @@ import os
 import shutil
 import random
 import asyncio
+import time
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class Facebook(commands.Cog):
     def __init__(self,bot: commands.Bot):
@@ -20,7 +21,16 @@ class Facebook(commands.Cog):
         
         # 設置日誌
         self.setup_logging()
-        
+        try:
+            with open('JSON/Cookies.json','r',encoding='utf-8')as f:
+                self.cookies = json.load(f)
+        except:
+            self.cookies = {
+                'datr': 'y_9haN3HQZQEBj4W0XfaaCnK',
+                'sb': 'y_9haIwH6HDvW_SGJlsn2aaU',
+                'dpr': '2',
+                'wd': '798x847',
+                }
         self.headers = {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'accept-language': 'zh-TW,zh;q=0.9',
@@ -37,14 +47,9 @@ class Facebook(commands.Cog):
             'upgrade-insecure-requests': '1',
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
         }
-        self.cookies = {
-        'datr': 'v4RCaCFBBlFnfbA7BLJjeZpw',
-        'sb': 'v4RCaHRXccrV3Nutc30JS9Jo',
-        'dpr': '1.5',
-        'wd': '798x847',
-        }
         try:
-            self.UpdateCookie.start()
+            self.update_task = self.bot.loop.create_task(self.cookie_scheduler())
+            time.sleep(5)
             self.logger.info("開始初始化 Facebook 監控...")
             data = self.get_data()
             if data is None:
@@ -57,7 +62,7 @@ class Facebook(commands.Cog):
         except Exception as e:
             self.logger.error(f"初始化過程中發生錯誤: {e}")
             # 即使初始化失敗，也要啟動任務
-            self.UpdateCookie.start()
+            self.update_task = self.bot.loop.create_task(self.cookie_scheduler())
             self.check_data.start()
     
     def setup_logging(self):
@@ -118,19 +123,6 @@ class Facebook(commands.Cog):
                 self.logger.info("新貼文已成功發送到 Discord")
         except Exception as e:
             self.logger.error(f"check_data 中發生錯誤: {e}")
-            
-    @tasks.loop(hours=48)
-    async def UpdateCookie(self):
-        try:
-            self.logger.info("開始更新 Cookies...")
-            response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers)
-            self.cookies = response.cookies.get_dict()
-            self.cookies['dpr'] = '1.5'
-            self.cookies['wd'] = '798x847'
-            self.logger.info(f"Cookies 已更新: {self.cookies}")
-            await asyncio.sleep(random.randint(1, 5)*3600)
-        except Exception as e:
-            self.logger.error(f"更新 Cookies 時發生錯誤: {e}")
             
     def get_data(self):
         try:
@@ -224,6 +216,51 @@ class Facebook(commands.Cog):
             soup = BeautifulSoup(response.text, 'html.parser')
             title = soup.title.string if soup.title else "無法解析的貼文"
         return title, uri, response.url
+
+    async def cookie_scheduler(self):
+            try:
+                os.makedirs('JSON', exist_ok=True)
+                last_time = None
+                path = "JSON/last_cookie_update.json"
+
+                # 讀取上次時間
+                if os.path.exists(path):
+                    with open(path, "r", encoding="utf-8") as f:
+                        timestamp = json.load(f).get("last_update")
+                        if timestamp:
+                            last_time = datetime.fromisoformat(timestamp)
+
+                # 如果有記錄
+                if last_time:
+                    elapsed = datetime.now() - last_time
+                    remaining = timedelta(hours=48) - elapsed
+                    if remaining.total_seconds() > 0:
+                        self.logger.info(f"等待剩餘時間: {remaining}")
+                        await asyncio.sleep(remaining.total_seconds())
+
+                # 一直跑
+                while True:
+                    await self.UpdateCookie()
+                    with open(path, "w", encoding="utf-8") as f:
+                        json.dump({"last_update": datetime.now().isoformat()}, f, indent=2)
+                    await asyncio.sleep(48 * 3600)  # 48 小時
+                    await asyncio.sleep(random.randint(1,10) * 3600)
+
+            except Exception as e:
+                self.logger.error(f"cookie_scheduler 錯誤：{e}")
+
+    async def UpdateCookie(self):
+        try:
+            self.logger.info("開始更新 Cookies...")
+            response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers)
+            self.cookies = response.cookies.get_dict()
+            self.cookies['dpr'] = '2'
+            self.cookies['wd'] = '798x847'
+            self.logger.info(f"Cookies 已更新: {self.cookies}")
+            with open('JSON/Cookies.json', 'w', encoding='utf-8') as f:
+                json.dump(self.cookies, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            self.logger.error(f"更新 Cookies 時發生錯誤: {e}")
 
 def setup(bot: commands.Bot):
     bot.add_cog(Facebook(bot))
