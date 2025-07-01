@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, bridge, tasks
-import requests
+from curl_cffi import requests
 import re
 import json
 from bs4 import BeautifulSoup
@@ -34,10 +34,8 @@ class Facebook(commands.Cog):
         self.headers = {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'accept-language': 'zh-TW,zh;q=0.9',
-            'cache-control': 'no-cache',
-            'pragma': 'no-cache',
             'priority': 'u=0, i',
-            'sec-ch-ua': '"Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
+            'sec-ch-ua': '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"',
             'sec-fetch-dest': 'document',
@@ -45,7 +43,7 @@ class Facebook(commands.Cog):
             'sec-fetch-site': 'none',
             'sec-fetch-user': '?1',
             'upgrade-insecure-requests': '1',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
         }
         try:
             self.update_task = self.bot.loop.create_task(self.cookie_scheduler())
@@ -104,7 +102,7 @@ class Facebook(commands.Cog):
             if url != self.latest and content != self.content and uri != self.image:
                 self.logger.info(f"檢測到新貼文: {url}")
                 with open('1.jpg', 'wb') as img_file:
-                    img_response = requests.get(url = uri, headers=self.headers, allow_redirects=True)
+                    img_response = requests.get(url = uri, headers=self.headers, allow_redirects=True,impersonate='chrome110')
                     img_file.write(img_response.content)
                 self.latest = url
                 self.content = content
@@ -130,7 +128,7 @@ class Facebook(commands.Cog):
             
     def get_data(self):
         try:
-            response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers,cookies=self.cookies)
+            response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers,cookies=self.cookies,impersonate='chrome110')
             response.encoding = 'utf-8' 
             
             # 檢查回應狀態
@@ -169,7 +167,7 @@ class Facebook(commands.Cog):
             if '__typename' in data['styles']['attachment']['media'].keys() and data['styles']['attachment']['media']['__typename'] == 'Video':
                 url = data['styles']['attachment']['url'].replace('\\','')
                 uri = data['styles']['attachment']['media']['thumbnailImage']['uri'].replace('\\','')
-                response = requests.get(url, headers=self.headers,cookies=self.cookies, allow_redirects=True)
+                response = requests.get(url, headers=self.headers,cookies=self.cookies, allow_redirects=True,impersonate='chrome110')
                 pattern = r'"story":{"message":(.*?)}'
                 match = re.search(pattern, response.text, re.DOTALL)
                 if match:
@@ -194,7 +192,7 @@ class Facebook(commands.Cog):
             else:
                 url = data['styles']['attachment']['media']['url'].replace('\\','')
                 uri = data['styles']['attachment']['media']['photo_image']['uri'].replace('\\','')
-                response = requests.get(url, headers=self.headers,allow_redirects=True)
+                response = requests.get(url, headers=self.headers,allow_redirects=True,impersonate='chrome110')
                 pattern = r'"message_preferred_body":(.*?)},"container'
                 match = re.search(pattern, response.text, re.DOTALL)
                 if match:
@@ -216,7 +214,7 @@ class Facebook(commands.Cog):
         else:
             url = data['styles']['attachment']['url'].replace('\\','')
             uri = data['styles']['attachment']['all_subattachments']['nodes'][0]["media"]['viewer_image']['uri'].replace('\\','')
-            response = requests.get(url, headers=self.headers,cookies=self.cookies, allow_redirects=True)
+            response = requests.get(url, headers=self.headers,cookies=self.cookies, allow_redirects=True,impersonate='chrome110')
             soup = BeautifulSoup(response.text, 'html.parser')
             title = soup.title.string if soup.title else "無法解析的貼文"
         return title, uri, response.url
@@ -256,7 +254,7 @@ class Facebook(commands.Cog):
     async def UpdateCookie(self):
         try:
             self.logger.info("開始更新 Cookies...")
-            response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers)
+            response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers,impersonate='chrome110')
             self.cookies = response.cookies.get_dict()
             self.cookies['dpr'] = '2'
             self.cookies['wd'] = '798x847'
