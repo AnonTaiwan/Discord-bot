@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import os
 import logging
 from datetime import datetime
-
+import asyncio
 
 class Log(commands.Cog):
 
@@ -15,7 +15,6 @@ class Log(commands.Cog):
         self.DEVELOPER = [330256191127289856, 705432231304495205]
         if not os.path.exists('logs'):
             os.makedirs('logs')
-
         # 設置日誌文件名（包含日期）
         log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
 
@@ -33,7 +32,8 @@ class Log(commands.Cog):
                 logging.StreamHandler()  # 同時輸出到控制台
             ])
         self.logger = logging.getLogger(__name__)
-
+        self.LogFile_Update.start()
+        
     @discord.slash_command(name="log", description="查看日誌")
     async def log(self, ctx: discord.ApplicationContext, date: str = discord.Option(default=None, description="你想查詢的日期，例如 20250627")):
         if ctx.author.id not in self.DEVELOPER:
@@ -70,6 +70,32 @@ class Log(commands.Cog):
         else:
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用重啟指令，但沒有權限。")
+
+
+    @tasks.loop(minutes = 10)
+    async def LogFile_Update(self):
+        now = datetime.now().strftime("%Y%m%d")
+        if now != self.date:
+            if not os.path.exists('logs'):
+                os.makedirs('logs')
+
+            # 設置日誌文件名（包含日期）
+            log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
+
+            # 配置日誌格式
+            log_format = '%(asctime)s - %(levelname)s - %(message)s'
+            date_format = '%Y-%m-%d %H:%M:%S'
+
+            # 配置日誌
+            logging.basicConfig(level=logging.INFO, format=log_format, datefmt=date_format,
+                handlers=[
+                    logging.FileHandler(log_filename, encoding='utf-8'),
+                    logging.StreamHandler()  # 同時輸出到控制台
+            ])
+            self.logger = logging.getLogger(__name__)
+            self.date = now
+            self.logger.info("bot.py: 日誌時間更新")
+ 
 
 def setup(bot: commands.Bot):
     bot.add_cog(Log(bot))

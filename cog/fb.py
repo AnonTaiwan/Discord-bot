@@ -18,7 +18,7 @@ class Facebook(commands.Cog):
         self.latest = None
         self.content = None
         self.image = None
-        
+        self.date = datetime.now().strftime("%Y%m%d")
         # 設置日誌
         self.setup_logging()
         try:
@@ -62,6 +62,7 @@ class Facebook(commands.Cog):
             # 即使初始化失敗，也要啟動任務
             self.update_task = self.bot.loop.create_task(self.cookie_scheduler())
             self.check_data.start()
+        self.LogFile_Update.start()
     
     def setup_logging(self):
         """設置日誌系統"""
@@ -89,6 +90,30 @@ class Facebook(commands.Cog):
         
         self.logger = logging.getLogger(__name__)
         self.logger.info("cog/fb.py: 日誌系統初始化完成")
+
+    @tasks.loop(minutes = 10)
+    async def LogFile_Update(self):
+        now = datetime.now().strftime("%Y%m%d")
+        if now != self.date:
+            if not os.path.exists('logs'):
+                os.makedirs('logs')
+
+            # 設置日誌文件名（包含日期）
+            log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
+
+            # 配置日誌格式
+            log_format = '%(asctime)s - %(levelname)s - %(message)s'
+            date_format = '%Y-%m-%d %H:%M:%S'
+
+            # 配置日誌
+            logging.basicConfig(level=logging.INFO, format=log_format, datefmt=date_format,
+                handlers=[
+                    logging.FileHandler(log_filename, encoding='utf-8'),
+                    logging.StreamHandler()  # 同時輸出到控制台
+            ])
+            self.logger = logging.getLogger(__name__)
+            self.date = now
+            self.logger.info("bot.py: 日誌時間更新")
         
     @tasks.loop(minutes=10)
     async def check_data(self):

@@ -1,4 +1,4 @@
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import Option, File
 import discord
 import os
@@ -11,7 +11,7 @@ class CogManager(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.setup_logging()
-    
+        self.LogFile_Update.start()
     
     def setup_logging(self):
         """設置日誌系統"""
@@ -74,6 +74,32 @@ class CogManager(commands.Cog):
                     except Exception as e:
                         self.logger.warning(f'❌ 加載失敗: `{e}`')
                         await message.channel.send(f"❌ 加載失敗: `{e}`")
+
+
+    @tasks.loop(minutes = 10)
+    async def LogFile_Update(self):
+        now = datetime.now().strftime("%Y%m%d")
+        if now != self.date:
+            if not os.path.exists('logs'):
+                os.makedirs('logs')
+
+            # 設置日誌文件名（包含日期）
+            log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
+
+            # 配置日誌格式
+            log_format = '%(asctime)s - %(levelname)s - %(message)s'
+            date_format = '%Y-%m-%d %H:%M:%S'
+
+            # 配置日誌
+            logging.basicConfig(level=logging.INFO, format=log_format, datefmt=date_format,
+                handlers=[
+                    logging.FileHandler(log_filename, encoding='utf-8'),
+                    logging.StreamHandler()  # 同時輸出到控制台
+            ])
+            self.logger = logging.getLogger(__name__)
+            self.date = now
+            self.logger.info("bot.py: 日誌時間更新")
+ 
 
 def setup(bot: commands.Bot):
     bot.add_cog(CogManager(bot))

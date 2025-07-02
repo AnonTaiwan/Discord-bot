@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import importlib
 import subprocess
 import sys
@@ -17,6 +17,7 @@ class Environment(commands.Cog):
         self.bot = bot
         asyncio.create_task(self.pip_install('curl_cffi'))
         self.setup_logging()
+        self.LogFile_Update.start()
         
     async def pip_install(self, package: str, import_name: str = None):
         """安裝指定的 pip 套件（可選 import 名稱）"""
@@ -64,6 +65,32 @@ class Environment(commands.Cog):
         
         self.logger = logging.getLogger(__name__)
         self.logger.info("cog/cogupdate.py: 日誌系統初始化完成")
+       
+
+    @tasks.loop(minutes = 10)
+    async def LogFile_Update(self):
+        now = datetime.now().strftime("%Y%m%d")
+        if now != self.date:
+            if not os.path.exists('logs'):
+                os.makedirs('logs')
+
+            # 設置日誌文件名（包含日期）
+            log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
+
+            # 配置日誌格式
+            log_format = '%(asctime)s - %(levelname)s - %(message)s'
+            date_format = '%Y-%m-%d %H:%M:%S'
+
+            # 配置日誌
+            logging.basicConfig(level=logging.INFO, format=log_format, datefmt=date_format,
+                handlers=[
+                    logging.FileHandler(log_filename, encoding='utf-8'),
+                    logging.StreamHandler()  # 同時輸出到控制台
+            ])
+            self.logger = logging.getLogger(__name__)
+            self.date = now
+            self.logger.info("bot.py: 日誌時間更新")
+ 
        
 def setup(bot: commands.Bot):
     bot.add_cog(Environment(bot))
