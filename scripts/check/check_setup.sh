@@ -23,7 +23,7 @@ fi
 # 檢查必要的 Python 套件
 echo ""
 echo "2. 檢查 Python 套件..."
-REQUIRED_PACKAGES=("pycord" "requests" "bs4")
+REQUIRED_PACKAGES=("pycord" "requests" "bs4" "curl_cffi")
 MISSING_PACKAGES=()
 
 for package in "${REQUIRED_PACKAGES[@]}"; do
