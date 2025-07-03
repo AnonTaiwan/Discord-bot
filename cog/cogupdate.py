@@ -52,10 +52,10 @@ class CogManager(commands.Cog):
             for attachment in message.attachments:
                 if attachment.filename.endswith('.py'):
                     # 假設所有 cog 都在 cog 資料夾中
-                    cog_path = f'cog/{attachment.filename}'
-
                     # 儲存檔案
-                    await attachment.save(fp=cog_path)
+                    from pathlib import Path
+                    cog_path_obj = Path(f'cog/{attachment.filename}')
+                    await attachment.save(fp=cog_path_obj)
                     await message.channel.send(f"✅ 已更新 `{attachment.filename}`")
                     self.logger.info(f'{message.author.name}: 更新 {attachment.filename}')
 

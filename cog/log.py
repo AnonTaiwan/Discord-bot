@@ -36,7 +36,7 @@ class Log(commands.Cog):
         self.LogFile_Update.start()
         
     @discord.slash_command(name="log", description="查看日誌")
-    async def log(self, ctx: discord.ApplicationContext, date: str = discord.Option(default=None, description="你想查詢的日期，例如 20250627")):
+    async def log(self, ctx: discord.ApplicationContext, date: str = discord.Option(default=None, description="你想查詢的日期，例如 20250627")): # type: ignore
         if ctx.author.id not in self.DEVELOPER:
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name}嘗試使用日誌指令，但沒有權限。")
