@@ -13,6 +13,7 @@ class Log(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.DEVELOPER = [330256191127289856, 705432231304495205]
+        self.date = datetime.now().strftime("%Y%m%d")
         if not os.path.exists('logs'):
             os.makedirs('logs')
         # 設置日誌文件名（包含日期）

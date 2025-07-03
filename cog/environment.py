@@ -17,9 +17,10 @@ class Environment(commands.Cog):
         self.bot = bot
         asyncio.create_task(self.pip_install('curl_cffi'))
         self.setup_logging()
+        self.date = datetime.now().strftime("%Y%m%d")
         self.LogFile_Update.start()
         
-    async def pip_install(self, package: str, import_name: str = None):
+    async def pip_install(self, package: str, import_name: str = ""):
         """安裝指定的 pip 套件（可選 import 名稱）"""
         try:
             importlib.import_module(import_name or package)
@@ -34,12 +35,15 @@ class Environment(commands.Cog):
         if message.content == '!JSON_Update' and message.author.id in DEVELOPER and message.attachments:
             for attachment in message.attachments:
                 if attachment.filename.endswith('.json'):
-                    path = f'JSON/{attachment.filename}'
-                    await attachment.save(fp=path)
+                    path = os.path.join('JSON', attachment.filename)
+                    # 修正：將 str 轉為 Path 物件以符合 save 的型別要求
+                    from pathlib import Path
+                    path_obj = Path(path)
+                    await attachment.save(fp=path_obj)
                     await message.channel.send(f"♻️ 已更新 `{attachment.filename}`")
-                    self.logger.info(f'{message.author.nick} 更新了 {attachment.filename}')
-    
-    def setup_logging(self):
+                    # 使用 display_name 以支援 User/Member
+                    author_name = getattr(message.author, "display_name", getattr(message.author, "name", "未知用戶"))
+                    self.logger.info(f'{author_name} 更新了 {attachment.filename}')
         """設置日誌系統"""
         # 創建 logs 目錄（如果不存在）
         if not os.path.exists('logs'):

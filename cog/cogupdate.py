@@ -11,6 +11,7 @@ class CogManager(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.setup_logging()
+        self.date = datetime.now().strftime("%Y%m%d")
         self.LogFile_Update.start()
     
     def setup_logging(self):
