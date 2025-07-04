@@ -21,8 +21,8 @@ class MyBot(commands.Bot):
             self.load_extension(ext)
             print(f"✅ 已加載擴展: {ext}")
         await self.sync_commands()
-        self.logfile_update.start()
         self.auto_restart.start()
+        self.night_shutdown.start() 
 
     async def on_ready(self):
         game = discord.Game("Blue Archive")
@@ -30,27 +30,6 @@ class MyBot(commands.Bot):
         await self.change_presence(status=discord.Status.online, activity=game)
         await self.setup_hook()
         self.remove_command("help")
-
-    @tasks.loop(minutes=30)
-    async def logfile_update(self):
-        now = datetime.now().strftime("%Y%m%d")
-        if now != self.date:
-            log_filename = f'logs/fb_bot_{now}.log'
-            for handler in logging.root.handlers[:]:
-                logging.root.removeHandler(handler)
-            logging.basicConfig(
-                level=logging.INFO,
-                format='%(asctime)s - %(levelname)s - %(message)s',
-                datefmt='%Y-%m-%d %H:%M:%S',
-                handlers=[
-                    logging.FileHandler(log_filename, encoding='utf-8'),
-                    logging.StreamHandler()
-                ]
-            )
-            global logger
-            logger = logging.getLogger(__name__)
-            logger.info("bot.py: 日誌時間更新")
-            self.date = now
 
     @tasks.loop(hours=6)
     async def auto_restart(self):
@@ -60,24 +39,40 @@ class MyBot(commands.Bot):
     async def before_auto_restart(self):
         await asyncio.sleep(3600 * 6)
 
+    @tasks.loop(minutes=5)
+    async def night_shutdown(self):
+        now = datetime.now()
+        # 如果現在時間在 0:00 ~ 8:00
+        if 0 <= now.hour < 8:
+            logger.info("⏰ 到了夜間關機時段，自動關閉機器人")
+            await self.close()
+
 async def main():
-    bot = MyBot()
-    if not os.path.exists('logs'):
-        os.makedirs('logs')
-    log_filename = f'logs/fb_bot_{bot.date}.log'
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
-        handlers=[
-            logging.FileHandler(log_filename, encoding='utf-8'),
-            logging.StreamHandler()
-        ]
-    )
-    global logger
-    logger = logging.getLogger(__name__)
-    logger.info("bot.py: 日誌系統初始化完成")
-    await bot.start(TOKEN)
+    while True:
+        now = datetime.now()
+        if 0 <= now.hour < 8:
+            # 算出距離8點還有幾秒
+            seconds_to_8 = ((8 - now.hour) * 3600 - now.minute * 60 - now.second)
+            print(f"夜間關機，將於 {seconds_to_8} 秒後自動開機")
+            await asyncio.sleep(seconds_to_8)
+            continue  # 跳過這次，等到8點再啟動
+        bot = MyBot()
+        if not os.path.exists('logs'):
+            os.makedirs('logs')
+        log_filename = f'logs/fb_bot_{bot.date}.log'
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            handlers=[
+                logging.FileHandler(log_filename, encoding='utf-8'),
+                logging.StreamHandler()
+            ]
+        )
+        global logger
+        logger = logging.getLogger(__name__)
+        logger.info("bot.py: 日誌系統初始化完成")
+        await bot.start(TOKEN)
 
 if __name__ == "__main__":
     asyncio.run(main())
