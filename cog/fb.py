@@ -131,9 +131,6 @@ class Facebook(commands.Cog):
                 with open('1.jpg', 'wb') as img_file:
                     img_response = requests.get(url = uri, headers=self.headers, allow_redirects=True,impersonate='chrome110')
                     img_file.write(img_response.content)
-                self.latest = url
-                self.content = content
-                self.image = uri
                 channel = self.bot.get_channel(1357294484903297127)
                 # channel = self.bot.get_channel(873263562942992395)
                 embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
@@ -146,6 +143,9 @@ class Facebook(commands.Cog):
                 os.remove('1.jpg')
                 await msg.publish()
                 self.logger.info("新貼文已成功發送到 Discord")
+                self.latest = url
+                self.content = content
+                self.image = uri
         except Exception as e:
             pass
             
