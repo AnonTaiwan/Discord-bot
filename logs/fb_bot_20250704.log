@@ -1,0 +1,70 @@
+2025-07-04 09:37:42 - INFO - bot.py: 日誌系統初始化完成
+2025-07-04 09:37:42 - INFO - logging in using static token
+2025-07-04 09:37:43 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-04 09:37:44 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-b-g60j",{"micros":113139,"calls":["id_created",{"micros":392,"calls":[]},"session_lookup_time",{"micros":3883,"calls":[]},"session_lookup_finished",{"micros":26,"calls":[]},"discord-sessions-prd-2-25",{"micros":108494,"calls":["start_session",{"micros":92791,"calls":["discord-api-rpc-6689799bb6-gn2d7",{"micros":71101,"calls":["get_user",{"micros":7726},"get_guilds",{"micros":7411},"send_scheduled_deletion_message",{"micros":44},"guild_join_requests",{"micros":3},"authorized_ip_coro",{"micros":10},"pending_payments",{"micros":4779},"apex_experiments",{"micros":2528},"user_activities",{"micros":4},"played_application_ids",{"micros":2}]}]},"starting_guild_connect",{"micros":29,"calls":[]},"presence_started",{"micros":310,"calls":[]},"guilds_started",{"micros":97,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":15245,"calls":[]},"connect_finished",{"micros":15249,"calls":[]},"build_ready",{"micros":14,"calls":[]},"clean_ready",{"micros":1,"calls":[]},"optimize_ready",{"micros":0,"calls":[]},"split_ready",{"micros":1,"calls":[]}]}]}] (Session ID: 2157812ed01a64a95082b9380528de86).
+2025-07-04 09:37:46 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:39:43 - INFO - bot.py: 日誌系統初始化完成
+2025-07-04 09:39:43 - INFO - logging in using static token
+2025-07-04 09:39:45 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-04 09:39:45 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-c-7j3k",{"micros":214263,"calls":["id_created",{"micros":711,"calls":[]},"session_lookup_time",{"micros":688,"calls":[]},"session_lookup_finished",{"micros":10,"calls":[]},"discord-sessions-prd-2-122",{"micros":211502,"calls":["start_session",{"micros":174407,"calls":["discord-api-rpc-6689799bb6-grp86",{"micros":144361,"calls":["get_user",{"micros":6209},"get_guilds",{"micros":4066},"send_scheduled_deletion_message",{"micros":10},"guild_join_requests",{"micros":581},"authorized_ip_coro",{"micros":8},"pending_payments",{"micros":6288},"apex_experiments",{"micros":3417},"user_activities",{"micros":12},"played_application_ids",{"micros":3}]}]},"starting_guild_connect",{"micros":30,"calls":[]},"presence_started",{"micros":336,"calls":[]},"guilds_started",{"micros":100,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":36605,"calls":[]},"connect_finished",{"micros":36609,"calls":[]},"build_ready",{"micros":17,"calls":[]},"clean_ready",{"micros":0,"calls":[]},"optimize_ready",{"micros":0,"calls":[]},"split_ready",{"micros":1,"calls":[]}]}]}] (Session ID: 9116865d43236161dd6f9d3688db0c9b).
+2025-07-04 09:39:48 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:39:48 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-04 09:39:49 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-04 09:39:54 - INFO - 開始初始化 Facebook 監控...
+2025-07-04 09:39:56 - INFO - 最新貼文 URL: https://www.facebook.com/BANDBAND1027/posts/pfbid02UWiGem5jdbQd1SMcW4j5zW47Y5Y47neAfaJtxtVf4ouGJ1YTnXSLhPhbzPPYeuyEl
+2025-07-04 09:39:56 - INFO - Facebook 監控初始化完成
+2025-07-04 09:39:56 - INFO - 開始更新 Cookies...
+2025-07-04 09:39:56 - INFO - Cookies 已更新: {'datr': '7TBnaDD5yvfPJTjoYZNoG5Zt', 'sb': '7TBnaERYPysnm-XK1YtZzCJL', 'dpr': '2', 'wd': '798x847'}
+2025-07-04 09:40:19 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:41:03 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:42:14 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:42:29 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:42:58 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:43:06 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:43:21 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:43:24 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:43:32 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:44:35 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:45:03 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:45:25 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:45:27 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:45:30 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:45:30 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:46:16 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:46:19 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:48:36 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:48:51 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:49:08 - INFO - bot.py: 日誌系統初始化完成
+2025-07-04 09:49:08 - INFO - logging in using static token
+2025-07-04 09:49:09 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-04 09:49:09 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-c-v6ww",{"micros":102728,"calls":["id_created",{"micros":1464,"calls":[]},"session_lookup_time",{"micros":337,"calls":[]},"session_lookup_finished",{"micros":12,"calls":[]},"discord-sessions-prd-2-59",{"micros":100501,"calls":["start_session",{"micros":97793,"calls":["discord-api-rpc-6689799bb6-gfql7",{"micros":81458,"calls":["get_user",{"micros":8584},"get_guilds",{"micros":7689},"send_scheduled_deletion_message",{"micros":12},"guild_join_requests",{"micros":15236},"authorized_ip_coro",{"micros":19},"pending_payments",{"micros":5691},"apex_experiments",{"micros":1235},"user_activities",{"micros":16},"played_application_ids",{"micros":4}]}]},"starting_guild_connect",{"micros":28,"calls":[]},"presence_started",{"micros":270,"calls":[]},"guilds_started",{"micros":77,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":2311,"calls":[]},"connect_finished",{"micros":2314,"calls":[]},"build_ready",{"micros":16,"calls":[]},"clean_ready",{"micros":0,"calls":[]},"optimize_ready",{"micros":1,"calls":[]},"split_ready",{"micros":0,"calls":[]}]}]}] (Session ID: cc9496748a9a8c21473e0eab4e847c93).
+2025-07-04 09:49:12 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 09:49:12 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-04 09:49:12 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-04 09:49:17 - INFO - 開始初始化 Facebook 監控...
+2025-07-04 09:49:19 - INFO - 最新貼文 URL: https://www.facebook.com/BANDBAND1027/posts/122138177216707135
+2025-07-04 09:49:19 - INFO - Facebook 監控初始化完成
+2025-07-04 09:49:19 - INFO - 等待剩餘時間: 1 day, 23:50:37.137250
+2025-07-04 10:01:34 - INFO - bot.py: 日誌系統初始化完成
+2025-07-04 10:01:34 - INFO - logging in using static token
+2025-07-04 10:01:35 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-04 10:01:35 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-c-qbc4",{"micros":125596,"calls":["id_created",{"micros":498,"calls":[]},"session_lookup_time",{"micros":2988,"calls":[]},"session_lookup_finished",{"micros":14,"calls":[]},"discord-sessions-prd-2-110",{"micros":121810,"calls":["start_session",{"micros":68113,"calls":["discord-api-rpc-6689799bb6-fjr8x",{"micros":53785,"calls":["get_user",{"micros":6483},"get_guilds",{"micros":10355},"send_scheduled_deletion_message",{"micros":19},"guild_join_requests",{"micros":3},"authorized_ip_coro",{"micros":13},"pending_payments",{"micros":4705},"apex_experiments",{"micros":1164},"user_activities",{"micros":4},"played_application_ids",{"micros":2}]}]},"starting_guild_connect",{"micros":29,"calls":[]},"presence_started",{"micros":6525,"calls":[]},"guilds_started",{"micros":110,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":2,"calls":[]},"presence_connect",{"micros":46996,"calls":[]},"connect_finished",{"micros":47000,"calls":[]},"build_ready",{"micros":29,"calls":[]},"clean_ready",{"micros":1,"calls":[]},"optimize_ready",{"micros":0,"calls":[]},"split_ready",{"micros":0,"calls":[]}]}]}] (Session ID: 5d8952853db6215823ab6d91ab1c559f).
+2025-07-04 10:01:38 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 10:01:38 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-04 10:01:38 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-04 10:01:43 - INFO - 開始初始化 Facebook 監控...
+2025-07-04 10:01:45 - INFO - 最新貼文 URL: https://www.facebook.com/BANDBAND1027/posts/122138177216707135
+2025-07-04 10:01:45 - INFO - Facebook 監控初始化完成
+2025-07-04 10:01:45 - INFO - 等待剩餘時間: 1 day, 23:38:11.019141
+2025-07-04 10:07:20 - INFO - bot.py: 日誌系統初始化完成
+2025-07-04 10:07:20 - INFO - logging in using static token
+2025-07-04 10:07:21 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-04 10:07:21 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-b-n4x8",{"micros":101693,"calls":["id_created",{"micros":466,"calls":[]},"session_lookup_time",{"micros":402,"calls":[]},"session_lookup_finished",{"micros":17,"calls":[]},"discord-sessions-prd-2-94",{"micros":100404,"calls":["start_session",{"micros":66590,"calls":["discord-api-rpc-6689799bb6-v56tg",{"micros":48792,"calls":["get_user",{"micros":6900},"get_guilds",{"micros":3750},"send_scheduled_deletion_message",{"micros":15},"guild_join_requests",{"micros":5307},"authorized_ip_coro",{"micros":27},"pending_payments",{"micros":7908},"apex_experiments",{"micros":802},"user_activities",{"micros":4},"played_application_ids",{"micros":2}]}]},"starting_guild_connect",{"micros":24,"calls":[]},"presence_started",{"micros":14303,"calls":[]},"guilds_started",{"micros":127,"calls":[]},"lobbies_started",{"micros":0,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":19326,"calls":[]},"connect_finished",{"micros":19330,"calls":[]},"build_ready",{"micros":28,"calls":[]},"clean_ready",{"micros":1,"calls":[]},"optimize_ready",{"micros":0,"calls":[]},"split_ready",{"micros":0,"calls":[]}]}]}] (Session ID: 5e61d705962e5c9ae561dc82199bf8b6).
+2025-07-04 10:07:22 - WARNING - We are being rate limited. Retrying in 3.44 seconds. Handled under the bucket "None:None:/applications/{application_id}/commands"
+2025-07-04 10:07:24 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 10:07:24 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-04 10:07:24 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-04 10:07:29 - INFO - 開始初始化 Facebook 監控...
+2025-07-04 10:07:31 - INFO - 最新貼文 URL: https://www.facebook.com/BANDBAND1027/posts/122138177216707135
+2025-07-04 10:07:31 - INFO - Facebook 監控初始化完成
+2025-07-04 10:07:31 - INFO - 等待剩餘時間: 1 day, 23:32:25.664955

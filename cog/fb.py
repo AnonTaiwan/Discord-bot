@@ -61,8 +61,10 @@ class Facebook(commands.Cog):
             self.logger.error(f"初始化過程中發生錯誤: {e}")
             # 即使初始化失敗，也要啟動任務
             self.update_task = self.bot.loop.create_task(self.cookie_scheduler())
-            self.check_data.start()
-        self.LogFile_Update.start()
+            if not self.check_data.is_running():
+                self.check_data.start()
+            if not self.LogFile_Update.is_running():
+                self.LogFile_Update.start()
     
     def setup_logging(self):
         """設置日誌系統"""
@@ -145,7 +147,7 @@ class Facebook(commands.Cog):
                 await msg.publish()
                 self.logger.info("新貼文已成功發送到 Discord")
         except Exception as e:
-            self.logger.error(f"check_data 中發生錯誤: {e}")
+            pass
             
     @check_data.before_loop
     async def BeforeCheckData(self):
@@ -180,8 +182,6 @@ class Facebook(commands.Cog):
                     return None
             else:
                 self.logger.warning("在 Facebook 回應中找不到 attachments 模式")
-                # 可以添加調試信息來查看回應內容
-                self.logger.debug(f"回應長度: {len(response.text)}")
                 return None
         except Exception as e:
             self.logger.error(f"get_data 中發生錯誤: {e}")

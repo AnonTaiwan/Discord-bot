@@ -1,0 +1,763 @@
+2025-07-03 00:30:05 - INFO - bot.py: 日誌系統初始化完成
+2025-07-03 00:30:05 - INFO - logging in using static token
+2025-07-03 00:30:05 - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f9331d5f0e0>
+2025-07-03 00:30:05 - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7f9330e69d90>, 3815318.442149149)])']
+connector: <aiohttp.connector.TCPConnector object at 0x7f9331e5cf80>
+2025-07-03 00:30:29 - INFO - bot.py: 日誌系統初始化完成
+2025-07-03 00:30:29 - INFO - logging in using static token
+2025-07-03 00:30:30 - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f2e30732720>
+2025-07-03 00:30:30 - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7f2e30751d90>, 3815343.263030663)])']
+connector: <aiohttp.connector.TCPConnector object at 0x7f2e30732780>
+2025-07-03 00:31:33 - INFO - bot.py: 日誌系統初始化完成
+2025-07-03 00:31:33 - INFO - logging in using static token
+2025-07-03 00:31:34 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-03 00:31:34 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-c-znlj",{"micros":205585,"calls":["id_created",{"micros":526,"calls":[]},"session_lookup_time",{"micros":329,"calls":[]},"session_lookup_finished",{"micros":14,"calls":[]},"discord-sessions-prd-2-161",{"micros":204307,"calls":["start_session",{"micros":183905,"calls":["discord-api-rpc-6d5df96575-jv2vq",{"micros":139132,"calls":["get_user",{"micros":13510},"get_guilds",{"micros":17111},"send_scheduled_deletion_message",{"micros":11},"guild_join_requests",{"micros":419},"authorized_ip_coro",{"micros":15},"pending_payments",{"micros":4776},"apex_experiments",{"micros":1568},"user_activities",{"micros":4},"played_application_ids",{"micros":2}]}]},"starting_guild_connect",{"micros":38,"calls":[]},"presence_started",{"micros":5711,"calls":[]},"guilds_started",{"micros":114,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":14515,"calls":[]},"connect_finished",{"micros":14520,"calls":[]},"build_ready",{"micros":16,"calls":[]},"clean_ready",{"micros":1,"calls":[]},"optimize_ready",{"micros":0,"calls":[]},"split_ready",{"micros":0,"calls":[]}]}]}] (Session ID: 04dcff5233df5d6c007f2864ca356b47).
+2025-07-03 00:34:07 - INFO - bot.py: 日誌系統初始化完成
+2025-07-03 00:34:07 - INFO - logging in using static token
+2025-07-03 00:34:08 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-03 00:34:08 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-c-0qxn",{"micros":106698,"calls":["id_created",{"micros":667,"calls":[]},"session_lookup_time",{"micros":3978,"calls":[]},"session_lookup_finished",{"micros":27,"calls":[]},"discord-sessions-prd-2-143",{"micros":101683,"calls":["start_session",{"micros":88913,"calls":["discord-api-rpc-6d5df96575-mnnjh",{"micros":71699,"calls":["get_user",{"micros":14651},"get_guilds",{"micros":3984},"send_scheduled_deletion_message",{"micros":15},"guild_join_requests",{"micros":2},"authorized_ip_coro",{"micros":13},"pending_payments",{"micros":8328},"apex_experiments",{"micros":694},"user_activities",{"micros":5},"played_application_ids",{"micros":2}]}]},"starting_guild_connect",{"micros":29,"calls":[]},"presence_started",{"micros":313,"calls":[]},"guilds_started",{"micros":95,"calls":[]},"lobbies_started",{"micros":2,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":12310,"calls":[]},"connect_finished",{"micros":12314,"calls":[]},"build_ready",{"micros":14,"calls":[]},"clean_ready",{"micros":1,"calls":[]},"optimize_ready",{"micros":0,"calls":[]},"split_ready",{"micros":1,"calls":[]}]}]}] (Session ID: ffa6f9e6207f67dbfb0e7eb9ad8a6c81).
+2025-07-03 00:34:11 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 00:34:11 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 00:34:11 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-03 00:34:16 - INFO - 開始初始化 Facebook 監控...
+2025-07-03 00:34:19 - INFO - 最新貼文 URL: https://www.facebook.com/122122606034707135/posts/1894006328118839
+2025-07-03 00:34:19 - INFO - Facebook 監控初始化完成
+2025-07-03 00:34:19 - INFO - 等待剩餘時間: 2:35:12.450654
+2025-07-03 00:34:19 - INFO - ⏰ 例行重啟機器人...
+2025-07-03 00:34:19 - INFO - Websocket closed with 1000, cannot reconnect.
+2025-07-03 00:34:19 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-10' coro=<Loop._loop() done, defined at /usr/local/lib/python3.12/site-packages/discord/ext/tasks/__init__.py:152> exception=AttributeError("'Log' object has no attribute 'date'")>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/discord/ext/tasks/__init__.py", line 198, in _loop
+    raise exc
+  File "/usr/local/lib/python3.12/site-packages/discord/ext/tasks/__init__.py", line 169, in _loop
+    await self.coro(*args, **kwargs)
+  File "/root/Anon Taiwan/cog/log.py", line 78, in LogFile_Update
+    if now != self.date:
+              ^^^^^^^^^
+AttributeError: 'Log' object has no attribute 'date'
+2025-07-03 00:34:19 - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7fb81d569430>
+2025-07-03 00:34:19 - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7fb81c86dd90>, 3815572.99128571)])']
+connector: <aiohttp.connector.TCPConnector object at 0x7fb81d2f89b0>
+2025-07-03 00:34:19 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-9' coro=<Loop._loop() done, defined at /usr/local/lib/python3.12/site-packages/discord/ext/tasks/__init__.py:152> exception=AttributeError("'CogManager' object has no attribute 'date'")>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/discord/ext/tasks/__init__.py", line 198, in _loop
+    raise exc
+  File "/usr/local/lib/python3.12/site-packages/discord/ext/tasks/__init__.py", line 169, in _loop
+    await self.coro(*args, **kwargs)
+  File "/root/Anon Taiwan/cog/cogupdate.py", line 82, in LogFile_Update
+    if now != self.date:
+              ^^^^^^^^^
+AttributeError: 'CogManager' object has no attribute 'date'
+2025-07-03 00:34:19 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-12' coro=<Loop._loop() done, defined at /usr/local/lib/python3.12/site-packages/discord/ext/tasks/__init__.py:152> exception=AttributeError("'Environment' object has no attribute 'date'")>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/discord/ext/tasks/__init__.py", line 198, in _loop
+    raise exc
+  File "/usr/local/lib/python3.12/site-packages/discord/ext/tasks/__init__.py", line 169, in _loop
+    await self.coro(*args, **kwargs)
+  File "/root/Anon Taiwan/cog/environment.py", line 73, in LogFile_Update
+    if now != self.date:
+              ^^^^^^^^^
+AttributeError: 'Environment' object has no attribute 'date'
+2025-07-03 00:36:28 - INFO - bot.py: 日誌系統初始化完成
+2025-07-03 00:36:28 - INFO - logging in using static token
+2025-07-03 00:36:28 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-03 00:36:29 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-b-jd20",{"micros":196544,"calls":["id_created",{"micros":478,"calls":[]},"session_lookup_time",{"micros":416,"calls":[]},"session_lookup_finished",{"micros":15,"calls":[]},"discord-sessions-prd-2-100",{"micros":195162,"calls":["start_session",{"micros":175868,"calls":["discord-api-rpc-6d5df96575-667k6",{"micros":146942,"calls":["get_user",{"micros":12237},"get_guilds",{"micros":5952},"send_scheduled_deletion_message",{"micros":12},"guild_join_requests",{"micros":2},"authorized_ip_coro",{"micros":13},"pending_payments",{"micros":4104},"apex_experiments",{"micros":1640},"user_activities",{"micros":5},"played_application_ids",{"micros":2}]}]},"starting_guild_connect",{"micros":23,"calls":[]},"presence_started",{"micros":13206,"calls":[]},"guilds_started",{"micros":101,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":5940,"calls":[]},"connect_finished",{"micros":5945,"calls":[]},"build_ready",{"micros":16,"calls":[]},"clean_ready",{"micros":0,"calls":[]},"optimize_ready",{"micros":1,"calls":[]},"split_ready",{"micros":0,"calls":[]}]}]}] (Session ID: 426e4453911fdbe8a9bc0340175d1896).
+2025-07-03 00:36:31 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 00:36:31 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 00:36:31 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-03 00:36:36 - INFO - 開始初始化 Facebook 監控...
+2025-07-03 00:36:38 - INFO - 最新貼文 URL: https://www.facebook.com/122122606034707135/posts/1894006328118839
+2025-07-03 00:36:38 - INFO - Facebook 監控初始化完成
+2025-07-03 00:36:38 - INFO - 等待剩餘時間: 2:32:52.932658
+2025-07-03 00:36:39 - INFO - ⏰ 例行重啟機器人...
+2025-07-03 00:36:39 - INFO - Websocket closed with 1000, cannot reconnect.
+2025-07-03 00:36:39 - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7fd8addd17c0>
+2025-07-03 00:36:39 - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7fd8ac359d90>, 3815712.643723755)])']
+connector: <aiohttp.connector.TCPConnector object at 0x7fd8ad44d100>
+2025-07-03 00:38:37 - INFO - bot.py: 日誌系統初始化完成
+2025-07-03 00:38:37 - INFO - logging in using static token
+2025-07-03 00:38:38 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-03 00:38:38 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-c-v5p5",{"micros":139498,"calls":["id_created",{"micros":371,"calls":[]},"session_lookup_time",{"micros":521,"calls":[]},"session_lookup_finished",{"micros":12,"calls":[]},"discord-sessions-prd-2-134",{"micros":138224,"calls":["start_session",{"micros":128289,"calls":["discord-api-rpc-6b4d8b4db8-25vnz",{"micros":94734,"calls":["get_user",{"micros":27984},"get_guilds",{"micros":3166},"send_scheduled_deletion_message",{"micros":8},"guild_join_requests",{"micros":28817},"authorized_ip_coro",{"micros":10},"pending_payments",{"micros":3356},"apex_experiments",{"micros":2285},"user_activities",{"micros":4},"played_application_ids",{"micros":8}]}]},"starting_guild_connect",{"micros":27,"calls":[]},"presence_started",{"micros":270,"calls":[]},"guilds_started",{"micros":82,"calls":[]},"lobbies_started",{"micros":2,"calls":[]},"guilds_connect",{"micros":2,"calls":[]},"presence_connect",{"micros":9534,"calls":[]},"connect_finished",{"micros":9538,"calls":[]},"build_ready",{"micros":14,"calls":[]},"clean_ready",{"micros":1,"calls":[]},"optimize_ready",{"micros":0,"calls":[]},"split_ready",{"micros":0,"calls":[]}]}]}] (Session ID: c82a8e43e639998340b6bf30d95c811e).
+2025-07-03 00:38:40 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 00:38:41 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 00:38:41 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-03 00:38:46 - INFO - 開始初始化 Facebook 監控...
+2025-07-03 00:38:48 - INFO - 最新貼文 URL: https://www.facebook.com/122122606034707135/posts/1894006328118839
+2025-07-03 00:38:48 - INFO - Facebook 監控初始化完成
+2025-07-03 00:38:48 - INFO - 等待剩餘時間: 2:30:42.963075
+2025-07-03 01:09:20 - INFO - 日誌文件 logs/fb_bot_20250703.log 已發送給 zaber8787_
+2025-07-03 01:40:32 - INFO - Got a request to RESUME the websocket.
+2025-07-03 01:40:33 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-03 01:40:33 - INFO - Shard ID None has successfully RESUMED session c82a8e43e639998340b6bf30d95c811e under trace ["gateway-prd-us-east1-d-k274",{"micros":28112,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":263,"calls":[]},"session_lookup_finished",{"micros":13,"calls":[]},"discord-sessions-prd-2-134",{"micros":72}]}].
+2025-07-03 02:45:29 - INFO - Got a request to RESUME the websocket.
+2025-07-03 02:45:29 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-03 02:45:30 - INFO - Shard ID None has successfully RESUMED session c82a8e43e639998340b6bf30d95c811e under trace ["gateway-prd-us-east1-d-s68f",{"micros":902,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":388,"calls":[]},"session_lookup_finished",{"micros":17,"calls":[]},"discord-sessions-prd-2-134",{"micros":26}]}].
+2025-07-03 03:09:31 - INFO - 開始更新 Cookies...
+2025-07-03 03:09:32 - INFO - Cookies 已更新: {'datr': '64NlaBBdrhtbuGRA-RApJsko', 'ps_l': '0', 'ps_n': '0', 'sb': '64NlaHFWp_RykX92Y0A0qlmk', 'dpr': '2', 'wd': '798x847'}
+2025-07-03 04:52:22 - INFO - Got a request to RESUME the websocket.
+2025-07-03 04:52:23 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-03 04:52:23 - INFO - Shard ID None has successfully RESUMED session c82a8e43e639998340b6bf30d95c811e under trace ["gateway-prd-us-east1-d-t9xz",{"micros":22983,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":249,"calls":[]},"session_lookup_finished",{"micros":19,"calls":[]},"discord-sessions-prd-2-134",{"micros":37}]}].
+2025-07-03 06:38:49 - INFO - ⏰ 例行重啟機器人...
+2025-07-03 06:38:49 - INFO - Websocket closed with 1000, cannot reconnect.
+2025-07-03 06:38:51 - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f95553ff0e0>
+2025-07-03 09:11:41 - INFO - bot.py: 日誌系統初始化完成
+2025-07-03 09:11:41 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 09:11:42 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 09:11:42 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-03 09:11:47 - INFO - 開始初始化 Facebook 監控...
+2025-07-03 09:11:49 - INFO - 最新貼文 URL: https://www.facebook.com/122122606034707135/posts/1894006328118839
+2025-07-03 09:11:49 - INFO - Facebook 監控初始化完成
+2025-07-03 09:11:49 - INFO - logging in using static token
+2025-07-03 09:11:49 - INFO - 等待剩餘時間: 1 day, 17:57:42.538461
+2025-07-03 09:11:50 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-03 09:11:50 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-b-8q3d",{"micros":232758,"calls":["id_created",{"micros":628,"calls":[]},"session_lookup_time",{"micros":1822,"calls":[]},"session_lookup_finished",{"micros":11,"calls":[]},"discord-sessions-prd-2-82",{"micros":229295,"calls":["start_session",{"micros":191290,"calls":["discord-api-rpc-5bbcc4dc78-g62m8",{"micros":172342,"calls":["get_user",{"micros":8396},"get_guilds",{"micros":7056},"send_scheduled_deletion_message",{"micros":16},"guild_join_requests",{"micros":33018},"authorized_ip_coro",{"micros":9},"pending_payments",{"micros":5228},"apex_experiments",{"micros":5042},"user_activities",{"micros":6},"played_application_ids",{"micros":3}]}]},"starting_guild_connect",{"micros":26,"calls":[]},"presence_started",{"micros":12090,"calls":[]},"guilds_started",{"micros":73,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":0,"calls":[]},"presence_connect",{"micros":25794,"calls":[]},"connect_finished",{"micros":25798,"calls":[]},"build_ready",{"micros":14,"calls":[]},"clean_ready",{"micros":0,"calls":[]},"optimize_ready",{"micros":1,"calls":[]},"split_ready",{"micros":0,"calls":[]}]}]}] (Session ID: 83102dabe6b647cb7c1f39462d89835f).
+2025-07-03 10:51:08 - INFO - Got a request to RESUME the websocket.
+2025-07-03 10:51:08 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-03 10:51:09 - INFO - Shard ID None has successfully RESUMED session 83102dabe6b647cb7c1f39462d89835f under trace ["gateway-prd-us-east1-b-1czd",{"micros":1796,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":225,"calls":[]},"session_lookup_finished",{"micros":12,"calls":[]},"discord-sessions-prd-2-82",{"micros":28}]}].
+2025-07-03 11:31:55 - INFO - 檢測到新貼文: https://www.facebook.com/BANDBAND1027/posts/pfbid0Z8PPwVCQfFVkEG5Sb1aAVKWyrAXtBbf9p7FhYWaPwLTwWo2DLUXQ7WuEb7875e7sl
+2025-07-03 11:31:58 - INFO - 新貼文已成功發送到 Discord
+2025-07-03 12:11:54 - INFO - ⏰ 例行重啟機器人...
+2025-07-03 12:11:54 - INFO - Websocket closed with 1000, cannot reconnect.
+2025-07-03 12:11:54 - INFO - 🔄 Restarting bot...
+2025-07-03 12:11:54 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 12:11:54 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 12:11:54 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-03 12:11:59 - INFO - 開始初始化 Facebook 監控...
+2025-07-03 12:12:00 - INFO - 最新貼文 URL: https://www.facebook.com/BANDBAND1027/posts/pfbid0Z8PPwVCQfFVkEG5Sb1aAVKWyrAXtBbf9p7FhYWaPwLTwWo2DLUXQ7WuEb7875e7sl
+2025-07-03 12:12:00 - INFO - Facebook 監控初始化完成
+2025-07-03 12:12:00 - INFO - logging in using static token
+2025-07-03 12:12:00 - INFO - 等待剩餘時間: 1 day, 14:57:32.038938
+2025-07-03 12:12:01 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-03 12:12:02 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-c-rz9c",{"micros":89342,"calls":["id_created",{"micros":425,"calls":[]},"session_lookup_time",{"micros":287,"calls":[]},"session_lookup_finished",{"micros":12,"calls":[]},"discord-sessions-prd-2-128",{"micros":88239,"calls":["start_session",{"micros":64671,"calls":["discord-api-rpc-bdd745bbd-4m2vn",{"micros":53225,"calls":["get_user",{"micros":6814},"get_guilds",{"micros":6303},"send_scheduled_deletion_message",{"micros":16},"guild_join_requests",{"micros":1917},"authorized_ip_coro",{"micros":10},"pending_payments",{"micros":3911},"apex_experiments",{"micros":802},"user_activities",{"micros":3},"played_application_ids",{"micros":1}]}]},"starting_guild_connect",{"micros":27,"calls":[]},"presence_started",{"micros":13421,"calls":[]},"guilds_started",{"micros":88,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":10009,"calls":[]},"connect_finished",{"micros":10014,"calls":[]},"build_ready",{"micros":15,"calls":[]},"clean_ready",{"micros":0,"calls":[]},"optimize_ready",{"micros":1,"calls":[]},"split_ready",{"micros":0,"calls":[]}]}]}] (Session ID: 8d06f685e37cc77eaddf380dcd91d696).
+2025-07-03 12:25:20 - INFO - bot.py: 日誌系統初始化完成
+2025-07-03 12:25:20 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 12:25:20 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 12:25:20 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-03 12:25:25 - INFO - 開始初始化 Facebook 監控...
+2025-07-03 12:25:26 - INFO - 最新貼文 URL: https://www.facebook.com/BANDBAND1027/posts/pfbid0Z8PPwVCQfFVkEG5Sb1aAVKWyrAXtBbf9p7FhYWaPwLTwWo2DLUXQ7WuEb7875e7sl
+2025-07-03 12:25:26 - INFO - Facebook 監控初始化完成
+2025-07-03 12:25:26 - INFO - logging in using static token
+2025-07-03 12:25:26 - INFO - 等待剩餘時間: 1 day, 14:44:05.852293
+2025-07-03 12:25:27 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-03 12:25:27 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-c-n1cj",{"micros":51574,"calls":["id_created",{"micros":433,"calls":[]},"session_lookup_time",{"micros":318,"calls":[]},"session_lookup_finished",{"micros":15,"calls":[]},"discord-sessions-prd-2-140",{"micros":50536,"calls":["start_session",{"micros":48012,"calls":["discord-api-rpc-bdd745bbd-dxx87",{"micros":35517,"calls":["get_user",{"micros":6310},"get_guilds",{"micros":2772},"send_scheduled_deletion_message",{"micros":13},"guild_join_requests",{"micros":464},"authorized_ip_coro",{"micros":14},"pending_payments",{"micros":3878},"apex_experiments",{"micros":1027},"user_activities",{"micros":3},"played_application_ids",{"micros":2}]}]},"starting_guild_connect",{"micros":36,"calls":[]},"presence_started",{"micros":1998,"calls":[]},"guilds_started",{"micros":76,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":395,"calls":[]},"connect_finished",{"micros":399,"calls":[]},"build_ready",{"micros":13,"calls":[]},"clean_ready",{"micros":0,"calls":[]},"optimize_ready",{"micros":0,"calls":[]},"split_ready",{"micros":1,"calls":[]}]}]}] (Session ID: 75bfba3299405640509dedf4fa6db309).
+2025-07-03 12:27:05 - INFO - 日誌文件 logs/fb_bot_20250703.log 已發送給 zaber8787_
+2025-07-03 14:53:10 - INFO - Got a request to RESUME the websocket.
+2025-07-03 14:53:10 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-03 14:53:10 - INFO - Shard ID None has successfully RESUMED session 75bfba3299405640509dedf4fa6db309 under trace ["gateway-prd-us-east1-b-zxl2",{"micros":41828,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":237,"calls":[]},"session_lookup_finished",{"micros":11,"calls":[]},"discord-sessions-prd-2-140",{"micros":35}]}].
+2025-07-03 15:25:30 - INFO - ⏰ 例行重啟機器人...
+2025-07-03 15:25:30 - INFO - Websocket closed with 1000, cannot reconnect.
+2025-07-03 15:25:30 - INFO - 🔄 Restarting bot...
+2025-07-03 15:25:30 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 15:25:30 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 15:25:30 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-03 15:25:35 - INFO - 開始初始化 Facebook 監控...
+2025-07-03 15:25:36 - INFO - 最新貼文 URL: https://www.facebook.com/BANDBAND1027/posts/pfbid0Z8PPwVCQfFVkEG5Sb1aAVKWyrAXtBbf9p7FhYWaPwLTwWo2DLUXQ7WuEb7875e7sl
+2025-07-03 15:25:36 - INFO - Facebook 監控初始化完成
+2025-07-03 15:25:36 - INFO - logging in using static token
+2025-07-03 15:25:36 - INFO - 等待剩餘時間: 1 day, 11:43:55.403604
+2025-07-03 15:25:38 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-03 15:25:39 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-d-s8s2",{"micros":136680,"calls":["id_created",{"micros":796,"calls":[]},"session_lookup_time",{"micros":355,"calls":[]},"session_lookup_finished",{"micros":13,"calls":[]},"discord-sessions-prd-2-30",{"micros":135227,"calls":["start_session",{"micros":131005,"calls":["discord-api-rpc-bdd745bbd-mkhk9",{"micros":96831,"calls":["get_user",{"micros":18012},"get_guilds",{"micros":5853},"send_scheduled_deletion_message",{"micros":18},"guild_join_requests",{"micros":37227},"authorized_ip_coro",{"micros":14},"pending_payments",{"micros":5592},"apex_experiments",{"micros":2237},"user_activities",{"micros":6},"played_application_ids",{"micros":3}]}]},"starting_guild_connect",{"micros":29,"calls":[]},"presence_started",{"micros":271,"calls":[]},"guilds_started",{"micros":127,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":2,"calls":[]},"presence_connect",{"micros":3774,"calls":[]},"connect_finished",{"micros":3779,"calls":[]},"build_ready",{"micros":13,"calls":[]},"clean_ready",{"micros":0,"calls":[]},"optimize_ready",{"micros":1,"calls":[]},"split_ready",{"micros":0,"calls":[]}]}]}] (Session ID: f74d80bd400fa0f968fc9cfee2204f9d).
+2025-07-03 16:12:27 - INFO - 日誌文件 logs/fb_bot_20250703.log 已發送給 zaber8787_
+2025-07-03 17:35:30 - INFO - 檢測到新貼文: https://www.facebook.com/122122606034707135/posts/1769065130667933
+2025-07-03 17:35:30 - ERROR - check_data 中發生錯誤: Session is closed
+2025-07-03 17:35:49 - INFO - 檢測到新貼文: https://www.facebook.com/122122606034707135/posts/1769065130667933
+2025-07-03 17:35:51 - INFO - 新貼文已成功發送到 Discord
+2025-07-03 17:48:55 - INFO - 日誌文件 logs/fb_bot_20250703.log 已發送給 zaber8787_
+2025-07-03 18:08:47 - INFO - Got a request to RESUME the websocket.
+2025-07-03 18:08:47 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-03 18:08:48 - INFO - Shard ID None has successfully RESUMED session f74d80bd400fa0f968fc9cfee2204f9d under trace ["gateway-prd-us-east1-d-2lr1",{"micros":816,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":332,"calls":[]},"session_lookup_finished",{"micros":13,"calls":[]},"discord-sessions-prd-2-30",{"micros":27}]}].
+2025-07-03 18:25:42 - INFO - ⏰ 例行重啟機器人...
+2025-07-03 18:25:42 - INFO - Websocket closed with 1000, cannot reconnect.
+2025-07-03 18:25:42 - INFO - 🔄 Restarting bot...
+2025-07-03 18:25:42 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 18:25:42 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 18:25:42 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-03 18:25:47 - INFO - 開始初始化 Facebook 監控...
+2025-07-03 18:25:48 - INFO - 最新貼文 URL: https://www.facebook.com/122122606034707135/posts/1769065130667933
+2025-07-03 18:25:48 - INFO - Facebook 監控初始化完成
+2025-07-03 18:25:48 - INFO - logging in using static token
+2025-07-03 18:25:48 - INFO - 等待剩餘時間: 1 day, 8:43:43.534833
+2025-07-03 18:25:52 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-03 18:25:52 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-d-93k9",{"micros":131459,"calls":["id_created",{"micros":535,"calls":[]},"session_lookup_time",{"micros":5800,"calls":[]},"session_lookup_finished",{"micros":18,"calls":[]},"discord-sessions-prd-2-150",{"micros":123913,"calls":["start_session",{"micros":56708,"calls":["discord-api-rpc-bdd745bbd-zhfkp",{"micros":40557,"calls":["get_user",{"micros":6042},"get_guilds",{"micros":4085},"send_scheduled_deletion_message",{"micros":19},"guild_join_requests",{"micros":4},"authorized_ip_coro",{"micros":23},"pending_payments",{"micros":5773},"apex_experiments",{"micros":1080},"user_activities",{"micros":5},"played_application_ids",{"micros":2}]}]},"starting_guild_connect",{"micros":27,"calls":[]},"presence_started",{"micros":15020,"calls":[]},"guilds_started",{"micros":119,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":51995,"calls":[]},"connect_finished",{"micros":52000,"calls":[]},"build_ready",{"micros":12,"calls":[]},"clean_ready",{"micros":1,"calls":[]},"optimize_ready",{"micros":0,"calls":[]},"split_ready",{"micros":24,"calls":[]}]}]}] (Session ID: e11235cfe4d2905ab83546ba4337de5f).
+2025-07-03 18:35:34 - INFO - 檢測到新貼文: https://www.facebook.com/122122606034707135/posts/122138085572707135
+2025-07-03 18:35:34 - ERROR - check_data 中發生錯誤: Session is closed
+2025-07-03 18:35:42 - INFO - 檢測到新貼文: https://www.facebook.com/122122606034707135/posts/122138085572707135
+2025-07-03 18:35:42 - ERROR - check_data 中發生錯誤: Session is closed
+2025-07-03 18:35:56 - INFO - 檢測到新貼文: https://www.facebook.com/122122606034707135/posts/122138085572707135
+2025-07-03 18:35:58 - INFO - 新貼文已成功發送到 Discord
+2025-07-03 19:15:34 - INFO - 檢測到新貼文: https://www.facebook.com/122122606034707135/posts/122138088068707135
+2025-07-03 19:15:34 - ERROR - check_data 中發生錯誤: Session is closed
+2025-07-03 19:15:44 - INFO - 檢測到新貼文: https://www.facebook.com/122122606034707135/posts/122138088068707135
+2025-07-03 19:15:44 - ERROR - check_data 中發生錯誤: Session is closed
+2025-07-03 19:15:53 - INFO - 檢測到新貼文: https://www.facebook.com/122122606034707135/posts/122138088068707135
+2025-07-03 19:15:57 - INFO - 新貼文已成功發送到 Discord
+2025-07-03 20:16:16 - INFO - Websocket closed with 1006, attempting a reconnect.
+2025-07-03 20:16:16 - INFO - Got a request to RESUME the websocket.
+2025-07-03 20:16:17 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-03 20:16:17 - INFO - Shard ID None has successfully RESUMED session e11235cfe4d2905ab83546ba4337de5f under trace ["gateway-prd-us-east1-c-0qln",{"micros":9658,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":295,"calls":[]},"session_lookup_finished",{"micros":13,"calls":[]},"discord-sessions-prd-2-150",{"micros":37}]}].
+2025-07-03 21:25:55 - INFO - ⏰ 例行重啟機器人...
+2025-07-03 21:25:55 - INFO - Websocket closed with 1000, cannot reconnect.
+2025-07-03 21:25:55 - INFO - 🔄 Restarting bot...
+2025-07-03 21:25:55 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 21:25:55 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-03 21:25:55 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-03 21:26:00 - INFO - 開始初始化 Facebook 監控...
+2025-07-03 21:26:02 - INFO - 最新貼文 URL: https://www.facebook.com/122122606034707135/posts/122138088068707135
+2025-07-03 21:26:02 - INFO - Facebook 監控初始化完成
+2025-07-03 21:26:02 - INFO - logging in using static token
+2025-07-03 21:26:02 - INFO - 等待剩餘時間: 1 day, 5:43:29.892493
+2025-07-03 21:26:03 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-03 21:26:03 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-d-vprz",{"micros":129892,"calls":["id_created",{"micros":466,"calls":[]},"session_lookup_time",{"micros":4834,"calls":[]},"session_lookup_finished",{"micros":11,"calls":[]},"discord-sessions-prd-2-120",{"micros":124177,"calls":["start_session",{"micros":74010,"calls":["discord-api-rpc-bdd745bbd-8dc5c",{"micros":49039,"calls":["get_user",{"micros":5981},"get_guilds",{"micros":3589},"send_scheduled_deletion_message",{"micros":11},"guild_join_requests",{"micros":2},"authorized_ip_coro",{"micros":11},"pending_payments",{"micros":7276},"apex_experiments",{"micros":2473},"user_activities",{"micros":5},"played_application_ids",{"micros":3}]}]},"starting_guild_connect",{"micros":76,"calls":[]},"presence_started",{"micros":8580,"calls":[]},"guilds_started",{"micros":104,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":41386,"calls":[]},"connect_finished",{"micros":41390,"calls":[]},"build_ready",{"micros":13,"calls":[]},"clean_ready",{"micros":0,"calls":[]},"optimize_ready",{"micros":1,"calls":[]},"split_ready",{"micros":1,"calls":[]}]}]}] (Session ID: 71e02cd67ae5b6a82e37d80a487b90a1).
+2025-07-03 22:29:13 - INFO - Got a request to RESUME the websocket.
+2025-07-03 22:29:13 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-03 22:29:13 - INFO - Shard ID None has successfully RESUMED session 71e02cd67ae5b6a82e37d80a487b90a1 under trace ["gateway-prd-us-east1-d-1h5b",{"micros":3580,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":777,"calls":[]},"session_lookup_finished",{"micros":10,"calls":[]},"discord-sessions-prd-2-120",{"micros":37}]}].
+2025-07-03 22:35:33 - INFO - 檢測到新貼文: https://www.facebook.com/BANDBAND1027/posts/pfbid0G3k1xKdsFyG8s1LuMkGcbzh1zz7XYDrK5yEsPhjeogRGeCW3hh6GQ3DFzXp9Lwoql
+2025-07-03 22:35:33 - ERROR - check_data 中發生錯誤: Session is closed
+2025-07-03 22:35:44 - INFO - 檢測到新貼文: https://www.facebook.com/BANDBAND1027/posts/pfbid0G3k1xKdsFyG8s1LuMkGcbzh1zz7XYDrK5yEsPhjeogRGeCW3hh6GQ3DFzXp9Lwoql
+2025-07-03 22:35:44 - ERROR - check_data 中發生錯誤: Session is closed
+2025-07-03 22:35:59 - INFO - 檢測到新貼文: https://www.facebook.com/BANDBAND1027/posts/pfbid0G3k1xKdsFyG8s1LuMkGcbzh1zz7XYDrK5yEsPhjeogRGeCW3hh6GQ3DFzXp9Lwoql
+2025-07-03 22:35:59 - ERROR - check_data 中發生錯誤: Session is closed
+2025-07-03 22:36:11 - INFO - 檢測到新貼文: https://www.facebook.com/BANDBAND1027/posts/pfbid0G3k1xKdsFyG8s1LuMkGcbzh1zz7XYDrK5yEsPhjeogRGeCW3hh6GQ3DFzXp9Lwoql
+2025-07-03 22:36:14 - INFO - 新貼文已成功發送到 Discord
+2025-07-03 23:09:24 - INFO - Websocket closed with 1006, attempting a reconnect.
+2025-07-03 23:09:24 - INFO - Got a request to RESUME the websocket.
+2025-07-03 23:09:24 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-03 23:09:24 - INFO - Shard ID None has successfully RESUMED session 71e02cd67ae5b6a82e37d80a487b90a1 under trace ["gateway-prd-us-east1-b-0kjf",{"micros":24841,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":222,"calls":[]},"session_lookup_finished",{"micros":13,"calls":[]},"discord-sessions-prd-2-120",{"micros":48}]}].
+2025-07-04 00:05:26 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:05:26 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:05:26 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:05:26 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:05:39 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:05:39 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:05:39 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:05:39 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:05:51 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:05:51 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:05:51 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:05:51 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:06:02 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:06:02 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:06:02 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:06:02 - INFO - bot.py: 日誌時間更新
+2025-07-04 00:26:06 - INFO - ⏰ 例行重啟機器人...
+2025-07-04 00:26:06 - INFO - Websocket closed with 1000, cannot reconnect.
+2025-07-04 00:26:06 - INFO - 🔄 Restarting bot...
+2025-07-04 00:26:06 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 00:26:06 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 00:26:06 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-04 00:26:11 - INFO - 開始初始化 Facebook 監控...
+2025-07-04 00:26:13 - INFO - 最新貼文 URL: https://www.facebook.com/BANDBAND1027/posts/pfbid0G3k1xKdsFyG8s1LuMkGcbzh1zz7XYDrK5yEsPhjeogRGeCW3hh6GQ3DFzXp9Lwoql
+2025-07-04 00:26:13 - INFO - Facebook 監控初始化完成
+2025-07-04 00:26:13 - INFO - logging in using static token
+2025-07-04 00:26:13 - INFO - 等待剩餘時間: 1 day, 2:43:19.301935
+2025-07-04 00:26:16 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-04 00:26:16 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-b-j7n7",{"micros":219594,"calls":["id_created",{"micros":498,"calls":[]},"session_lookup_time",{"micros":399,"calls":[]},"session_lookup_finished",{"micros":12,"calls":[]},"discord-sessions-prd-2-148",{"micros":218354,"calls":["start_session",{"micros":172545,"calls":["discord-api-rpc-bdd745bbd-vm9b8",{"micros":153284,"calls":["get_user",{"micros":104563},"get_guilds",{"micros":6514},"send_scheduled_deletion_message",{"micros":18},"guild_join_requests",{"micros":3},"authorized_ip_coro",{"micros":10},"pending_payments",{"micros":7858},"apex_experiments",{"micros":715},"user_activities",{"micros":5},"played_application_ids",{"micros":2}]}]},"starting_guild_connect",{"micros":43,"calls":[]},"presence_started",{"micros":15437,"calls":[]},"guilds_started",{"micros":98,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":2,"calls":[]},"presence_connect",{"micros":30211,"calls":[]},"connect_finished",{"micros":30215,"calls":[]},"build_ready",{"micros":13,"calls":[]},"clean_ready",{"micros":0,"calls":[]},"optimize_ready",{"micros":0,"calls":[]},"split_ready",{"micros":1,"calls":[]}]}]}] (Session ID: da05c52919e6b807d4dbdce879df0cf8).
+2025-07-04 00:56:20 - INFO - bot.py: 日誌時間更新
+2025-07-04 01:01:23 - INFO - Got a request to RESUME the websocket.
+2025-07-04 01:01:24 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-04 01:01:24 - INFO - Shard ID None has successfully RESUMED session da05c52919e6b807d4dbdce879df0cf8 under trace ["gateway-prd-us-east1-d-ln3d",{"micros":4955,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":315,"calls":[]},"session_lookup_finished",{"micros":13,"calls":[]},"discord-sessions-prd-2-148",{"micros":28}]}].
+2025-07-04 02:05:49 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:05:49 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:06:02 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:06:02 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:06:13 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:06:13 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:06:17 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:06:17 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:15:34 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:15:34 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:15:49 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:15:49 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:15:58 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:15:58 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:16:06 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:16:06 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:16:15 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:16:15 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:25:34 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:25:34 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:25:43 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:25:43 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:25:54 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:25:54 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:26:13 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:26:13 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:26:22 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:26:22 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:35:37 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:35:37 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:35:50 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:35:50 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:36:02 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:36:02 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:36:07 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:36:07 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:36:22 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:36:22 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:45:33 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:45:33 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:45:46 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:45:46 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:45:58 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:45:58 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:46:13 - INFO - Websocket closed with 1006, attempting a reconnect.
+2025-07-04 02:46:13 - INFO - Got a request to RESUME the websocket.
+2025-07-04 02:46:13 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-04 02:46:13 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:46:13 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:46:13 - INFO - Shard ID None has successfully RESUMED session da05c52919e6b807d4dbdce879df0cf8 under trace ["gateway-prd-us-east1-c-sgtb",{"micros":40847,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":308,"calls":[]},"session_lookup_finished",{"micros":20,"calls":[]},"discord-sessions-prd-2-148",{"micros":36}]}].
+2025-07-04 02:46:15 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:46:15 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:55:27 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:55:27 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:55:48 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:55:48 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:56:00 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:56:00 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:56:13 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:56:13 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 02:56:21 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 02:56:21 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:05:30 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:05:30 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:05:45 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:05:45 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:06:01 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:06:01 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:06:05 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:06:05 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:06:24 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:06:24 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:15:35 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:15:35 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:15:47 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:15:47 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:16:00 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:16:00 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:16:07 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:16:07 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:16:20 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:16:20 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:25:34 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:25:34 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:25:42 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:25:42 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:25:53 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:25:53 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:26:08 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:26:08 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:26:16 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:26:16 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:26:20 - INFO - ⏰ 例行重啟機器人...
+2025-07-04 03:26:20 - INFO - Websocket closed with 1000, cannot reconnect.
+2025-07-04 03:26:20 - INFO - 🔄 Restarting bot...
+2025-07-04 03:26:20 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 03:26:20 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 03:26:20 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-04 03:26:25 - INFO - 開始初始化 Facebook 監控...
+2025-07-04 03:26:25 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:26:25 - WARNING - 無法獲取 Facebook 數據，跳過初始化
+2025-07-04 03:26:25 - INFO - logging in using static token
+2025-07-04 03:26:25 - INFO - 等待剩餘時間: 23:43:06.992331
+2025-07-04 03:26:25 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-04 03:26:26 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-d-93k9",{"micros":99770,"calls":["id_created",{"micros":543,"calls":[]},"session_lookup_time",{"micros":1471,"calls":[]},"session_lookup_finished",{"micros":14,"calls":[]},"discord-sessions-prd-2-6",{"micros":96980,"calls":["start_session",{"micros":64114,"calls":["discord-api-rpc-c6dccd599-nxbxx",{"micros":48927,"calls":["get_user",{"micros":6301},"get_guilds",{"micros":9028},"send_scheduled_deletion_message",{"micros":17},"guild_join_requests",{"micros":3},"authorized_ip_coro",{"micros":14},"pending_payments",{"micros":4634},"apex_experiments",{"micros":924},"user_activities",{"micros":4},"played_application_ids",{"micros":2}]}]},"starting_guild_connect",{"micros":50,"calls":[]},"presence_started",{"micros":9766,"calls":[]},"guilds_started",{"micros":108,"calls":[]},"lobbies_started",{"micros":1,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":22910,"calls":[]},"connect_finished",{"micros":22916,"calls":[]},"build_ready",{"micros":22,"calls":[]},"clean_ready",{"micros":0,"calls":[]},"optimize_ready",{"micros":1,"calls":[]},"split_ready",{"micros":0,"calls":[]}]}]}] (Session ID: 58f6e72da99f766a76ee364652e5f457).
+2025-07-04 03:35:33 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:35:33 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:35:46 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:35:46 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:35:59 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:35:59 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:36:09 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:36:09 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:36:16 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:36:16 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:45:30 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:45:30 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:45:45 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:45:45 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:45:58 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:45:58 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:46:09 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:46:09 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:46:16 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:46:16 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:55:33 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:55:33 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:55:44 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:55:44 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:55:56 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:55:56 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:56:04 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:56:04 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:56:16 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 03:56:16 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 03:56:29 - INFO - bot.py: 日誌時間更新
+2025-07-04 04:05:29 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:05:29 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:05:49 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:05:49 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:05:55 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:05:55 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:06:11 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:06:11 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:06:15 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:06:15 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:15:27 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:15:27 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:15:41 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:15:41 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:15:55 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:15:55 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:16:05 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:16:05 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:16:17 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:16:17 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:25:29 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:25:29 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:25:44 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:25:44 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:25:56 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:25:56 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:26:08 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:26:08 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:26:22 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:26:22 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:35:29 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:35:29 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:35:50 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:35:50 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:35:59 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:35:59 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:36:13 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:36:13 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:36:15 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:36:15 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:45:34 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:45:34 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:45:48 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:45:48 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:46:01 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:46:01 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:46:06 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:46:06 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:46:15 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:46:15 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:55:32 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:55:32 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:55:46 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:55:46 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:56:01 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:56:01 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:56:12 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:56:12 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 04:56:15 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 04:56:15 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:05:32 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:05:32 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:05:43 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:05:43 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:06:01 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:06:01 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:06:04 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:06:04 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:06:21 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:06:21 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:15:30 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:15:30 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:15:43 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:15:43 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:16:01 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:16:01 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:16:09 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:16:09 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:16:18 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:16:18 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:24:24 - INFO - Got a request to RESUME the websocket.
+2025-07-04 05:24:24 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-04 05:24:24 - INFO - Shard ID None has successfully RESUMED session 58f6e72da99f766a76ee364652e5f457 under trace ["gateway-prd-us-east1-c-7glq",{"micros":502,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":257,"calls":[]},"session_lookup_finished",{"micros":12,"calls":[]},"discord-sessions-prd-2-6",{"micros":23}]}].
+2025-07-04 05:25:33 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:25:33 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:25:46 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:25:46 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:25:53 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:25:53 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:26:10 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:26:10 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:26:18 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:26:18 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:35:34 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:35:34 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:35:48 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:35:48 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:35:58 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:35:58 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:36:09 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:36:09 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:36:17 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:36:17 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:45:28 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:45:28 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:45:48 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:45:48 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:45:57 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:45:57 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:46:11 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:46:11 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:46:23 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:46:23 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:55:32 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:55:32 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:55:46 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:55:46 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:55:59 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:55:59 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:56:07 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:56:07 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 05:56:23 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 05:56:23 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:05:33 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:05:33 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:05:46 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:05:46 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:05:55 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:05:55 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:06:09 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:06:09 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:06:22 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:06:22 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:15:36 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:15:36 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:15:41 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:15:41 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:16:00 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:16:00 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:16:07 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:16:07 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:16:18 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:16:18 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:23:14 - INFO - Websocket closed with 1001, attempting a reconnect.
+2025-07-04 06:23:14 - INFO - Got a request to RESUME the websocket.
+2025-07-04 06:23:15 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-04 06:23:15 - INFO - Shard ID None has successfully RESUMED session 58f6e72da99f766a76ee364652e5f457 under trace ["gateway-prd-us-east1-d-k8cf",{"micros":3563,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":2749,"calls":[]},"session_lookup_finished",{"micros":13,"calls":[]},"discord-sessions-prd-2-6",{"micros":30}]}].
+2025-07-04 06:25:34 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:25:34 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:25:43 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:25:43 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:25:58 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:25:58 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:26:13 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:26:13 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:26:20 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:26:20 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:26:29 - INFO - ⏰ 例行重啟機器人...
+2025-07-04 06:26:29 - INFO - Websocket closed with 1000, cannot reconnect.
+2025-07-04 06:26:29 - INFO - 🔄 Restarting bot...
+2025-07-04 06:26:29 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 06:26:29 - INFO - cog/cogupdate.py: 日誌系統初始化完成
+2025-07-04 06:26:29 - INFO - cog/fb.py: 日誌系統初始化完成
+2025-07-04 06:26:34 - INFO - 開始初始化 Facebook 監控...
+2025-07-04 06:26:34 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:26:34 - WARNING - 無法獲取 Facebook 數據，跳過初始化
+2025-07-04 06:26:34 - INFO - logging in using static token
+2025-07-04 06:26:34 - INFO - 等待剩餘時間: 20:42:57.507521
+2025-07-04 06:26:35 - INFO - Shard ID None has sent the IDENTIFY payload.
+2025-07-04 06:26:35 - INFO - Shard ID None has connected to Gateway: ["gateway-prd-us-east1-c-mfs4",{"micros":126675,"calls":["id_created",{"micros":302,"calls":[]},"session_lookup_time",{"micros":327,"calls":[]},"session_lookup_finished",{"micros":16,"calls":[]},"discord-sessions-prd-2-8",{"micros":125160,"calls":["start_session",{"micros":87966,"calls":["discord-api-rpc-7fd5f78cdd-dm5wf",{"micros":72060,"calls":["get_user",{"micros":16968},"get_guilds",{"micros":7354},"send_scheduled_deletion_message",{"micros":17},"guild_join_requests",{"micros":2},"authorized_ip_coro",{"micros":13},"pending_payments",{"micros":5728},"apex_experiments",{"micros":1871},"user_activities",{"micros":12},"played_application_ids",{"micros":3}]}]},"starting_guild_connect",{"micros":51,"calls":[]},"presence_started",{"micros":13667,"calls":[]},"guilds_started",{"micros":106,"calls":[]},"lobbies_started",{"micros":2,"calls":[]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":23347,"calls":[]},"connect_finished",{"micros":23351,"calls":[]},"build_ready",{"micros":15,"calls":[]},"clean_ready",{"micros":0,"calls":[]},"optimize_ready",{"micros":0,"calls":[]},"split_ready",{"micros":1,"calls":[]}]}]}] (Session ID: 7e77da808dc63061aecf8bdfd6945e32).
+2025-07-04 06:35:37 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:35:37 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:35:48 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:35:48 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:35:59 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:35:59 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:36:11 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:36:11 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:36:23 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:36:23 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:45:33 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:45:33 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:45:48 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:45:48 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:45:57 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:45:57 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:46:05 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:46:05 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:46:19 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:46:19 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:55:36 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:55:36 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:55:46 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:55:46 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:55:54 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:55:54 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:56:13 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:56:13 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:56:19 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 06:56:19 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 06:56:38 - INFO - bot.py: 日誌時間更新
+2025-07-04 07:05:36 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:05:36 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:05:41 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:05:41 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:06:01 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:06:01 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:06:11 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:06:11 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:06:15 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:06:15 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:15:36 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:15:36 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:15:49 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:15:49 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:15:59 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:15:59 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:16:11 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:16:11 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:16:17 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:16:17 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:25:29 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:25:29 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:25:48 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:25:48 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:25:58 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:25:58 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:26:07 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:26:07 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:26:22 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:26:22 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:35:31 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:35:31 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:35:45 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:35:45 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:36:01 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:36:01 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:36:09 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:36:09 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:36:20 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:36:20 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:45:29 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:45:29 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:45:42 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:45:42 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:45:53 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:45:53 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:46:14 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:46:14 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:46:17 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:46:17 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:55:37 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:55:37 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:55:45 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:55:45 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:56:01 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:56:01 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:56:12 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:56:12 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 07:56:18 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 07:56:18 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:05:33 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:05:33 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:05:42 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:05:42 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:05:59 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:05:59 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:06:05 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:06:05 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:06:18 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:06:18 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:15:31 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:15:31 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:15:50 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:15:50 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:15:56 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:15:56 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:16:12 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:16:12 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:16:18 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:16:18 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:25:31 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:25:31 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:25:50 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:25:50 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:25:54 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:25:54 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:26:08 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:26:08 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:26:20 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:26:20 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:35:28 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:35:28 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:35:46 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:35:46 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:35:56 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:35:56 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:36:10 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:36:10 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:36:14 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:36:14 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:45:30 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:45:30 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:45:44 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:45:44 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:45:57 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:45:57 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:46:12 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:46:12 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:46:16 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:46:16 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:52:06 - INFO - Websocket closed with 1006, attempting a reconnect.
+2025-07-04 08:52:06 - INFO - Got a request to RESUME the websocket.
+2025-07-04 08:52:07 - INFO - Shard ID None has sent the RESUME payload.
+2025-07-04 08:52:07 - INFO - Shard ID None has successfully RESUMED session 7e77da808dc63061aecf8bdfd6945e32 under trace ["gateway-prd-us-east1-c-rqmg",{"micros":798,"calls":["id_created",{"micros":0,"calls":[]},"session_lookup_time",{"micros":266,"calls":[]},"session_lookup_finished",{"micros":12,"calls":[]},"discord-sessions-prd-2-8",{"micros":30}]}].
+2025-07-04 08:55:31 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:55:31 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:55:48 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:55:48 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:56:00 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:56:00 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:56:10 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:56:10 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 08:56:18 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 08:56:18 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:05:29 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:05:29 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:05:46 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:05:46 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:05:55 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:05:55 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:06:11 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:06:11 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:06:24 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:06:24 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:15:32 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:15:32 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:15:42 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:15:42 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:15:59 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:15:59 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:16:14 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:16:14 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:16:14 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:16:14 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:25:11 - INFO - 日誌文件 logs/fb_bot_20250704.log 已發送給 zaber8787_
+2025-07-04 09:25:35 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:25:35 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:25:46 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:25:46 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:25:55 - INFO - 日誌文件 logs/fb_bot_20250703.log 已發送給 zaber8787_
+2025-07-04 09:26:01 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:26:01 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:26:13 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:26:13 - WARNING - 在 check_data 中無法獲取 Facebook 數據
+2025-07-04 09:26:17 - WARNING - 在 Facebook 回應中找不到 attachments 模式
+2025-07-04 09:26:17 - WARNING - 在 check_data 中無法獲取 Facebook 數據

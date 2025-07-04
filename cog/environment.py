@@ -44,32 +44,6 @@ class Environment(commands.Cog):
                     # 使用 display_name 以支援 User/Member
                     author_name = getattr(message.author, "display_name", getattr(message.author, "name", "未知用戶"))
                     self.logger.info(f'{author_name} 更新了 {attachment.filename}')
-        """設置日誌系統"""
-        # 創建 logs 目錄（如果不存在）
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
-        
-        # 設置日誌文件名（包含日期）
-        log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
-        
-        # 配置日誌格式
-        log_format = '%(asctime)s - %(levelname)s - %(message)s'
-        date_format = '%Y-%m-%d %H:%M:%S'
-        
-        # 配置日誌
-        logging.basicConfig(
-            level=logging.INFO,
-            format=log_format,
-            datefmt=date_format,
-            handlers=[
-                logging.FileHandler(log_filename, encoding='utf-8'),
-                logging.StreamHandler()  # 同時輸出到控制台
-            ]
-        )
-        
-        self.logger = logging.getLogger(__name__)
-        self.logger.info("cog/cogupdate.py: 日誌系統初始化完成")
-       
 
     @tasks.loop(minutes = 10)
     async def LogFile_Update(self):
@@ -95,6 +69,34 @@ class Environment(commands.Cog):
             self.date = now
             self.logger.info("bot.py: 日誌時間更新")
  
+    
+    def setup_logging(self):
+        """設置日誌系統"""
+        # 創建 logs 目錄（如果不存在）
+        if not os.path.exists('logs'):
+            os.makedirs('logs')
+        
+        # 設置日誌文件名（包含日期）
+        log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
+        
+        # 配置日誌格式
+        log_format = '%(asctime)s - %(levelname)s - %(message)s'
+        date_format = '%Y-%m-%d %H:%M:%S'
+        
+        # 配置日誌
+        logging.basicConfig(
+            level=logging.INFO,
+            format=log_format,
+            datefmt=date_format,
+            handlers=[
+                logging.FileHandler(log_filename, encoding='utf-8'),
+                logging.StreamHandler()  # 同時輸出到控制台
+            ]
+        )
+        
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("cog/fb.py: 日誌系統初始化完成")
+
        
 def setup(bot: commands.Bot):
     bot.add_cog(Environment(bot))
