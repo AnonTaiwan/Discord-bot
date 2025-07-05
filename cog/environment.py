@@ -70,7 +70,7 @@ class Environment(commands.Cog):
         )
         
         self.logger = logging.getLogger(__name__)
-        self.logger.info("cog/fb.py: 日誌系統初始化完成")
+        self.logger.info("cog/enviroment.py: 日誌系統初始化完成")
 
        
 def setup(bot: commands.Bot):

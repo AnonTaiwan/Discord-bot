@@ -33,6 +33,7 @@ class Log(commands.Cog):
                 logging.StreamHandler()  # 同時輸出到控制台
             ])
         self.logger = logging.getLogger(__name__)
+        self.logger.info("cog/log.py: 日誌系統初始化完成")
         
     @discord.slash_command(name="log", description="查看日誌")
     async def log(self, ctx: discord.ApplicationContext, date: str = discord.Option(default=None, description="你想查詢的日期，例如 20250627")): # type: ignore

@@ -33,7 +33,7 @@ class MyBot(commands.Bot):
 
     @tasks.loop(hours=6)
     async def auto_restart(self):
-        logger.info("⏰ 例行重啟機器人...")
+        logger.info("⏰ 例行重啟機器人...") #type:ignore
         await self.close()
     @auto_restart.before_loop
     async def before_auto_restart(self):
@@ -44,7 +44,8 @@ class MyBot(commands.Bot):
         now = datetime.now()
         # 如果現在時間在 0:00 ~ 8:00
         if 0 <= now.hour < 8:
-            logger.info("⏰ 到了夜間關機時段，自動關閉機器人")
+            logger.info("⏰ 到了夜間關機時段，自動關閉機器人") #type:ignore
+            logger = None
             await self.close()
 
 async def main():
@@ -56,7 +57,7 @@ async def main():
             print(f"夜間關機，將於 {seconds_to_8} 秒後自動開機")
             await asyncio.sleep(seconds_to_8)
             continue  # 跳過這次，等到8點再啟動
-        bot = MyBot()
+        
         if not os.path.exists('logs'):
             os.makedirs('logs')
         log_filename = f'logs/fb_bot_{bot.date}.log'
@@ -69,10 +70,12 @@ async def main():
                 logging.StreamHandler()
             ]
         )
-        global logger
         logger = logging.getLogger(__name__)
         logger.info("bot.py: 日誌系統初始化完成")
+        bot = MyBot()
         await bot.start(TOKEN)
 
 if __name__ == "__main__":
+    global logger
+    logger = None
     asyncio.run(main())
