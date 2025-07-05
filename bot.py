@@ -60,7 +60,7 @@ async def main():
         
         if not os.path.exists('logs'):
             os.makedirs('logs')
-        log_filename = f'logs/fb_bot_{bot.date}.log'
+        log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s',
