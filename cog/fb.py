@@ -54,14 +54,13 @@ class Facebook(commands.Cog):
                 return
             self.content, self.image, self.latest = self.filte_data(data)
             self.logger.info(f"最新貼文 URL: {self.latest}")
-            self.check_data.start()
+            asyncio.create_task(self.check_data())
             self.logger.info("Facebook 監控初始化完成")
         except Exception as e:
             self.logger.error(f"初始化過程中發生錯誤: {e}")
             # 即使初始化失敗，也要啟動任務
             self.update_task = self.bot.loop.create_task(self.cookie_scheduler())
-            if not self.check_data.is_running():
-                self.check_data.start()
+            asyncio.create_task(self.check_data())
     
     def setup_logging(self):
         """設置日誌系統"""
@@ -90,42 +89,40 @@ class Facebook(commands.Cog):
         self.logger = logging.getLogger(__name__)
         self.logger.info("cog/fb.py: 日誌系統初始化完成")
 
-    @tasks.loop(minutes=10)
     async def check_data(self):
-        try:
-            await asyncio.sleep(random.randint(1, 10))
-            data = self.get_data()
-            if data is None:
-                self.logger.warning("在 check_data 中無法獲取 Facebook 數據")
-                return
-            content, uri, url = self.filte_data(data)
-            if url != self.latest and content != self.content and uri != self.image:
-                self.logger.info(f"檢測到新貼文: {url}")
-                with open('1.jpg', 'wb') as img_file:
-                    img_response = requests.get(url = uri, headers=self.headers, allow_redirects=True,impersonate='chrome110')
-                    img_file.write(img_response.content)
-                channel = self.bot.get_channel(1357294484903297127)
-                # channel = self.bot.get_channel(873263562942992395)
-                embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
-                embed.add_field(name='貼文連結', value=url, inline=False)
-                embed.add_field(name='貼文內容', value=content, inline=False)
-                file = discord.File(f"1.jpg", filename=f"1.jpg")
-                embed.set_image(url=f"attachment://1.jpg")
-                msg = await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
-                # await channel.send(embed=embed, file=file)
-                os.remove('1.jpg')
-                self.latest = url
-                self.content = content
-                self.image = uri
-                self.logger.info("新貼文已成功發送到 Discord")
-                await msg.publish()
-                
-        except Exception as e:
-            pass
-            
-    @check_data.before_loop
-    async def BeforeCheckData(self):
-        await asyncio.sleep(10*60)
+        while True:
+            await asyncio.sleep(10 * 60)
+            try:
+                await asyncio.sleep(random.randint(1, 10))
+                data = self.get_data()
+                if data is None:
+                    self.logger.warning("在 check_data 中無法獲取 Facebook 數據")
+                    await asyncio.sleep(10 * 60)
+                    continue
+                content, uri, url = self.filte_data(data)
+                if url != self.latest and content != self.content and uri != self.image:
+                    self.logger.info(f"檢測到新貼文: {url}")
+                    with open('1.jpg', 'wb') as img_file:
+                        img_response = requests.get(url = uri, headers=self.headers, allow_redirects=True,impersonate='chrome110')
+                        img_file.write(img_response.content)
+                    channel = self.bot.get_channel(1357294484903297127)
+                    # channel = self.bot.get_channel(873263562942992395)
+                    embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
+                    embed.add_field(name='貼文連結', value=url, inline=False)
+                    embed.add_field(name='貼文內容', value=content, inline=False)
+                    file = discord.File(f"1.jpg", filename=f"1.jpg")
+                    embed.set_image(url=f"attachment://1.jpg")
+                    msg = await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
+                    # await channel.send(embed=embed, file=file)
+                    os.remove('1.jpg')
+                    self.latest = url
+                    self.content = content
+                    self.image = uri
+                    self.logger.info("新貼文已成功發送到 Discord")
+                    await msg.publish()
+                    
+            except Exception as e:
+                pass
             
     def get_data(self):
         try:
