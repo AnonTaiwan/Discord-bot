@@ -28,16 +28,19 @@ class MyBot(commands.Bot):
         await self.change_presence(status=discord.Status.online, activity=game)
         await self.setup_hook()
         self.remove_command("help")
-        current_time = datetime.now()
-        if current_time.hour != 0:
-            # 算出距離下個 0 點（明天的 0:00）還有幾秒
-            tomorrow = (current_time + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-            seconds_to_midnight = int((tomorrow - current_time).total_seconds())
-            print(f"將於 {seconds_to_midnight} 秒後自動執行")
-            await asyncio.sleep(seconds_to_midnight)
+        self.loop.create_task(self.auto_shutdown_at_midnight())
+
+    async def auto_shutdown_at_midnight(self):
+        now = datetime.now()
+        if now.hour == 0:
+            print("已到 0 點，立即關機")
             await self.close()
         else:
-            # 如果已經是 0 點，直接執行
+            # 算到下個 0 點還有幾秒
+            tomorrow = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            seconds_to_midnight = int((tomorrow - now).total_seconds())
+            print(f"將於 {seconds_to_midnight} 秒後自動關機")
+            await asyncio.sleep(seconds_to_midnight)
             await self.close()
 
 

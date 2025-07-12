@@ -134,7 +134,7 @@ class Facebook(commands.Cog):
                 self.logger.warning(f"Facebook 返回狀態碼 {response.status_code}")
                 return None
                 
-            pattern = r"\"attachments\":\[{\"styles\"(.*?)}}}"  # 抓取 styles 到 attachments 結尾附近
+            pattern = r"\"attachments\":\[{\"media\"(.*?)}}}"  # 抓取 styles 到 attachments 結尾附近
             match = re.search(pattern, response.text, re.DOTALL)
             if match:
                 text = '{"styles"' + match.group(1)
