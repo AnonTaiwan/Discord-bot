@@ -19,6 +19,7 @@ class Facebook(commands.Cog):
         self.content = None
         self.image = None
         # 設置日誌
+        self.load_latest_post()
         self.setup_logging()
         try:
             with open('JSON/Cookies.json','r',encoding='utf-8')as f:
@@ -109,17 +110,20 @@ class Facebook(commands.Cog):
                     # channel = self.bot.get_channel(873263562942992395)
                     embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
                     embed.add_field(name='貼文連結', value=url, inline=False)
-                    embed.add_field(name='貼文內容', value=content, inline=False)
+                    embed.add_field(name='貼文內容', value=content or "（無內容）", inline=False)
                     file = discord.File(f"1.jpg", filename=f"1.jpg")
                     embed.set_image(url=f"attachment://1.jpg")
-                    msg = await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
-                    # await channel.send(embed=embed, file=file)
+                    if channel and hasattr(channel, "send"):
+                        msg = await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file) #type:ignore
+                        await msg.publish()
+                    else:
+                        self.logger.error("找不到指定的 Discord 頻道或無法發送訊息")
                     os.remove('1.jpg')
                     self.latest = url
                     self.content = content
                     self.image = uri
+                    self.save_latest_post()
                     self.logger.info("新貼文已成功發送到 Discord")
-                    await msg.publish()
                     
             except Exception as e:
                 pass
@@ -137,7 +141,7 @@ class Facebook(commands.Cog):
             pattern = r"\"attachments\":\[{\"media\"(.*?)}}}"  # 抓取 styles 到 attachments 結尾附近
             match = re.search(pattern, response.text, re.DOTALL)
             if match:
-                text = '{"styles"' + match.group(1)
+                text = '{"media"' + match.group(1)
                 cnt = 0
                 for i in range(len(text)):
                     if text[i] == '{':
@@ -259,6 +263,26 @@ class Facebook(commands.Cog):
                 json.dump(self.cookies, f, ensure_ascii=False, indent=2)
         except Exception as e:
             self.logger.error(f"更新 Cookies 時發生錯誤: {e}")
+
+    def save_latest_post(self):
+        with open('JSON/latest_post.json', 'w', encoding='utf-8') as f:
+            json.dump({
+                'latest': self.latest,
+                'content': self.content,
+                'image': self.image
+            }, f, ensure_ascii=False, indent=2)
+
+    def load_latest_post(self):
+        try:
+            with open('JSON/latest_post.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                self.latest = data.get('latest')
+                self.content = data.get('content')
+                self.image = data.get('image')  # 修正這裡
+        except Exception:
+            self.latest = None
+            self.content = None
+            self.image = None
 
 def setup(bot: commands.Bot):
     bot.add_cog(Facebook(bot))
