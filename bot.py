@@ -39,8 +39,8 @@ class MyBot(commands.Bot):
             # 算到下個 0 點還有幾秒
             tomorrow = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
             seconds_to_midnight = int((tomorrow - now).total_seconds())
-            print(f"將於 {seconds_to_midnight} 秒後自動關機")
-            await asyncio.sleep(seconds_to_midnight)
+            print(f"將於 {seconds_to_midnight + 5} 秒後自動關機")
+            await asyncio.sleep(seconds_to_midnight + 5)
             await self.close()
 
 
