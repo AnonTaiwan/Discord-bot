@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 import asyncio
 import os
+import time
 import logging
 from datetime import datetime, timedelta
 
@@ -41,6 +42,7 @@ class MyBot(commands.Bot):
             seconds_to_midnight = int((tomorrow - now).total_seconds())
             print(f"將於 {seconds_to_midnight + 5} 秒後自動關機")
             await asyncio.sleep(seconds_to_midnight + 5)
+            print('每日12點自動關機')
             await self.close()
 
 
@@ -78,7 +80,7 @@ async def main():
             # 算出距離8點還有幾秒
             seconds_to_8 = ((8 - current_hour.hour) * 3600 - current_hour.minute * 60 - current_hour.second)
             print(f"夜間關機，將於 {seconds_to_8} 秒後自動開機")
-            await asyncio.sleep(seconds_to_8)
+            time.sleep(seconds_to_8 + 5)
             continue  # 跳過這次，等到8點再啟動
         
         now = datetime.now()

@@ -18,6 +18,7 @@ class Facebook(commands.Cog):
         self.latest = None
         self.content = None
         self.image = None
+        self.check_data_lock = asyncio.Lock()
         # 設置日誌
         self.load_latest_post()
         self.setup_logging()
@@ -55,12 +56,10 @@ class Facebook(commands.Cog):
                 return
             self.content, self.image, self.latest = self.filte_data(data)
             self.logger.info(f"最新貼文 URL: {self.latest}")
-            asyncio.create_task(self.check_data())
-            self.logger.info("Facebook 監控初始化完成")
         except Exception as e:
             self.logger.error(f"初始化過程中發生錯誤: {e}")
-            # 即使初始化失敗，也要啟動任務
-            self.update_task = self.bot.loop.create_task(self.cookie_scheduler())
+        finally:
+            # 無論如何只啟動一次
             asyncio.create_task(self.check_data())
     
     def setup_logging(self):
@@ -95,36 +94,37 @@ class Facebook(commands.Cog):
             await asyncio.sleep(10 * 60)
             try:
                 await asyncio.sleep(random.randint(1, 10))
-                data = self.get_data()
-                if data is None:
-                    self.logger.warning("在 check_data 中無法獲取 Facebook 數據")
-                    await asyncio.sleep(10 * 60)
-                    continue
-                content, uri, url = self.filte_data(data)
-                if url != self.latest and content != self.content and uri != self.image:
-                    self.logger.info(f"檢測到新貼文: {url}")
-                    with open('1.jpg', 'wb') as img_file:
-                        img_response = requests.get(url = uri, headers=self.headers, allow_redirects=True,impersonate='chrome110')
-                        img_file.write(img_response.content)
-                    channel = self.bot.get_channel(1357294484903297127)
-                    # channel = self.bot.get_channel(873263562942992395)
-                    embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
-                    embed.add_field(name='貼文連結', value=url, inline=False)
-                    embed.add_field(name='貼文內容', value=content or "（無內容）", inline=False)
-                    file = discord.File(f"1.jpg", filename=f"1.jpg")
-                    embed.set_image(url=f"attachment://1.jpg")
-                    if channel and hasattr(channel, "send"):
-                        msg = await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file) #type:ignore
-                        await msg.publish()
-                    else:
-                        self.logger.error("找不到指定的 Discord 頻道或無法發送訊息")
-                    os.remove('1.jpg')
-                    self.latest = url
-                    self.content = content
-                    self.image = uri
-                    self.save_latest_post()
-                    self.logger.info("新貼文已成功發送到 Discord")
-                    
+                async with self.check_data_lock:
+                    data = self.get_data()
+                    if data is None:
+                        self.logger.warning("在 check_data 中無法獲取 Facebook 數據")
+                        await asyncio.sleep(10 * 60)
+                        continue
+                    content, uri, url = self.filte_data(data)
+                    if url != self.latest and content != self.content and uri != self.image:
+                        self.logger.info(f"檢測到新貼文: {url}")
+                        with open('1.jpg', 'wb') as img_file:
+                            img_response = requests.get(url = uri, headers=self.headers, allow_redirects=True,impersonate='chrome110')
+                            img_file.write(img_response.content)
+                        channel = self.bot.get_channel(1357294484903297127)
+                        # channel = self.bot.get_channel(873263562942992395)
+                        embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
+                        embed.add_field(name='貼文連結', value=url, inline=False)
+                        embed.add_field(name='貼文內容', value=content or "（無內容）", inline=False)
+                        file = discord.File(f"1.jpg", filename=f"1.jpg")
+                        embed.set_image(url=f"attachment://1.jpg")
+                        if channel and hasattr(channel, "send"):
+                            msg = await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file) #type:ignore
+                            await msg.publish()
+                        else:
+                            self.logger.error("找不到指定的 Discord 頻道或無法發送訊息")
+                        os.remove('1.jpg')
+                        self.latest = url
+                        self.content = content
+                        self.image = uri
+                        self.save_latest_post()
+                        self.logger.info("新貼文已成功發送到 Discord")
+                        
             except Exception as e:
                 pass
             
