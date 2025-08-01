@@ -55,6 +55,10 @@ class Facebook(commands.Cog):
                 self.logger.warning("無法獲取 Facebook 數據，跳過初始化")
                 return
             self.content, self.image, self.latest = self.filte_data(data)
+            if self.content is None and self.image is None and self.latest is None:
+                self.logger.warning("無法獲取 Facebook 數據，以之前的紀錄代替")
+                self.load_latest_post()
+                return
             self.logger.info(f"最新貼文 URL: {self.latest}")
         except Exception as e:
             self.logger.error(f"初始化過程中發生錯誤: {e}")
@@ -101,6 +105,9 @@ class Facebook(commands.Cog):
                         await asyncio.sleep(10 * 60)
                         continue
                     content, uri, url = self.filte_data(data)
+                    if self.content is None and self.image is None and self.latest is None:
+                        self.logger.warning("無法獲取 Facebook 數據，用最近的紀錄代替")
+                        self.load_latest_post()
                     if url != self.latest and content != self.content and uri != self.image:
                         self.logger.info(f"檢測到新貼文: {url}")
                         with open('1.jpg', 'wb') as img_file:
@@ -111,14 +118,24 @@ class Facebook(commands.Cog):
                         embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
                         embed.add_field(name='貼文連結', value=url, inline=False)
                         embed.add_field(name='貼文內容', value=content or "（無內容）", inline=False)
-                        file = discord.File(f"1.jpg", filename=f"1.jpg")
-                        embed.set_image(url=f"attachment://1.jpg")
-                        if channel and hasattr(channel, "send"):
-                            msg = await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file) #type:ignore
-                            await msg.publish()
+                        
+                        # 檢查檔案是否存在
+                        if os.path.exists("1.jpg"):
+                            file = discord.File(f"1.jpg", filename=f"1.jpg")
+                            embed.set_image(url=f"attachment://1.jpg")
+                            if channel and hasattr(channel, "send"):
+                                msg = await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file) #type:ignore
+                                await msg.publish()
+                            else:
+                                self.logger.error("找不到指定的 Discord 頻道或無法發送訊息")
+                            os.remove('1.jpg')
                         else:
-                            self.logger.error("找不到指定的 Discord 頻道或無法發送訊息")
-                        os.remove('1.jpg')
+                            self.logger.warning("檔案 1.jpg 不存在，跳過檔案發送")
+                            if channel and hasattr(channel, "send"):
+                                msg = await channel.send(content = '<@&1357315095235137636>', embed=embed) #type:ignore
+                                await msg.publish()
+                            else:
+                                self.logger.error("找不到指定的 Discord 頻道或無法發送訊息")
                         self.latest = url
                         self.content = content
                         self.image = uri
@@ -190,27 +207,31 @@ class Facebook(commands.Cog):
                     title = "無法解析的影片貼文"
                     response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
             else:
-                url = data['styles']['attachment']['media']['url'].replace('\\','')
-                uri = data['styles']['attachment']['media']['photo_image']['uri'].replace('\\','')
-                response = requests.get(url, headers=self.headers,allow_redirects=True,impersonate='chrome110')
-                pattern = r'"message_preferred_body":(.*?)},"container'
-                match = re.search(pattern, response.text, re.DOTALL)
-                if match:
-                    temp = json.loads('{"message_preferred_body":' + match.group(1) + '}}')
-                    text = temp["message_preferred_body"]['text']
-                    title = bytes(text,'utf-8').decode(encoding="utf-8", errors="ignore")
-                    response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
-                else:
-                    # 如果找不到匹配，嘗試其他模式或使用預設值
-                    self.logger.warning("找不到 message_preferred_body 模式")
-                    # 嘗試其他可能的模式
-                    alt_pattern = r'"message":{"text":"(.*?)"'
-                    alt_match = re.search(alt_pattern, response.text, re.DOTALL)
-                    if alt_match:
-                        title = alt_match.group(1)
+                try:
+                    url = data['styles']['attachment']['media']['url'].replace('\\','')
+                    uri = data['styles']['attachment']['media']['photo_image']['uri'].replace('\\','')
+                    response = requests.get(url, headers=self.headers,allow_redirects=True,impersonate='chrome110')
+                    pattern = r'"message_preferred_body":(.*?)},"container'
+                    match = re.search(pattern, response.text, re.DOTALL)
+                    if match:
+                        temp = json.loads('{"message_preferred_body":' + match.group(1) + '}}')
+                        text = temp["message_preferred_body"]['text']
+                        title = bytes(text,'utf-8').decode(encoding="utf-8", errors="ignore")
+                        response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
                     else:
-                        title = "無法解析的圖片貼文"
-                    response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
+                        # 如果找不到匹配，嘗試其他模式或使用預設值
+                        self.logger.warning("找不到 message_preferred_body 模式")
+                        # 嘗試其他可能的模式
+                        alt_pattern = r'"message":{"text":"(.*?)"'
+                        alt_match = re.search(alt_pattern, response.text, re.DOTALL)
+                        if alt_match:
+                            title = alt_match.group(1)
+                        else:
+                            title = "無法解析的圖片貼文"
+                        response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
+                except Exception as e:
+                    self.logger.error(f"filte_data 中發生錯誤: {e}")
+                    return None, None, None
         else:
             url = data['styles']['attachment']['url'].replace('\\','')
             uri = data['styles']['attachment']['all_subattachments']['nodes'][0]["media"]['viewer_image']['uri'].replace('\\','')

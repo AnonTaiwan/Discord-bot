@@ -35,6 +35,9 @@ class MyBot(commands.Bot):
         now = datetime.now()
         if now.hour == 0:
             print("已到 0 點，立即關機")
+            for ext in self.initial_extensions:
+                self.unload_extension(ext)
+                print(f"✅ 已卸載擴展: {ext}")
             await self.close()
         else:
             # 算到下個 0 點還有幾秒
@@ -43,6 +46,9 @@ class MyBot(commands.Bot):
             print(f"將於 {seconds_to_midnight + 5} 秒後自動關機")
             await asyncio.sleep(seconds_to_midnight + 5)
             print('每日12點自動關機')
+            for ext in self.initial_extensions:
+                self.unload_extension(ext)
+                print(f"✅ 已卸載擴展: {ext}")
             await self.close()
 
 
