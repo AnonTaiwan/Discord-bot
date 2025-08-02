@@ -147,7 +147,7 @@ class Facebook(commands.Cog):
             
     def get_data(self):
         try:
-            response = requests.get('https://www.facebook.com/BANDBAND1027', headers=self.headers,cookies=self.cookies,impersonate='chrome110')
+            response = requests.get('https://www.facebook.com/profile.php?id=61566516636930', headers=self.headers,cookies=self.cookies,impersonate='chrome110')
             response.encoding = 'utf-8' 
             
             # 檢查回應狀態
@@ -200,12 +200,12 @@ class Facebook(commands.Cog):
                     temp = json.loads(text)
                     text = temp['message']['text']
                     title = bytes(text,'utf-8').decode(encoding="utf-8", errors="ignore")
-                    response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
+                    response.url = f'https://www.facebook.com/61566516636930/posts/{data['styles']['attachment']['media']['id']}'
                 else:
                     # 如果找不到匹配，使用預設值
                     self.logger.warning("找不到影片訊息模式")
                     title = "無法解析的影片貼文"
-                    response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
+                    response.url = f'https://www.facebook.com/61566516636930/posts/{data['styles']['attachment']['media']['id']}'
             else:
                 try:
                     url = data['styles']['attachment']['media']['url'].replace('\\','')
@@ -217,7 +217,7 @@ class Facebook(commands.Cog):
                         temp = json.loads('{"message_preferred_body":' + match.group(1) + '}}')
                         text = temp["message_preferred_body"]['text']
                         title = bytes(text,'utf-8').decode(encoding="utf-8", errors="ignore")
-                        response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
+                        response.url = f'https://www.facebook.com/61566516636930/posts/{data['styles']['attachment']['media']['id']}'
                     else:
                         # 如果找不到匹配，嘗試其他模式或使用預設值
                         self.logger.warning("找不到 message_preferred_body 模式")
@@ -228,7 +228,7 @@ class Facebook(commands.Cog):
                             title = alt_match.group(1)
                         else:
                             title = "無法解析的圖片貼文"
-                        response.url = f'https://www.facebook.com/122122606034707135/posts/{data['styles']['attachment']['media']['id']}'
+                        response.url = f'https://www.facebook.com/61566516636930/posts/{data['styles']['attachment']['media']['id']}'
                 except Exception as e:
                     self.logger.error(f"filte_data 中發生錯誤: {e}")
                     return None, None, None
