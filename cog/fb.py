@@ -185,10 +185,16 @@ class Facebook(commands.Cog):
                 url = data['styles']['attachment']['url'].replace('\\','')
                 uri = data['styles']['attachment']['media']['thumbnailImage']['uri'].replace('\\','')
                 response = requests.get(url, headers=self.headers,cookies=self.cookies, allow_redirects=True,impersonate='chrome110')
-                pattern = r'"story":{"message":(.*?)}'
+                if 'reel' not in url:
+                    pattern = r'"story":{"message":(.*?)}'
+                else:
+                    pattern = r'"message":(.*?)",'
                 match = re.search(pattern, response.text, re.DOTALL)
                 if match:
-                    text = '{"message":' + match.group(1) + '}'
+                    if 'reel' not in url:
+                        text = '{"message":' + match.group(1) + '}'
+                    else:
+                        text = '{"message":' + match.group(1) + '"'
                     cnt = 0
                     for i in range(len(text)):
                         if text[i] == '{':
