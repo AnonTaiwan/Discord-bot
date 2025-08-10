@@ -99,6 +99,11 @@ async def main():
             logger.info(f"日誌系統已更新至 {today}")
             
         bot = MyBot()
+
+        if os.environ.get("CI_RUNNING") == "true":
+            logger.info("CI 環境中，將不會啟動機器人")
+            await asyncio.sleep(30)
+
         await bot.start(TOKEN)
 
 if __name__ == "__main__":

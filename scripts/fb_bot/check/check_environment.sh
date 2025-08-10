@@ -125,10 +125,14 @@ echo ""
 echo "4. 檢查網路連接..."
 
 # 檢查基本網路
-if ping -c 1 8.8.8.8 &> /dev/null; then
-    echo "✅ 基本網路連接正常"
+if [[ "${CI_RUNNING}" == "true" ]]; then
+    echo "✅ CI 環境，跳過基本網路檢查"
 else
-    echo "❌ 基本網路連接失敗"
+    if ping -c 1 8.8.8.8 &> /dev/null; then
+        echo "✅ 基本網路連接正常"
+    else
+        echo "❌ 基本網路連接失敗"
+    fi
 fi
 
 # 檢查 Discord

@@ -1,0 +1,80 @@
+name: Bot Startup
+run-name: ${{ github.actor }} is Testing Bot Startup 
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  Bot-Startup:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-latest]
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Create and activate virtual environment
+      run: |
+        python -m venv .venv
+
+    - name: Install dependencies
+      run: |
+        source .venv/bin/activate
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Setup Environment
+      run: |
+        source .venv/bin/activate
+        scripts/manage.sh setup
+
+    - name: Check Environment
+      run: |
+        source .venv/bin/activate
+        scripts/manage.sh check
+      env:
+        CI_RUNNING: true
+
+    - name: Set Discord Bot Token to Testing App's Token
+      run: |
+        sed -i 's/TOKEN = ".*"/TOKEN = "MTQwNDAzMTIyOTY4NjMyMTIzMg.G-sHEH.Aryp0J4vUtw5vrRaCNtx3tt9DDnaz92fN4MRd4"/' bot.py
+
+    - name: Start Bot
+      id: start-bot
+      run: |
+        source .venv/bin/activate
+        scripts/manage.sh start
+      env:
+        CI_RUNNING: true
+      continue-on-error: true
+
+    - name: Check logs
+      run: |
+        if [ -f logs/bot_stdout.log ]; then
+          echo "Bot log output:"
+          cat logs/bot_stdout.log
+        else
+          echo "Log file not found. Bot may not have started correctly."
+          exit 1
+        fi
+
+    - name: Throw Error if Bot Failed to Start
+      if: ${{ steps.start-bot.outcome == 'failure' }}
+      run: |
+        echo "Bot failed to start. Please check the logs for more details."
+        exit 1
