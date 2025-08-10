@@ -105,6 +105,7 @@ async def main():
             await asyncio.sleep(30)
 
         await bot.start(TOKEN)
+        del bot
 
 if __name__ == "__main__":
     global logger
