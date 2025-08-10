@@ -1,4 +1,4 @@
-# Scripts 目錄
+# FaceBook Bot Scripts
 
 這個目錄包含了 Facebook Bot 專案的各種腳本工具，按功能分類組織。
 
@@ -52,14 +52,14 @@
 
 ```bash
 # 工具
-./scripts/tools/view_logs.py --help
-./scripts/tools/cleanup_project.sh
+./scripts/fb_bot/tools/view_logs.py --help
+./scripts/fb_bot/tools/cleanup_project.sh
 
 # 設置
-./scripts/setup/setup_env.sh
+./scripts/fb_bot/setup/setup_env.sh
 
 # 檢查
-./scripts/check/check_environment.sh
+./scripts/fb_bot/check/check_environment.sh
 ```
 
 ## 注意事項

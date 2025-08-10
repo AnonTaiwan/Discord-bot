@@ -3,11 +3,14 @@
 # Facebook Bot 完整環境檢查腳本
 # 檢查所有必要的套件、系統依賴和環境設置
 
+# Scripts 目錄
+FB_BOT_SCRIPT_DIR="$(dirname "$0")/.."
+
 echo "=== Facebook Bot 完整環境檢查 ==="
 echo ""
 
 # 載入 Python 執行器
-source "$(dirname "$0")/python_runner.sh"
+source "${FB_BOT_SCRIPT_DIR}/tools/python_runner.sh"
 
 # 獲取 Python 路徑
 PYTHON_PATH=$(get_python_path)
@@ -16,24 +19,24 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "使用 Python: $PYTHON_PATH"
+echo "使用 Python: ${PYTHON_PATH}"
 check_venv_status
 
 echo ""
 
 # 1. 檢查 Python 版本
 echo "1. 檢查 Python 版本..."
-PYTHON_VERSION=$($PYTHON_PATH --version 2>&1)
+PYTHON_VERSION=$(${PYTHON_PATH} --version 2>&1)
 echo "✅ $PYTHON_VERSION"
 
 # 檢查 Python 版本是否足夠新
-PYTHON_MAJOR=$($PYTHON_PATH -c "import sys; print(sys.version_info.major)" 2>/dev/null)
-PYTHON_MINOR=$($PYTHON_PATH -c "import sys; print(sys.version_info.minor)" 2>/dev/null)
+PYTHON_MAJOR=$(${PYTHON_PATH} -c "import sys; print(sys.version_info.major)" 2>/dev/null)
+PYTHON_MINOR=$(${PYTHON_PATH} -c "import sys; print(sys.version_info.minor)" 2>/dev/null)
 
-if [ "$PYTHON_MAJOR" -ge 3 ] && [ "$PYTHON_MINOR" -ge 7 ]; then
-    echo "✅ Python 版本符合要求 (>= 3.7)"
+if [ "${PYTHON_MAJOR}" -ge 3 ] && [ "${PYTHON_MINOR}" -ge 8 ]; then
+    echo "✅ Python 版本符合要求 (>= 3.8)"
 else
-    echo "⚠️  Python 版本可能過舊，建議使用 Python 3.7+"
+    echo "⚠️  Python 版本可能過舊，建議使用 Python 3.8+"
 fi
 
 # 2. 檢查系統依賴
@@ -93,13 +96,13 @@ MISSING_OPTIONAL=()
 # 檢查核心套件
 echo "核心套件："
 for package in "${CORE_PACKAGES[@]}"; do
-    IFS=':' read -r pip_name import_name <<< "$package"
-    if $PYTHON_PATH -c "import $import_name" 2>/dev/null; then
-        VERSION=$($PYTHON_PATH -c "import $import_name; print(getattr($import_name, '__version__', 'unknown'))" 2>/dev/null)
-        echo "✅ $pip_name ($VERSION)"
+    IFS=':' read -r pip_name import_name <<< "${package}"
+    if ${PYTHON_PATH} -c "import ${import_name}" 2>/dev/null; then
+        VERSION=$(${PYTHON_PATH} -c "import ${import_name}; print(getattr(${import_name}, '__version__', 'unknown'))" 2>/dev/null)
+        echo "✅ ${pip_name} (${VERSION})"
     else
-        echo "❌ $pip_name 未安裝"
-        MISSING_CORE+=($pip_name)
+        echo "❌ ${pip_name} 未安裝"
+        MISSING_CORE+=(${pip_name})
     fi
 done
 
@@ -107,13 +110,13 @@ done
 echo ""
 echo "可選套件："
 for package in "${OPTIONAL_PACKAGES[@]}"; do
-    IFS=':' read -r pip_name import_name <<< "$package"
-    if $PYTHON_PATH -c "import $import_name" 2>/dev/null; then
-        VERSION=$($PYTHON_PATH -c "import $import_name; print(getattr($import_name, '__version__', 'unknown'))" 2>/dev/null)
-        echo "✅ $pip_name ($VERSION)"
+    IFS=':' read -r pip_name import_name <<< "${package}"
+    if ${PYTHON_PATH} -c "import ${import_name}" 2>/dev/null; then
+        VERSION=$(${PYTHON_PATH} -c "import ${import_name}; print(getattr(${import_name}, '__version__', 'unknown'))" 2>/dev/null)
+        echo "✅ ${pip_name} (${VERSION})"
     else
-        echo "⚠️  $pip_name 未安裝（可選）"
-        MISSING_OPTIONAL+=($pip_name)
+        echo "⚠️  ${pip_name} 未安裝（可選）"
+        MISSING_OPTIONAL+=(${pip_name})
     fi
 done
 
@@ -180,28 +183,30 @@ echo ""
 echo "7. 檢查必要文件..."
 REQUIRED_FILES=("bot.py" "cog/fb.py")
 for file in "${REQUIRED_FILES[@]}"; do
-    if [ -f "$file" ]; then
-        echo "✅ $file 存在"
+    if [ -f "${file}" ]; then
+        echo "✅ ${file} 存在"
     else
-        echo "❌ $file 不存在"
+        echo "❌ ${file} 不存在"
     fi
 done
 
 # 8. 檢查腳本權限
 echo ""
 echo "8. 檢查腳本權限..."
-SCRIPTS=("start_bot.sh" "stop_bot.sh" "status_bot.sh" "restart_bot.sh" "python_runner.sh" "check_setup.sh" "setup_env.sh")
+SCRIPTS_DIR="${FB_BOT_SCRIPT_DIR}/.."
+SCRIPTS=("start_bot.sh" "stop_bot.sh" "status_bot.sh" "restart_bot.sh" "fb_bot/tools/python_runner.sh" "fb_bot/check/check_setup.sh" "fb_bot/setup/setup_env.sh")
 for script in "${SCRIPTS[@]}"; do
-    if [ -f "$script" ]; then
-        if [ -x "$script" ]; then
-            echo "✅ $script 可執行"
+    script="${SCRIPTS_DIR}/${script}"
+    if [ -f "${script}" ]; then
+        if [ -x "${script}" ]; then
+            echo "✅ ${script} 可執行"
         else
-            echo "⚠️  $script 需要執行權限"
-            chmod +x "$script"
+            echo "⚠️  ${script} 需要執行權限"
+            chmod +x "${script}"
             echo "✅ 已添加執行權限"
         fi
     else
-        echo "❌ $script 不存在"
+        echo "❌ ${script} 不存在"
     fi
 done
 
@@ -211,19 +216,19 @@ echo "9. 檢查系統資源..."
 
 # 檢查磁盤空間
 DISK_USAGE=$(df . | tail -1 | awk '{print $5}' | sed 's/%//')
-if [ "$DISK_USAGE" -lt 90 ]; then
-    echo "✅ 磁盤空間充足 ($DISK_USAGE% 使用)"
+if [ "${DISK_USAGE}" -lt 90 ]; then
+    echo "✅ 磁盤空間充足 (${DISK_USAGE}% 使用)"
 else
-    echo "⚠️  磁盤空間不足 ($DISK_USAGE% 使用)"
+    echo "⚠️  磁盤空間不足 (${DISK_USAGE}% 使用)"
 fi
 
 # 檢查記憶體
 if command -v free &> /dev/null; then
     MEMORY_AVAILABLE=$(free -m | awk 'NR==2{printf "%.0f", $7*100/$2}')
-    if [ "$MEMORY_AVAILABLE" -gt 20 ]; then
-        echo "✅ 記憶體充足 ($MEMORY_AVAILABLE% 可用)"
+    if [ "${MEMORY_AVAILABLE}" -gt 20 ]; then
+        echo "✅ 記憶體充足 (${MEMORY_AVAILABLE}% 可用)"
     else
-        echo "⚠️  記憶體不足 ($MEMORY_AVAILABLE% 可用)"
+        echo "⚠️  記憶體不足 (${MEMORY_AVAILABLE}% 可用)"
     fi
 fi
 
@@ -233,7 +238,7 @@ echo "10. 測試基本功能..."
 
 # 測試 Discord 功能
 echo "測試 Discord 功能..."
-$PYTHON_PATH -c "
+${PYTHON_PATH} -c "
 import discord
 from discord.ext import commands
 
@@ -253,7 +258,7 @@ except Exception as e:
 
 # 測試 requests 功能
 echo "測試 requests 功能..."
-$PYTHON_PATH -c "
+${PYTHON_PATH} -c "
 import requests
 
 try:
@@ -268,7 +273,7 @@ except Exception as e:
 
 # 測試 BeautifulSoup 功能
 echo "測試 BeautifulSoup 功能..."
-$PYTHON_PATH -c "
+${PYTHON_PATH} -c "
 from bs4 import BeautifulSoup
 
 try:

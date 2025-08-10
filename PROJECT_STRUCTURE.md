@@ -15,36 +15,38 @@ Anon-Taiwan/
 ├── 📁 logs/                     # 日誌文件目錄
 │   └── fb_bot_YYYYMMDD.log      # 日誌文件（按日期）
 │
-├── 🛠️ 常用管理腳本（根目錄）
+│
+├── 📁 scripts/                  🛠️ 常用管理腳本
 │   ├── manage.sh                # 🎯 統一管理工具（推薦使用）
 │   ├── start_bot.sh             # 啟動 Bot
 │   ├── stop_bot.sh              # 停止 Bot
 │   ├── restart_bot.sh           # 重啟 Bot
-│   └── status_bot.sh            # 檢查狀態
-│
-├── 📁 scripts/                  # 工具腳本目錄
-│   ├── 📄 README.md             # 腳本使用說明
+│   ├── status_bot.sh            # 檢查狀態
 │   │
-│   ├── 📁 tools/                # 維護工具
-│   │   ├── python_runner.sh     # Python 腳本執行器
-│   │   ├── view_logs.py         # 日誌查看工具
-│   │   └── cleanup_project.sh   # 專案清理工具
-│   │
-│   ├── 📁 setup/                # 設置工具
-│   │   ├── setup_env.sh         # 環境設置腳本
-│   │   ├── start_bot_screen.sh  # Screen 啟動腳本
-│   │   └── facebook-bot.service # Systemd 服務文件
-│   │
-│   └── 📁 check/                # 檢查工具
-│       ├── check_environment.sh # 完整環境檢查
-│       ├── check_setup.sh       # 基本設置檢查
-│       └── check_pycord.sh      # py-cord 專用檢查
+│   └── 📁 fb_bot/                   # 工具腳本目錄
+│       ├── 📄 README.md             # 腳本使用說明
+│       │
+│       ├── 📁 tools/                # 維護工具
+│       │   ├── python_runner.sh     # Python 腳本執行器
+│       │   ├── view_logs.py         # 日誌查看工具
+│       │   └── cleanup_project.sh   # 專案清理工具
+│       │
+│       ├── 📁 setup/                # 設置工具
+│       │   ├── setup_env.sh         # 環境設置腳本
+│       │   ├── start_bot_screen.sh  # Screen 啟動腳本
+│       │   └── facebook-bot.service # Systemd 服務文件
+│       │
+│       └── 📁 check/                # 檢查工具
+│           ├── check_environment.sh # 完整環境檢查
+│           ├── check_setup.sh       # 基本設置檢查
+│           └── check_pycord.sh      # py-cord 專用檢查
 │
 └── 📄 文檔
     ├── QUICK_START.md           # 快速開始指南
     ├── DEPLOYMENT_GUIDE.md      # 部署指南
     ├── README_LOGS.md           # 日誌系統說明
-    └── PROJECT_STRUCTURE.md     # 本文件
+    ├── PROJECT_STRUCTURE.md     # 本文件
+    └── README.md                # 專案概要
 ```
 
 ## 🎯 推薦使用方式
@@ -52,66 +54,66 @@ Anon-Taiwan/
 ### 統一管理工具（最簡單）
 ```bash
 # 基本操作
-./manage.sh start     # 啟動 Bot
-./manage.sh stop      # 停止 Bot
-./manage.sh restart   # 重啟 Bot
-./manage.sh status    # 檢查狀態
+scripts/manage.sh start     # 啟動 Bot
+scripts/manage.sh stop      # 停止 Bot
+scripts/manage.sh restart   # 重啟 Bot
+scripts/manage.sh status    # 檢查狀態
 
 # 環境管理
-./manage.sh setup     # 環境設置
-./manage.sh check     # 完整檢查
-./manage.sh check-env # 基本檢查
-./manage.sh check-py  # py-cord 檢查
+scripts/manage.sh setup     # 環境設置
+scripts/manage.sh check     # 完整檢查
+scripts/manage.sh check-env # 基本檢查
+scripts/manage.sh check-py  # py-cord 檢查
 
 # 日誌管理
-./manage.sh logs list                    # 列出日誌
-./manage.sh logs view --file xxx.log     # 查看日誌
-./manage.sh logs view --file xxx.log --follow  # 實時跟蹤
-./manage.sh logs search --file xxx.log --keyword 錯誤  # 搜索
-./manage.sh logs clean                   # 清理舊日誌
+scripts/manage.sh logs list                    # 列出日誌
+scripts/manage.sh logs view --file xxx.log     # 查看日誌
+scripts/manage.sh logs view --file xxx.log --follow  # 實時跟蹤
+scripts/manage.sh logs search --file xxx.log --keyword 錯誤  # 搜索
+scripts/manage.sh logs clean                   # 清理舊日誌
 
 # 維護工具
-./manage.sh cleanup   # 清理專案
-./manage.sh python    # 運行 Python 腳本
+scripts/manage.sh cleanup   # 清理專案
+scripts/manage.sh python    # 運行 Python 腳本
 
 # 幫助
-./manage.sh help      # 顯示幫助
+scripts/manage.sh help      # 顯示幫助
 ```
 
 ### 直接使用腳本（進階）
 ```bash
 # 常用腳本（根目錄）
-./start_bot.sh
-./stop_bot.sh
-./restart_bot.sh
-./status_bot.sh
+scripts/start_bot.sh
+scripts/stop_bot.sh
+scripts/restart_bot.sh
+scripts/status_bot.sh
 
 # 工具腳本
-./scripts/tools/view_logs.py --help
-./scripts/setup/setup_env.sh
-./scripts/check/check_environment.sh
+./scripts/fb_bot/tools/view_logs.py --help
+./scripts/fb_bot/setup/setup_env.sh
+./scripts/fb_bot/check/check_environment.sh
 ```
 
 ## 🔧 腳本功能說明
 
-### 根目錄腳本
+### 常用管理腳本 (`scripts/`)
 - **`manage.sh`**: 統一管理工具，提供所有功能的便捷介面
 - **`start_bot.sh`**: 啟動 Bot（支援虛擬環境）
 - **`stop_bot.sh`**: 停止 Bot
 - **`restart_bot.sh`**: 重啟 Bot
 - **`status_bot.sh`**: 檢查 Bot 運行狀態
 
-### 工具腳本 (`scripts/tools/`)
+### 工具腳本 (`scripts/fb_bot/tools/`)
 - **`python_runner.sh`**: 通用 Python 腳本執行器，自動檢測虛擬環境
 - **`view_logs.py`**: 日誌查看和管理工具，支援查看、搜索、清理
 - **`cleanup_project.sh`**: 專案清理工具，清理臨時文件和緩存
 
-### 設置腳本 (`scripts/setup/`)
+### 設置腳本 (`scripts/fb_bot/setup/`)
 - **`setup_env.sh`**: 環境設置腳本，自動創建虛擬環境並安裝依賴
 - **`start_bot_screen.sh`**: 使用 screen 會話啟動 Bot
 - **`facebook-bot.service`**: systemd 服務文件，用於系統級管理
 
-### 檢查腳本 (`scripts/check/`)
+### 檢查腳本 (`scripts/fb_bot/check/`)
 - **`check_environment.sh`**: 完整環境檢查，包括系統、Python、網路等
 - **`check_setup.sh`**: 基本設置檢查，檢查 Python、套件、Token 等
 - **`check_pycord.sh`**: py-cord 專用檢查，測試 Discord 功能
@@ -119,27 +121,27 @@ Anon-Taiwan/
 ## 📝 使用建議
 
 ### 日常使用
-1. **啟動 Bot**: `./manage.sh start`
-2. **檢查狀態**: `./manage.sh status`
-3. **查看日誌**: `./manage.sh logs view --file fb_bot_$(date +%Y%m%d).log --follow`
-4. **停止 Bot**: `./manage.sh stop`
+1. **啟動 Bot**: `scripts/manage.sh start`
+2. **檢查狀態**: `scripts/manage.sh status`
+3. **查看日誌**: `scripts/manage.sh logs view --file fb_bot_$(date +%Y%m%d).log --follow`
+4. **停止 Bot**: `scripts/manage.sh stop`
 
 ### 故障排除
-1. **環境檢查**: `./manage.sh check`
-2. **重新設置**: `./manage.sh setup`
-3. **查看錯誤**: `./manage.sh logs search --keyword 錯誤`
+1. **環境檢查**: `scripts/manage.sh check`
+2. **重新設置**: `scripts/manage.sh setup`
+3. **查看錯誤**: `scripts/manage.sh logs search --keyword 錯誤`
 
 ### 維護工作
-1. **清理日誌**: `./manage.sh logs clean`
-2. **清理專案**: `./manage.sh cleanup`
-3. **更新依賴**: `./manage.sh setup`
+1. **清理日誌**: `scripts/manage.sh logs clean`
+2. **清理專案**: `scripts/manage.sh cleanup`
+3. **更新依賴**: `scripts/manage.sh setup`
 
 ## 🚀 快速開始
 
 1. **首次設置**:
    ```bash
-   ./manage.sh setup
-   ./manage.sh check
+   scripts/manage.sh setup
+   scripts/manage.sh check
    ```
 
 2. **設置 Token**:
@@ -147,13 +149,13 @@ Anon-Taiwan/
 
 3. **啟動 Bot**:
    ```bash
-   ./manage.sh start
+   scripts/manage.sh start
    ```
 
 4. **監控運行**:
    ```bash
-   ./manage.sh status
-   ./manage.sh logs view --file fb_bot_$(date +%Y%m%d).log --follow
+   scripts/manage.sh status
+   scripts/manage.sh logs view --file fb_bot_$(date +%Y%m%d).log --follow
    ```
 
 ## 📚 相關文檔

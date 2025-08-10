@@ -13,8 +13,8 @@ check_venv_status
 # 獲取 Python 路徑
 PYTHON_PATH=$(get_python_path)
 if [ $? -eq 0 ]; then
-    PYTHON_VERSION=$($PYTHON_PATH --version 2>&1)
-    echo "✅ $PYTHON_VERSION"
+    PYTHON_VERSION=$(${PYTHON_PATH} --version 2>&1)
+    echo "✅ ${PYTHON_VERSION}"
 else
     echo "❌ 無法找到 Python 解釋器"
     exit 1
@@ -27,11 +27,11 @@ REQUIRED_PACKAGES=("pycord" "requests" "bs4" "curl_cffi")
 MISSING_PACKAGES=()
 
 for package in "${REQUIRED_PACKAGES[@]}"; do
-    if $PYTHON_PATH -c "import $package" 2>/dev/null; then
-        echo "✅ $package 已安裝"
+    if ${PYTHON_PATH} -c "import ${package}" 2>/dev/null; then
+        echo "✅ ${package} 已安裝"
     else
-        echo "❌ $package 未安裝"
-        MISSING_PACKAGES+=($package)
+        echo "❌ ${package} 未安裝"
+        MISSING_PACKAGES+=(${package})
     fi
 done
 
@@ -62,10 +62,10 @@ echo ""
 echo "4. 檢查必要文件..."
 REQUIRED_FILES=("bot.py" "cog/fb.py")
 for file in "${REQUIRED_FILES[@]}"; do
-    if [ -f "$file" ]; then
-        echo "✅ $file 存在"
+    if [ -f "${file}" ]; then
+        echo "✅ ${file} 存在"
     else
-        echo "❌ $file 不存在"
+        echo "❌ ${file} 不存在"
         exit 1
     fi
 done
@@ -75,16 +75,16 @@ echo ""
 echo "5. 檢查腳本權限..."
 SCRIPTS=("start_bot.sh" "stop_bot.sh" "status_bot.sh" "restart_bot.sh" "manage.sh")
 for script in "${SCRIPTS[@]}"; do
-    if [ -f "$script" ]; then
-        if [ -x "$script" ]; then
-            echo "✅ $script 可執行"
+    if [ -f "${script}" ]; then
+        if [ -x "${script}" ]; then
+            echo "✅ ${script} 可執行"
         else
-            echo "⚠️  $script 需要執行權限"
-            chmod +x "$script"
+            echo "⚠️  ${script} 需要執行權限"
+            chmod +x "${script}"
             echo "✅ 已添加執行權限"
         fi
     else
-        echo "❌ $script 不存在"
+        echo "❌ ${script} 不存在"
     fi
 done
 

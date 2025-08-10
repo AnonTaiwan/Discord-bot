@@ -8,8 +8,8 @@ echo ""
 
 # 檢查是否存在虛擬環境
 check_venv() {
-    if [ -n "$VIRTUAL_ENV" ]; then
-        echo "✅ 檢測到虛擬環境: $VIRTUAL_ENV"
+    if [ -n "${VIRTUAL_ENV}" ]; then
+        echo "✅ 檢測到虛擬環境: ${VIRTUAL_ENV}"
         return 0
     elif [ -f "venv/bin/activate" ]; then
         echo "✅ 檢測到本地虛擬環境: ./venv"
@@ -41,7 +41,7 @@ create_venv() {
     fi
     
     # 創建虛擬環境
-    $PYTHON_CMD -m venv venv
+    ${PYTHON_CMD} -m venv venv
     
     if [ $? -eq 0 ]; then
         echo "✅ 虛擬環境創建成功"
@@ -111,7 +111,7 @@ generate_env_config() {
 # 自動生成，請勿手動修改
 
 # Python 解釋器路徑
-PYTHON_PATH="$PYTHON_PATH"
+PYTHON_PATH="${PYTHON_PATH}"
 
 # 虛擬環境激活腳本
 VENV_ACTIVATE=""
@@ -124,8 +124,8 @@ elif [ -f "env/bin/activate" ]; then
 fi
 
 # 檢查是否在虛擬環境中
-if [ -n "\$VIRTUAL_ENV" ]; then
-    echo "在虛擬環境中: \$VIRTUAL_ENV"
+if [ -n "\${VIRTUAL_ENV}" ]; then
+    echo "在虛擬環境中: \${VIRTUAL_ENV}"
 elif [ -n "\$VENV_ACTIVATE" ]; then
     echo "使用本地虛擬環境: \$VENV_ACTIVATE"
 else
@@ -144,7 +144,7 @@ main() {
     else
         echo "未檢測到虛擬環境，是否要創建？(y/n)"
         read -r response
-        if [[ "$response" =~ ^[Yy]$ ]]; then
+        if [[ "${response}" =~ ^[Yy]$ ]]; then
             if create_venv; then
                 if install_dependencies; then
                     echo "✅ 虛擬環境設置完成"

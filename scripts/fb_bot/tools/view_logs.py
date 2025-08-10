@@ -176,4 +176,4 @@ def main():
         clean_old_logs(args.days)
 
 if __name__ == '__main__':
-    main() 
+    main()

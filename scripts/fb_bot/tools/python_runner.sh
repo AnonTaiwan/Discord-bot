@@ -13,7 +13,7 @@ load_env_config() {
 # 獲取 Python 解釋器路徑
 get_python_path() {
     # 如果已經在虛擬環境中
-    if [ -n "$VIRTUAL_ENV" ]; then
+    if [ -n "${VIRTUAL_ENV}" ]; then
         echo "python"
         return 0
     fi
@@ -49,8 +49,8 @@ run_python() {
     python_path=$(get_python_path)
     
     if [ $? -eq 0 ]; then
-        echo "使用 Python: $python_path"
-        $python_path "$@"
+        echo "使用 Python: ${python_path}"
+        ${python_path} "$@"
     else
         echo "❌ 無法找到 Python 解釋器"
         exit 1
@@ -59,8 +59,8 @@ run_python() {
 
 # 檢查虛擬環境狀態
 check_venv_status() {
-    if [ -n "$VIRTUAL_ENV" ]; then
-        echo "✅ 當前在虛擬環境中: $VIRTUAL_ENV"
+    if [ -n "${VIRTUAL_ENV}" ]; then
+        echo "✅ 當前在虛擬環境中: ${VIRTUAL_ENV}"
     elif [ -f "venv/bin/activate" ] || [ -f ".venv/bin/activate" ] || [ -f "env/bin/activate" ]; then
         echo "✅ 檢測到本地虛擬環境"
     else
@@ -69,7 +69,7 @@ check_venv_status() {
 }
 
 # 如果直接執行此腳本
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
     load_env_config
     check_venv_status
     run_python "$@"

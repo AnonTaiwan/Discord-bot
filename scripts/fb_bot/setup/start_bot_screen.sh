@@ -16,13 +16,13 @@ if ! command -v screen &> /dev/null; then
 fi
 
 # 檢查是否已經有同名的 screen 會話
-if screen -list | grep -q "$SCREEN_NAME"; then
-    echo "❌ Screen 會話 '$SCREEN_NAME' 已存在"
+if screen -list | grep -q "${SCREEN_NAME}"; then
+    echo "❌ Screen 會話 '${SCREEN_NAME}' 已存在"
     echo "使用以下命令連接到會話："
-    echo "screen -r $SCREEN_NAME"
+    echo "screen -r ${SCREEN_NAME}"
     echo ""
     echo "或使用以下命令終止現有會話："
-    echo "screen -S $SCREEN_NAME -X quit"
+    echo "screen -S ${SCREEN_NAME} -X quit"
     exit 1
 fi
 
@@ -31,7 +31,7 @@ mkdir -p logs
 
 # 創建新的 screen 會話並運行 bot
 echo "創建新的 screen 會話..."
-screen -dmS $SCREEN_NAME bash -c "
+screen -dmS ${SCREEN_NAME} bash -c "
     echo 'Bot 在 screen 會話中啟動...'
     python3 bot.py
     echo 'Bot 已停止，按任意鍵關閉會話...'
@@ -42,14 +42,14 @@ screen -dmS $SCREEN_NAME bash -c "
 sleep 2
 
 # 檢查會話是否創建成功
-if screen -list | grep -q "$SCREEN_NAME"; then
+if screen -list | grep -q "${SCREEN_NAME}"; then
     echo "✅ Bot 已在 screen 會話中啟動！"
-    echo "會話名稱: $SCREEN_NAME"
+    echo "會話名稱: ${SCREEN_NAME}"
     echo ""
     echo "管理命令："
-    echo "  連接到會話: screen -r $SCREEN_NAME"
+    echo "  連接到會話: screen -r ${SCREEN_NAME}"
     echo "  查看會話列表: screen -list"
-    echo "  終止會話: screen -S $SCREEN_NAME -X quit"
+    echo "  終止會話: screen -S ${SCREEN_NAME} -X quit"
     echo "  分離會話: Ctrl+A, 然後按 D"
     echo ""
     echo "您現在可以安全地關閉 SSH 窗口"

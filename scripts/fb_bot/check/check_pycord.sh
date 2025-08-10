@@ -15,16 +15,16 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "使用 Python: $PYTHON_PATH"
+echo "使用 Python: ${PYTHON_PATH}"
 check_venv_status
 
 echo ""
 
 # 檢查 py-cord 安裝
 echo "1. 檢查 py-cord 安裝..."
-if $PYTHON_PATH -c "import discord" 2>/dev/null; then
-    VERSION=$($PYTHON_PATH -c "import discord; print(discord.__version__)" 2>/dev/null)
-    echo "✅ py-cord 已安裝，版本: $VERSION"
+if ${PYTHON_PATH} -c "import discord" 2>/dev/null; then
+    VERSION=$(${PYTHON_PATH} -c "import discord; print(discord.__version__)" 2>/dev/null)
+    echo "✅ py-cord 已安裝，版本: ${VERSION}"
 else
     echo "❌ py-cord 未安裝"
     echo "請運行: pip install py-cord"
@@ -36,21 +36,21 @@ echo ""
 echo "2. 檢查 py-cord 功能..."
 
 # 檢查 bridge 功能
-if $PYTHON_PATH -c "from discord.ext import bridge" 2>/dev/null; then
+if ${PYTHON_PATH} -c "from discord.ext import bridge" 2>/dev/null; then
     echo "✅ Bridge 功能可用"
 else
     echo "❌ Bridge 功能不可用"
 fi
 
 # 檢查 commands 功能
-if $PYTHON_PATH -c "from discord.ext import commands" 2>/dev/null; then
+if ${PYTHON_PATH} -c "from discord.ext import commands" 2>/dev/null; then
     echo "✅ Commands 功能可用"
 else
     echo "❌ Commands 功能不可用"
 fi
 
 # 檢查 tasks 功能
-if $PYTHON_PATH -c "from discord.ext import tasks" 2>/dev/null; then
+if ${PYTHON_PATH} -c "from discord.ext import tasks" 2>/dev/null; then
     echo "✅ Tasks 功能可用"
 else
     echo "❌ Tasks 功能不可用"
@@ -59,19 +59,19 @@ fi
 # 檢查基本 Discord 功能
 echo ""
 echo "3. 檢查 Discord 基本功能..."
-if $PYTHON_PATH -c "import discord; print('Discord Intents:', discord.Intents.all())" 2>/dev/null; then
+if ${PYTHON_PATH} -c "import discord; print('Discord Intents:', discord.Intents.all())" 2>/dev/null; then
     echo "✅ Discord Intents 功能正常"
 else
     echo "❌ Discord Intents 功能異常"
 fi
 
-if $PYTHON_PATH -c "import discord; print('Discord Embed:', discord.Embed)" 2>/dev/null; then
+if ${PYTHON_PATH} -c "import discord; print('Discord Embed:', discord.Embed)" 2>/dev/null; then
     echo "✅ Discord Embed 功能正常"
 else
     echo "❌ Discord Embed 功能異常"
 fi
 
-if $PYTHON_PATH -c "import discord; print('Discord File:', discord.File)" 2>/dev/null; then
+if ${PYTHON_PATH} -c "import discord; print('Discord File:', discord.File)" 2>/dev/null; then
     echo "✅ Discord File 功能正常"
 else
     echo "❌ Discord File 功能異常"
@@ -98,7 +98,7 @@ fi
 # 測試基本 Discord 功能
 echo ""
 echo "5. 測試基本 Discord 功能..."
-$PYTHON_PATH -c "
+${PYTHON_PATH} -c "
 import discord
 from discord.ext import commands
 

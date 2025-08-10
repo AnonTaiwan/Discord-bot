@@ -4,8 +4,11 @@
 # 使用 nohup 在背景運行，即使 SSH 斷開也不會停止
 # 自動檢測和使用虛擬環境
 
+# 根路徑
+ROOT_PATH="$(dirname "$0")/.."
+
 # 載入 Python 執行器
-source "$(dirname "$0")/scripts/tools/python_runner.sh"
+source "$(dirname "$0")/fb_bot/tools/python_runner.sh"
 
 echo "正在啟動 Facebook Bot..."
 
@@ -26,14 +29,14 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "使用 Python: $PYTHON_PATH"
+echo "使用 Python: ${PYTHON_PATH}"
 
 # 檢查虛擬環境狀態
 check_venv_status
 
 # 使用 nohup 在背景運行
 echo "正在啟動 Bot..."
-nohup $PYTHON_PATH bot.py > logs/bot_stdout.log 2>&1 &
+nohup ${PYTHON_PATH} "${ROOT_PATH}/bot.py" > logs/bot_stdout.log 2>&1 &
 
 # 獲取進程 ID
 BOT_PID=$!
@@ -42,9 +45,9 @@ BOT_PID=$!
 sleep 3
 
 # 檢查程式是否成功啟動
-if kill -0 $BOT_PID 2>/dev/null; then
+if kill -0 ${BOT_PID} 2>/dev/null; then
     echo "✅ Bot 已成功啟動！"
-    echo "進程 ID: $BOT_PID"
+    echo "進程 ID: ${BOT_PID}"
     echo "日誌文件: logs/bot_stdout.log"
     echo "Facebook 監控日誌: logs/fb_bot_$(date +%Y%m%d).log"
     echo ""

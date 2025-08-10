@@ -4,6 +4,7 @@
 # 提供便捷的方式來調用各種工具
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FB_BOT_SCRIPT_DIR="${SCRIPT_DIR}/fb_bot"
 
 show_help() {
     echo "Facebook Bot 管理工具"
@@ -41,8 +42,8 @@ show_help() {
 # 檢查腳本是否存在
 check_script() {
     local script_path="$1"
-    if [ ! -f "$script_path" ]; then
-        echo "❌ 腳本不存在: $script_path"
+    if [ ! -f "${script_path}" ]; then
+        echo "❌ 腳本不存在: ${script_path}"
         return 1
     fi
     return 0
@@ -52,8 +53,8 @@ check_script() {
 run_script() {
     local script_path="$1"
     shift
-    if check_script "$script_path"; then
-        "$script_path" "$@"
+    if check_script "${script_path}"; then
+        "${script_path}" "$@"
     else
         exit 1
     fi
@@ -63,41 +64,41 @@ run_script() {
 case "${1:-help}" in
     # 常用命令
     start)
-        run_script "$SCRIPT_DIR/start_bot.sh"
+        run_script "${SCRIPT_DIR}/start_bot.sh"
         ;;
     stop)
-        run_script "$SCRIPT_DIR/stop_bot.sh"
+        run_script "${SCRIPT_DIR}/stop_bot.sh"
         ;;
     restart)
-        run_script "$SCRIPT_DIR/restart_bot.sh"
+        run_script "${SCRIPT_DIR}/restart_bot.sh"
         ;;
     status)
-        run_script "$SCRIPT_DIR/status_bot.sh"
+        run_script "${SCRIPT_DIR}/status_bot.sh"
         ;;
     
     # 環境檢查
     check)
-        run_script "$SCRIPT_DIR/scripts/check/check_environment.sh"
+        run_script "${FB_BOT_SCRIPT_DIR}/check/check_environment.sh"
         ;;
     check-env)
-        run_script "$SCRIPT_DIR/scripts/check/check_setup.sh"
+        run_script "${FB_BOT_SCRIPT_DIR}/check/check_setup.sh"
         ;;
     check-py)
-        run_script "$SCRIPT_DIR/scripts/check/check_pycord.sh"
+        run_script "${FB_BOT_SCRIPT_DIR}/check/check_pycord.sh"
         ;;
     
     # 設置工具
     setup)
-        run_script "$SCRIPT_DIR/scripts/setup/setup_env.sh"
+        run_script "${FB_BOT_SCRIPT_DIR}/setup/setup_env.sh"
         ;;
     screen)
-        run_script "$SCRIPT_DIR/scripts/setup/start_bot_screen.sh"
+        run_script "${FB_BOT_SCRIPT_DIR}/setup/start_bot_screen.sh"
         ;;
     systemd)
         echo "=== Systemd 設置說明 ==="
         echo ""
         echo "1. 複製服務文件："
-        echo "   sudo cp scripts/setup/facebook-bot.service /etc/systemd/system/"
+        echo "   sudo cp ${FB_BOT_SCRIPT_DIR}/setup/facebook-bot.service /etc/systemd/system/"
         echo ""
         echo "2. 修改服務文件中的路徑："
         echo "   sudo nano /etc/systemd/system/facebook-bot.service"
@@ -118,14 +119,14 @@ case "${1:-help}" in
     # 維護工具
     logs)
         shift
-        run_script "$SCRIPT_DIR/scripts/tools/view_logs.py" "$@"
+        run_script "${FB_BOT_SCRIPT_DIR}/tools/view_logs.py" "$@"
         ;;
     cleanup)
-        run_script "$SCRIPT_DIR/scripts/tools/cleanup_project.sh"
+        run_script "${FB_BOT_SCRIPT_DIR}/tools/cleanup_project.sh"
         ;;
     python)
         shift
-        run_script "$SCRIPT_DIR/scripts/tools/python_runner.sh" "$@"
+        run_script "${FB_BOT_SCRIPT_DIR}/tools/python_runner.sh" "$@"
         ;;
     
     # 幫助

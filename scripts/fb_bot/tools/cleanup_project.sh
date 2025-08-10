@@ -15,7 +15,7 @@ echo "- 舊的日誌文件（可選）"
 echo ""
 
 read -p "是否繼續？(y/n): " -r response
-if [[ ! "$response" =~ ^[Yy]$ ]]; then
+if [[ ! "${response}" =~ ^[Yy]$ ]]; then
     echo "清理已取消"
     exit 0
 fi
@@ -46,7 +46,7 @@ fi
 # 4. 清理舊日誌文件（可選）
 echo ""
 read -p "是否清理 7 天前的日誌文件？(y/n): " -r response
-if [[ "$response" =~ ^[Yy]$ ]]; then
+if [[ "${response}" =~ ^[Yy]$ ]]; then
     echo "4. 清理舊日誌文件..."
     if [ -d "logs" ]; then
         find logs -name "*.log" -mtime +7 -delete
@@ -71,7 +71,7 @@ echo ""
 # 顯示當前目錄大小
 if command -v du &> /dev/null; then
     TOTAL_SIZE=$(du -sh . | cut -f1)
-    echo "專案總大小: $TOTAL_SIZE"
+    echo "專案總大小: ${TOTAL_SIZE}"
 fi
 
 # 顯示剩餘文件
