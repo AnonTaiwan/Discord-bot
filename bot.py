@@ -6,7 +6,7 @@ import time
 import logging
 from datetime import datetime, timedelta
 
-TOKEN = "OTk3MjAyMzk4NDg3NTE5MzAz.GSH0uw.dHWYigfeu43GUZMD9pM9hozr-hN8UjKlHq6nQ8"
+TOKEN = "OTk3MjAyMzk4NDg3NTE5MzAz.GH07vC.iBlLgSy2Aq9n059kDOpu_mKt-crRJDHZx-nTic"
 DEVELOPER = [330256191127289856, 705432231304495205]
 
 class MyBot(commands.Bot):
