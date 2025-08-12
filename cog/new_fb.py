@@ -13,7 +13,7 @@ class NewFB(commands.Cog):
         # main channel
         # self.channel = self.bot.get_channel(1357294484903297127)
         # test channel
-        self.channel = self.bot.get_channel(1361993681934225548)
+        self.channel = self.bot.get_channel(1404889560068001864)
         self.setup_logging()
     
     def setup_logging(self):
@@ -78,7 +78,10 @@ class NewFB(commands.Cog):
         embed.add_field(name='貼文內容', value=message or "（無內容）", inline=False)
         file = discord.File(f"{data['id']}.jpg", filename=f"{data['id']}.jpg")
         embed.set_image(url=f"attachment://{data['id']}.jpg")
-        msg = await self.channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
+        # main setting
+        # msg = await self.channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
+        # test setting
+        msg = await self.channel.send(content = '', embed=embed, file=file)
         await msg.publish()
         self.logger.info(f"已發送新貼文通知: {data['id']}")
         os.remove(f"{data['id']}.jpg")
