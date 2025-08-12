@@ -5,8 +5,11 @@ import os
 import time
 import logging
 from datetime import datetime, timedelta
+import json
 
-TOKEN = "OTk3MjAyMzk4NDg3NTE5MzAz.GH07vC.iBlLgSy2Aq9n059kDOpu_mKt-crRJDHZx-nTic"
+with open("JSON/bot.json", "r", encoding="utf-8") as f:
+    config = json.load(f)
+TOKEN = config.get("TOKEN")
 DEVELOPER = [330256191127289856, 705432231304495205]
 
 class MyBot(commands.Bot):

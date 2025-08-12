@@ -1,7 +1,7 @@
 /.venv/
 __pycache__/
 *.pyc
-
+/JSON/
 Anon Taiwan.code-workspace
 
 .vscode/
