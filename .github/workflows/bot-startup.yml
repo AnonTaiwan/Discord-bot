@@ -54,7 +54,7 @@ jobs:
       run: |
         cp JSON/bot.json.sample JSON/bot.json
         sed -i 's/"TOKEN: ".*"/"TOKEN": "MTQwNDAzMTIyOTY4NjMyMTIzMg.G-sHEH.Aryp0J4vUtw5vrRaCNtx3tt9DDnaz92fN4MRd4"/' JSON/bot.json
-        sed -i 's/"DEVELOPER": \[.*\]/"DEVELOPER": ["123456789012345678"]/' JSON/bot.json
+        sed -i 's/"DEVELOPER": \[.*\]/"DEVELOPER": [123456789012345678]/' JSON/bot.json
 
     - name: Start Bot
       id: start-bot
