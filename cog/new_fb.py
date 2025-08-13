@@ -40,7 +40,7 @@ class NewFB(commands.Cog):
         )
         
         self.logger = logging.getLogger(__name__)
-        self.logger.info("cog/fb.py: 日誌系統初始化完成")
+        self.logger.info("cog/new_fb.py: 日誌系統初始化完成")
     
     def get_datas(self):
         response = requests.get('https://graph.facebook.com/v23.0/419295154604542/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token=EAAOZC1rBgpBoBPIZAr87f4ZBLD5w16FfWRNb099nL0QBpVkBtZAg4ZB9nQmapg6TezqXdz8uAKwV3BIHUu3igotisHk7dZBMGHFwqiJ5cvhhHN5HEF4bgvZAvmdgP97tUn2s7XhaPt0VhaVxQzbzaKTqcfA27RdEtvZCFyEGMX2WF5YkZBms1Tl8h8m8CXTH9y0rP9Fp4821qAdjyPYZBzG0ho3u33&limit=3')
