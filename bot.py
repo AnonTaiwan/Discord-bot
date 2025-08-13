@@ -19,12 +19,9 @@ class MyBot(commands.Bot):
             f"cog.{i[:-3]}" for i in os.listdir("./cog") if i.endswith(".py")
         ]
         self.date = datetime.now().strftime("%Y%m%d")
-
-    async def setup_hook(self):
         for ext in self.initial_extensions:
             self.load_extension(ext)
             print(f"✅ 已加載擴展: {ext}")
-        await self.sync_commands()
 
     async def on_ready(self):
         game = discord.Game("Blue Archive")

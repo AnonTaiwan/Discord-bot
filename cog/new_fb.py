@@ -14,9 +14,6 @@ class NewFB(commands.Cog):
         # self.channel = self.bot.get_channel(1357294484903297127)
         # test channel
         self.channel = self.bot.get_channel(1404889560068001864)
-        datas = self.get_datas()
-        self.latest = [i['id'] for i in datas]
-        self.check_for_updates.start()
         self.setup_logging()
     
     def setup_logging(self):
@@ -44,7 +41,7 @@ class NewFB(commands.Cog):
         )
         
         self.logger = logging.getLogger(__name__)
-        self.logger.info("cog/_fb.py: 日誌系統初始化完成")
+        self.logger.info("cog/fb.py: 日誌系統初始化完成")
     
     def get_datas(self):
         response = requests.get('https://graph.facebook.com/v23.0/419295154604542/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token=EAAOZC1rBgpBoBPIZAr87f4ZBLD5w16FfWRNb099nL0QBpVkBtZAg4ZB9nQmapg6TezqXdz8uAKwV3BIHUu3igotisHk7dZBMGHFwqiJ5cvhhHN5HEF4bgvZAvmdgP97tUn2s7XhaPt0VhaVxQzbzaKTqcfA27RdEtvZCFyEGMX2WF5YkZBms1Tl8h8m8CXTH9y0rP9Fp4821qAdjyPYZBzG0ho3u33&limit=3')
@@ -88,6 +85,13 @@ class NewFB(commands.Cog):
         await msg.publish()
         self.logger.info(f"已發送新貼文通知: {data['id']}")
         os.remove(f"{data['id']}.jpg")
+        
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f'Logged in as {self.bot.user} (ID: {self.bot.user.id})')
+        datas = self.get_datas()
+        self.latest = [i['id'] for i in datas]
+        self.check_for_updates.start()
         
     @tasks.loop(minutes=1)
     async def check_for_updates(self):
