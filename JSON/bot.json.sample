@@ -1,3 +1,4 @@
 {
-    "TOKEN": "Put your discord token here"
+    "TOKEN": "Put your discord token here",
+    "DEVELOPERS": [discord_id_1, discord_id_2, ...]
 }

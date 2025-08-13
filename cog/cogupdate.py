@@ -3,9 +3,13 @@ from discord import Option, File
 import discord
 import os
 import asyncio
+import json
 import logging
 from datetime import datetime
-DEVELOPER = [330256191127289856, 705432231304495205]
+
+with open("JSON/bot.json", "r", encoding="utf-8") as f:
+    config = json.load(f)
+DEVELOPER = config.get("DEVELOPER")
 
 class CogManager(commands.Cog):
     def __init__(self, bot):

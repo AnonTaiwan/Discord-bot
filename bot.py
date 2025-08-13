@@ -10,7 +10,7 @@ import json
 with open("JSON/bot.json", "r", encoding="utf-8") as f:
     config = json.load(f)
 TOKEN = config.get("TOKEN")
-DEVELOPER = [330256191127289856, 705432231304495205]
+DEVELOPER = config.get("DEVELOPER")
 
 class MyBot(commands.Bot):
     def __init__(self):

@@ -4,11 +4,14 @@ import importlib
 import subprocess
 import sys
 import asyncio
+import json
 import logging
 import os
 from datetime import datetime
 
-DEVELOPER = [330256191127289856, 705432231304495205]
+with open("JSON/bot.json", "r", encoding="utf-8") as f:
+    config = json.load(f)
+DEVELOPER = config.get("DEVELOPER")
 
 class Environment(commands.Cog):
     """自動檢查並安裝缺少的 Python 套件"""

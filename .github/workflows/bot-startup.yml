@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@v3
 
     - name: Setup Python ${{ matrix.python-version }}
@@ -28,11 +28,11 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Create and activate virtual environment
+    - name: Create and Activate Virtual Environment
       run: |
         python -m venv .venv
 
-    - name: Install dependencies
+    - name: Install Dependencies
       run: |
         source .venv/bin/activate
         python -m pip install --upgrade pip
@@ -50,10 +50,11 @@ jobs:
       env:
         CI_RUNNING: true
 
-    - name: Set Discord Bot Token to Testing App's Token
+    - name: Set Discord Bot Config
       run: |
         cp JSON/bot.json.sample JSON/bot.json
         sed -i 's/"TOKEN: ".*"/"TOKEN": "MTQwNDAzMTIyOTY4NjMyMTIzMg.G-sHEH.Aryp0J4vUtw5vrRaCNtx3tt9DDnaz92fN4MRd4"/' JSON/bot.json
+        sed -i 's/"DEVELOPER": \[.*\]/"DEVELOPER": ["123456789012345678"]/' JSON/bot.json
 
     - name: Start Bot
       id: start-bot
@@ -64,7 +65,7 @@ jobs:
         CI_RUNNING: true
       continue-on-error: true
 
-    - name: Check logs
+    - name: Check Logs
       run: |
         if [ -f logs/bot_stdout.log ]; then
           echo "Bot log output:"
