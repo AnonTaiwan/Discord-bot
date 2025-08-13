@@ -211,7 +211,7 @@ class Facebook(commands.Cog):
                     # 如果找不到匹配，使用預設值
                     self.logger.warning("找不到影片訊息模式")
                     title = "無法解析的影片貼文"
-                    response.url = f'https://www.facebook.com/61566516636930/posts/{data["styles"]["attachment"]["media'"]["id"]}'
+                    response.url = f'https://www.facebook.com/61566516636930/posts/{data["styles"]["attachment"]["media"]["id"]}'
             else:
                 try:
                     url = data['styles']['attachment']['media']['url'].replace('\\','')
