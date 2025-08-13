@@ -13,7 +13,6 @@ class NewFB(commands.Cog):
         # main channel
         # self.channel = self.bot.get_channel(1357294484903297127)
         # test channel
-        self.channel = self.bot.get_channel(1404889560068001864)
         self.setup_logging()
     
     def setup_logging(self):
@@ -91,6 +90,7 @@ class NewFB(commands.Cog):
         datas = self.get_datas()
         self.latest = [i['id'] for i in datas]
         self.check_for_updates.start()
+        self.channel = self.bot.get_channel(1404889560068001864)
         print(f'new_fb.cog: {self.bot.user} (ID: {self.bot.user.id})')
         
     @tasks.loop(minutes=1)
