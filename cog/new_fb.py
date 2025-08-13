@@ -10,17 +10,17 @@ class NewFB(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.latest = []
-        # main channel
-        # self.channel = self.bot.get_channel(1357294484903297127)
-        # test channel
         self.setup_logging()
-    
+        with open('JSON/bot.json', 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        self.FACEBOOK_TOKEN = config.get("FACEBOOK_TOKEN")
+
     def setup_logging(self):
         """設置日誌系統"""
         # 創建 logs 目錄（如果不存在）
         if not os.path.exists('logs'):
             os.makedirs('logs')
-        
+            
         # 設置日誌文件名（包含日期）
         log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
         
@@ -43,7 +43,7 @@ class NewFB(commands.Cog):
         self.logger.info("cog/new_fb.py: 日誌系統初始化完成")
     
     def get_datas(self):
-        response = requests.get('https://graph.facebook.com/v23.0/419295154604542/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token=EAAOZC1rBgpBoBPIZAr87f4ZBLD5w16FfWRNb099nL0QBpVkBtZAg4ZB9nQmapg6TezqXdz8uAKwV3BIHUu3igotisHk7dZBMGHFwqiJ5cvhhHN5HEF4bgvZAvmdgP97tUn2s7XhaPt0VhaVxQzbzaKTqcfA27RdEtvZCFyEGMX2WF5YkZBms1Tl8h8m8CXTH9y0rP9Fp4821qAdjyPYZBzG0ho3u33&limit=3')
+        response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={self.FACEBOOK_TOKEN}&limit=3')
         datas = json.loads(response.text)
         return datas['data']
             
@@ -90,6 +90,9 @@ class NewFB(commands.Cog):
         datas = self.get_datas()
         self.latest = [i['id'] for i in datas]
         self.check_for_updates.start()
+        # main channel
+        # self.channel = self.bot.get_channel(1357294484903297127)
+        # test channel
         self.channel = self.bot.get_channel(1404889560068001864)
         print(f'new_fb.cog: {self.bot.user} (ID: {self.bot.user.id})')
         
