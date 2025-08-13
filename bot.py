@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks
 import asyncio
 import os
-import time
+from time import sleep
 import logging
 from datetime import datetime, timedelta, date, time
 from pathlib import Path
@@ -93,7 +93,7 @@ async def main():
             # 算出距離8點還有幾秒
             seconds_to_8 = (datetime.combine(now, time(8, 0, 0)) - now).seconds
             print(f"夜間關機，將於 {seconds_to_8:,} 秒後自動開機")
-            time.sleep(seconds_to_8 + 5)
+            sleep(seconds_to_8 + 5)
             continue  # 跳過這次，等到8點再啟動
         
         now = datetime.now()
