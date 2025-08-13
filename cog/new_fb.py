@@ -88,10 +88,10 @@ class NewFB(commands.Cog):
         
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f'Logged in as {self.bot.user} (ID: {self.bot.user.id})')
         datas = self.get_datas()
         self.latest = [i['id'] for i in datas]
         self.check_for_updates.start()
+        print(f'new_fb.cog: {self.bot.user} (ID: {self.bot.user.id})')
         
     @tasks.loop(minutes=1)
     async def check_for_updates(self):

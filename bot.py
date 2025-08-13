@@ -27,7 +27,6 @@ class MyBot(commands.Bot):
         game = discord.Game("Blue Archive")
         print(f"✅ Logged in as {self.user}")
         await self.change_presence(status=discord.Status.online, activity=game)
-        await self.setup_hook()
         self.remove_command("help")
         self.loop.create_task(self.auto_shutdown_at_midnight())
 
