@@ -3,15 +3,17 @@ from discord.ext import commands, tasks
 from curl_cffi import requests
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, time
 import os
 import pytz
+
+timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
+daily_message_time = time(hour=0, minute=0, tzinfo=timezone)  # 每日訊息時間設定為午夜
 
 class NewFB(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.latest = []
-        self.timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
         self.setup_logging()
         with open('JSON/bot.json', 'r', encoding='utf-8') as f:
             config = json.load(f)
@@ -97,6 +99,8 @@ class NewFB(commands.Cog):
         # self.channel = self.bot.get_channel(1357294484903297127)
         # test channel
         self.channel = self.bot.get_channel(1404889560068001864)
+
+        self.daily_message.start()
         print(f'new_fb.cog: {self.bot.user} (ID: {self.bot.user.id})')
         
     @tasks.loop(minutes=1)
@@ -120,6 +124,39 @@ class NewFB(commands.Cog):
         except ValueError as e:
             self.logger.error(f"時間格式錯誤: {e}")
             return None
+        
+    def _get_posts_and_reels_count(self, start_timestamp, end_timestamp):
+        try:
+            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=&access_token={self.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
+            posts_data = json.loads(response.text)
+            posts_count = len(posts_data.get('data', []))
+
+            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=&access_token={self.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
+            reels_data = json.loads(response.text)
+            reels_count = len(reels_data.get('data', []))
+
+            return posts_count, reels_count
+        except Exception as e:
+            self.logger.error(f"Error fetching posts and reels count: {e}")
+            return 0, 0
+        
+    @tasks.loop(time=daily_message_time)
+    async def daily_message(self):
+        try:
+            today = datetime.now(timezone).replace(hour=0, minute=0, second=0, microsecond=0)
+            yesterday = today - timedelta(days=1)
+
+            today_timestamp = int(today.timestamp())
+            yesterday_timestamp = int(yesterday.timestamp())
+
+            posts_count, reels_count = self._get_posts_and_reels_count(yesterday_timestamp, today_timestamp)
+            content = f"今日貼文數量：{posts_count} 篇\n今日 Reels 數量：{reels_count} 篇"
+            
+            channel = self.bot.get_channel(1405253533540024340)
+            await channel.send(content)
+            self.logger.info("每日訊息已發送")
+        except Exception as e:
+            self.logger.error(f"Error sending daily message: {e}")
 
     @discord.slash_command(name="query", description="查看指定時間範圍內有幾篇貼文")
     async def query(self, ctx: discord.ApplicationContext, \
@@ -145,13 +182,7 @@ class NewFB(commands.Cog):
             else:
                 end_timestamp = self._formatted_time_to_unix_timestamp(end_date)
 
-            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=&access_token={self.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
-            datas = json.loads(response.text)
-            posts_count = len(datas.get('data', []))
-
-            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=&access_token={self.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
-            datas = json.loads(response.text)
-            reels_count = len(datas.get('data', []))
+            posts_count, reels_count = self._get_posts_and_reels_count(start_timestamp, end_timestamp)
 
             start_date_str = datetime.fromtimestamp(start_timestamp).strftime("%Y-%m-%d %H:%M:%S") if start_timestamp else "<unknown>"
             end_date_str = datetime.fromtimestamp(end_timestamp).strftime("%Y-%m-%d %H:%M:%S") if end_timestamp else "<unknown>"
