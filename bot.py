@@ -89,12 +89,14 @@ async def main():
     current_date = None
     while True:
         now = datetime.now()
+        """
         if 0 <= now.hour < 8:
             # 算出距離8點還有幾秒
             seconds_to_8 = (datetime.combine(now, time(8, 0, 0)) - now).seconds
             print(f"夜間關機，將於 {seconds_to_8:,} 秒後自動開機")
             sleep(seconds_to_8 + 5)
             continue  # 跳過這次，等到8點再啟動
+        """
         
         now = datetime.now()
         today = now.strftime("%Y%m%d")
