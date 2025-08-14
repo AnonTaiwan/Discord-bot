@@ -61,8 +61,8 @@ class Activity(commands.Cog):
         print(f'activity.cog: {self.bot.user} (ID: {self.bot.user.id})')
         
     @commands.Cog.listener()
-    async def on_member_update(self, before, after):
-        self.logger.info(f"Member update detected: {before.name} (ID: {before.id})")
+    async def on_presence_update(self, before, after):
+        self.logger.info(f"Member {before.name} (ID: {before.id}) presence updated")
         if before.status != after.status:
             self.logger.info(f"Member {after.name} changed status from {before.status} to {after.status}")
             # await self.channel.send(f"{after.mention} 的狀態已更新為: {after.status}")
