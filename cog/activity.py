@@ -8,11 +8,7 @@ import os
 class Activity(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.latest = []
         self.setup_logging()
-        with open('JSON/bot.json', 'r', encoding='utf-8') as f:
-            config = json.load(f)
-        self.FACEBOOK_TOKEN = config.get("FACEBOOK_TOKEN")
 
     def setup_logging(self):
         """設置日誌系統"""
@@ -66,6 +62,7 @@ class Activity(commands.Cog):
         
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
+        self.logger.info(f"Member update detected: {before.name} (ID: {before.id})")
         if before.status != after.status:
             self.logger.info(f"Member {after.name} changed status from {before.status} to {after.status}")
             # await self.channel.send(f"{after.mention} 的狀態已更新為: {after.status}")
