@@ -1,19 +1,22 @@
 import discord
-from discord.ext import commands, bridge, tasks
+from discord.ext import commands, tasks
 from curl_cffi import requests
 import json
 import logging
 from datetime import datetime
 import os
+import pytz
 
 class NewFB(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.latest = []
+        self.timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
         self.setup_logging()
         with open('JSON/bot.json', 'r', encoding='utf-8') as f:
             config = json.load(f)
         self.FACEBOOK_TOKEN = config.get("FACEBOOK_TOKEN")
+        self.DEVELOPER = config.get("DEVELOPER")
 
     def setup_logging(self):
         """設置日誌系統"""
@@ -42,8 +45,8 @@ class NewFB(commands.Cog):
         self.logger = logging.getLogger(__name__)
         self.logger.info("cog/new_fb.py: 日誌系統初始化完成")
     
-    def get_datas(self):
-        response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={self.FACEBOOK_TOKEN}&limit=3')
+    def get_datas(self, limit=3):
+        response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={self.FACEBOOK_TOKEN}&limit={limit}')
         datas = json.loads(response.text)
         return datas['data']
             
@@ -108,6 +111,60 @@ class NewFB(commands.Cog):
                 self.latest = [i['id'] for i in datas]
         except Exception as e:
             self.logger.error(f"Error checking for updates: {e}")
+
+    def _formatted_time_to_unix_timestamp(self, formatted_time):
+        try:
+            dt = datetime.strptime(formatted_time, "%Y-%m-%d %H:%M:%S")
+            localized_dt = self.timezone.localize(dt)
+            return int(localized_dt.timestamp())
+        except ValueError as e:
+            self.logger.error(f"時間格式錯誤: {e}")
+            return None
+
+    @discord.slash_command(name="query", description="查看指定時間範圍內有幾篇貼文")
+    async def query(self, ctx: discord.ApplicationContext, \
+                    start_date: discord.Option(description="開始日期，格式為 YYYY-MM-DD HH:MM:SS", required=True), \
+                    end_date: discord.Option(default=None, description="結束日期，格式為 YYYY-MM-DD HH:MM:SS", required=False)):
+        
+        has_allowed_role = any(role.id == 1359938675768557719 for role in ctx.author.roles) # 小編身份組
+        if ctx.author.id not in self.DEVELOPER and has_allowed_role is False:
+            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
+            self.logger.warning(f"❌ {ctx.author.name} 嘗試使用查詢指令，但沒有權限。")
+            return
+        
+        if start_date is None:
+            await ctx.respond("❌ 請提供開始日期，格式為 YYYY-MM-DD HH:MM:SS。", ephemeral=True)
+            self.logger.warning(f"❌ {ctx.author.name} 未提供開始日期。")
+            return
+        
+        try:
+            start_timestamp = self._formatted_time_to_unix_timestamp(start_date) if start_date else None
+
+            if end_date is None:
+                end_timestamp = int(datetime.now().timestamp())
+            else:
+                end_timestamp = self._formatted_time_to_unix_timestamp(end_date)
+
+            print(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=message,created_time&access_token={self.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
+
+            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=&access_token={self.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
+            datas = json.loads(response.text)
+            posts_count = len(datas.get('data', []))
+
+            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=&access_token={self.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
+            datas = json.loads(response.text)
+            reels_count = len(datas.get('data', []))
+
+            start_date_str = datetime.fromtimestamp(start_timestamp).strftime("%Y-%m-%d %H:%M:%S") if start_timestamp else "<unknown>"
+            end_date_str = datetime.fromtimestamp(end_timestamp).strftime("%Y-%m-%d %H:%M:%S") if end_timestamp else "<unknown>"
+
+            content = f"在 {start_date_str} 到 {end_date_str} 之間：\n- 貼文: {posts_count} 篇\n- Reels: {reels_count} 篇"
+            if posts_count == 100 or reels_count == 100:
+                content += "\n\n注意：查詢結果可能不完整，因為 Facebook API 的限制。"
+            await ctx.respond(content)
+        except Exception as e:
+            await ctx.respond(f"❌ 發生錯誤: {e}")
+            self.logger.error(f"Error in query command: {e}")
 
 def setup(bot: commands.Bot):
     bot.add_cog(NewFB(bot))
