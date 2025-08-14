@@ -71,4 +71,4 @@ class Activity(commands.Cog):
             # await self.channel.send(f"{after.mention} 的狀態已更新為: {after.status}")
 
 def setup(bot: commands.Bot):
-    bot.add_cog(NewFB(bot))
+    bot.add_cog(Activity(bot))
