@@ -145,8 +145,6 @@ class NewFB(commands.Cog):
             else:
                 end_timestamp = self._formatted_time_to_unix_timestamp(end_date)
 
-            print(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=message,created_time&access_token={self.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
-
             response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=&access_token={self.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
             datas = json.loads(response.text)
             posts_count = len(datas.get('data', []))
