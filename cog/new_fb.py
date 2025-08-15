@@ -8,7 +8,7 @@ import os
 import pytz
 
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
-daily_message_time = time(hour=0, minute=32, second=0, tzinfo=timezone)  # 每日訊息時間設定為午夜
+daily_message_time = time(hour=0, minute=48, second=0, tzinfo=timezone)  # 每日訊息時間設定為午夜
 
 class NewFB(commands.Cog):
     def __init__(self, bot):
@@ -172,7 +172,7 @@ class NewFB(commands.Cog):
             self.logger.error(f"Error fetching posts and reels count: {e}")
             return 0, 0
         
-    @tasks.loop(time=daily_message_time, count=1)
+    @tasks.loop(time=daily_message_time)
     async def daily_message(self):
         if self.daily_message_sent:
             return
