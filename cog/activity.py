@@ -5,6 +5,7 @@ import logging
 from datetime import datetime, timedelta
 import os
 
+CHANNEL_ID = 1354880766126985358
 JERRY_ID = 654273506921414656
 
 class Activity(commands.Cog):
@@ -84,7 +85,7 @@ class Activity(commands.Cog):
         
     @commands.Cog.listener()
     async def on_ready(self):
-        self.channel = self.bot.get_channel(1405253533540024340)
+        self.channel = self.bot.get_channel(CHANNEL_ID)
         print(f'activity.cog: {self.bot.user} (ID: {self.bot.user.id})')
 
     def _is_playing_league_of_legends(self, member):
