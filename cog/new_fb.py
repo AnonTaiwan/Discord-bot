@@ -113,7 +113,8 @@ class NewFB(commands.Cog):
         datas = self.get_datas()
         self.latest = [i['id'] for i in datas]
         self.reel = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=description,created_time,permalink_url&access_token={self.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
-        self.check_for_updates.start()
+        self.check_post_updates.start()
+        self.check_reel_updates.start()
         # main channel
         # self.channel = self.bot.get_channel(1357294484903297127)
         # test channel
