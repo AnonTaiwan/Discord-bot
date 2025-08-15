@@ -72,7 +72,13 @@ class NewFB(commands.Cog):
         with open(f'{data['id']}.jpg','wb') as f:
             f.write(response.content)
 
-    async def send_message(self, data):
+    async def _send_update_message(self, data_id, embed, file):
+        msg = await self.channel.send(content = '', embed=embed, file=file)
+        await msg.publish()
+        self.logger.info(f"已發送新貼文通知: {data_id}")
+        os.remove(f"{data_id}.jpg")
+
+    async def _send_post_update_message(self, data):
         await self.get_photo(data)
         message = data.get('message', 'No message provided')
         message = bytes(message,'utf-8').decode(encoding="utf-8", errors="ignore")
@@ -85,10 +91,22 @@ class NewFB(commands.Cog):
         # main setting
         # msg = await self.channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
         # test setting
-        msg = await self.channel.send(content = '', embed=embed, file=file)
-        await msg.publish()
-        self.logger.info(f"已發送新貼文通知: {data['id']}")
-        os.remove(f"{data['id']}.jpg")
+        await self._send_update_message(data['id'], embed, file)
+    
+    async def _send_reel_update_message(self, reel):
+        reel_data_id = reel['id']
+        url = f'https://www.facebook.com{reel['permalink_url'].replace('\\','')}'
+        message = reel.get('description', 'No description provided')
+        message = bytes(message,'utf-8').decode(encoding="utf-8", errors="ignore")
+        picture_url = reel.get('picture', {}).get('url', '')
+        with open(f'{reel_data_id}.jpg', 'wb') as f:
+            f.write(requests.get(picture_url).content)
+        embed = discord.Embed(title='Anon Taiwan 更新了新 Reel！', url=url, color=discord.Color.blue())
+        file = discord.File(f"{reel_data_id}.jpg", filename=f"{reel_data_id}.jpg")
+        embed.set_image(url=f"attachment://{reel_data_id}.jpg")
+        embed.add_field(name='Reel 連結', value=url, inline=False)
+        embed.add_field(name='Reel 內容', value=message or "（無內容）", inline=False)
+        await self._send_update_message(reel_data_id, embed, file)
         
     @commands.Cog.listener()
     async def on_ready(self):
@@ -105,40 +123,26 @@ class NewFB(commands.Cog):
         print(f'new_fb.cog: {self.bot.user} (ID: {self.bot.user.id})')
     
     @tasks.loop(minutes=1)
-    async def check_for_updates(self):
+    async def check_post_updates(self):
         try:
             datas = self.get_datas()
             new_post = [i for i in datas if i['id'] not in self.latest]
             if new_post:
                 self.logger.info(f"發現 {len(new_post)} 條新貼文")
                 for post in new_post:
-                    await self.send_message(post)
+                    await self._send_post_update_message(post)
                 self.latest = [i['id'] for i in datas]
         except Exception as e:
             self.logger.error(f"Error checking for updates: {e}")
 
     @tasks.loop(minutes=5)
-    async def check_for_reel(self):
+    async def check_reel_updates(self):
         try:
             response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=description,created_time,permalink_url,picture&access_token={self.FACEBOOK_TOKEN}&limit=3')
             reels_data = response.json()
             if self.reel != reels_data['data'][0]['id']:
                 self.reel = reels_data['data'][0]['id']
-                ID = reels_data['data'][0]['id']
-                reel = reels_data['data'][0]
-                url = f'https://www.facebook.com{reel['permalink_url'].replace('\\','')}'
-                message = reel.get('description', 'No description provided')
-                message = bytes(message,'utf-8').decode(encoding="utf-8", errors="ignore")
-                picture_url = reel.get('picture', {}).get('url', '')
-                with open(f'{ID}.jpg', 'wb') as f:
-                        f.write(requests.get(picture_url).content)
-                embed = discord.Embed(title='Anon Taiwan 更新了新 Reel！', url=url, color=discord.Color.blue())
-                file = discord.File(f"{ID}.jpg", filename=f"{ID}.jpg")
-                embed.set_image(url=f"attachment://{ID}.jpg")
-                embed.add_field(name='Reel連結', value=url, inline=False)
-                embed.add_field(name='Reel 內容', value=message or "（無內容）", inline=False)
-                msg = await self.channel.send(content = '', embed=embed, file=file)
-                await msg.publish()
+                self._send_reel_update_message(reels_data['data'][0])
         except Exception as e:
             self.logger.error(f"Error checking for reels: {e}")
 
