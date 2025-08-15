@@ -8,12 +8,13 @@ import os
 import pytz
 
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
-daily_message_time = time(hour=0, minute=0, tzinfo=timezone)  # 每日訊息時間設定為午夜
+daily_message_time = time(hour=0, minute=0, second=0, tzinfo=timezone)  # 每日訊息時間設定為午夜
 
 class NewFB(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.latest = []
+        self.daily_message_sent = False
         self.setup_logging()
         with open('JSON/bot.json', 'r', encoding='utf-8') as f:
             config = json.load(f)
@@ -171,8 +172,11 @@ class NewFB(commands.Cog):
             self.logger.error(f"Error fetching posts and reels count: {e}")
             return 0, 0
         
-    @tasks.loop(time=daily_message_time)
+    @tasks.loop(time=daily_message_time, count=1)
     async def daily_message(self):
+        if self.daily_message_sent:
+            return
+        
         try:
             today = datetime.now(timezone).replace(hour=0, minute=0, second=0, microsecond=0)
             yesterday = today - timedelta(days=1)
@@ -186,8 +190,17 @@ class NewFB(commands.Cog):
             channel = self.bot.get_channel(1405253533540024340)
             await channel.send(content)
             self.logger.info("每日訊息已發送")
+            self.daily_message_sent = True
         except Exception as e:
             self.logger.error(f"Error sending daily message: {e}")
+
+    @daily_message.after_loop
+    async def after_dayly_message(self):
+        if self.daily_message.is_running():
+            now = datetime.now(timezone)
+            if now.hour != 0 and now.minute != 0 and now.second != 0:
+                self.daily_message_sent = False
+                self.logger.info("每日訊息已重置，將於明天午夜再次發送。")
 
     @discord.slash_command(name="query", description="查看指定時間範圍內有幾篇貼文")
     async def query(self, ctx: discord.ApplicationContext, start_date: discord.Option(description="開始日期，格式為 YYYY-MM-DD HH:MM:SS", required=True), end_date: discord.Option(default=None, description="結束日期，格式為 YYYY-MM-DD HH:MM:SS", required=False)): #type:ignore
