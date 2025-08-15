@@ -79,7 +79,7 @@ class Activity(commands.Cog):
             return format(self.length, '.1f')
 
     async def send_message(self):
-        content = f'偵測到 <@{JERRY_ID}}> 偷打 LoL，歡迎用紅布條長度增加為 {self._format_length()} 公尺'
+        content = f'偵測到 <@{JERRY_ID}> 偷打 LoL，歡迎用紅布條長度增加為 {self._format_length()} 公尺'
         await self.channel.send(content = content)
         
     @commands.Cog.listener()
