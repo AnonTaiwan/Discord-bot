@@ -217,7 +217,7 @@ class NewFB(commands.Cog):
 
             content = f"在 {start_date_str} 到 {end_date_str} 之間：\n- 貼文: {posts_count} 篇\n- Reels: {reels_count} 篇"
             if posts_count == 100 or reels_count == 100:
-                content += "\n\n注意：查詢結果可能不完整，因為 Facebook API 的限制。"
+                content += "\n\n注意：因為 Facebook API 的限制，查詢結果至多為 100。"
             await ctx.respond(content)
         except Exception as e:
             await ctx.respond(f"❌ 發生錯誤: {e}")
