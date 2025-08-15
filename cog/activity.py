@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, bridge, tasks
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 JERRY_ID = 654273506921414656
@@ -11,6 +11,39 @@ class Activity(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.setup_logging()
+
+        self.cooldown_list = {}
+
+        self._check_config_exist()
+        self._read_config()
+
+    def _check_config_exist(self):
+        if not os.path.exists('config.json'):
+            with open('config.json', 'w', encoding='utf-8') as f:
+                json.dump({ "length": 0 }, f, ensure_ascii=False, indent=4)
+            self.logger.info("config.json 不存在，已創建一個空的 config.json")
+        else:
+            self.logger.info("config.json 已存在")
+
+    def _read_config(self):
+        with open('config.json', 'r', encoding='utf-8') as f:
+            try:
+                config = json.load(f)
+                self.logger.info("已成功讀取 config.json")
+            except json.JSONDecodeError as e:
+                self.logger.error(f"讀取 config.json 時發生錯誤: {e}")
+                config = { "length": 0 }
+        self.length = config.get("length", 0)
+
+        self.logger.info(f'Length: {self.length}')
+
+    def _write_config(self):
+        with open('config.json', 'w', encoding='utf-8') as f:
+            try:
+                json.dump({ "length": self.length }, f, ensure_ascii=False, indent=4)
+                self.logger.info("已成功寫入 config.json")
+            except Exception as e:
+                self.logger.error(f"寫入 config.json 時發生錯誤: {e}")
 
     def setup_logging(self):
         """設置日誌系統"""
@@ -39,37 +72,44 @@ class Activity(commands.Cog):
         self.logger = logging.getLogger(__name__)
         self.logger.info("cog/activity.py: 日誌系統初始化完成")
 
-    async def send_message(self, data):
-        await self.get_photo(data)
-        message = data.get('message', 'No message provided')
-        message = bytes(message,'utf-8').decode(encoding="utf-8", errors="ignore")
-        url = data.get('permalink_url', 'No URL provided').replace('\\','')
-        embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
-        embed.add_field(name='貼文連結', value=url, inline=False)
-        embed.add_field(name='貼文內容', value=message or "（無內容）", inline=False)
-        file = discord.File(f"{data['id']}.jpg", filename=f"{data['id']}.jpg")
-        embed.set_image(url=f"attachment://{data['id']}.jpg")
-        # main setting
-        # msg = await self.channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
-        # test setting
-        msg = await self.channel.send(content = '', embed=embed, file=file)
-        await msg.publish()
-        self.logger.info(f"已發送新貼文通知: {data['id']}")
-        os.remove(f"{data['id']}.jpg")
+    def _format_length(self):
+        if int(self.length + 0.6) == int(self.length):
+            return str(int(self.length))
+        else:
+            return format(self.length, '.1f')
+
+    async def send_message(self):
+
+        content = f'偵測到 <@654273506921414656> 偷打 LoL，歡迎用紅布條長度增加為 {self._format_length()} 公尺'
+        await self.channel.send(content = content)
         
     @commands.Cog.listener()
     async def on_ready(self):
-        self.channel = self.bot.get_channel(1354880766126985358)
+        self.channel = self.bot.get_channel(1405253533540024340)
         print(f'activity.cog: {self.bot.user} (ID: {self.bot.user.id})')
+
+    def _is_playing_league_of_legends(self, member):
+        for activity in member.activities:
+            if activity.type == discord.ActivityType.playing and activity.name == "League of Legends":
+                return True
+        return False
         
     @commands.Cog.listener()
     async def on_presence_update(self, before, after):
         if before.id != JERRY_ID:
             return
-        
-        if before.status != after.status:
-            self.logger.info(f"Member {after.name} changed status from {before.status} to {after.status}")
-            # await self.channel.send(f"{after.mention} 的狀態已更新為: {after.status}")
+
+        if not self._is_playing_league_of_legends(before) and self._is_playing_league_of_legends(after):
+            if after.name not in self.cooldown_list or datetime.now() - self.cooldown_list[after.name] > timedelta(minutes=5):
+                self.logger.info(f"Member {after.name} started playing League of Legends")
+                self.length += 1.5
+                self.logger.info(f"Length updated to {self.length}")
+                self._write_config()
+                await self.send_message()
+
+        if self._is_playing_league_of_legends(before) and not self._is_playing_league_of_legends(after):
+            self.logger.info(f"Member {after.name} stopped playing League of Legends")
+            self.cooldown_list[after.name] = datetime.now()
 
 def setup(bot: commands.Bot):
     bot.add_cog(Activity(bot))
