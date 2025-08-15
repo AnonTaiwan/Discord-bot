@@ -94,6 +94,7 @@ class NewFB(commands.Cog):
     async def on_ready(self):
         datas = self.get_datas()
         self.latest = [i['id'] for i in datas]
+        self.reel = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=description,created_time,permalink_url&access_token={self.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
         self.check_for_updates.start()
         # main channel
         # self.channel = self.bot.get_channel(1357294484903297127)
@@ -102,7 +103,7 @@ class NewFB(commands.Cog):
 
         self.daily_message.start()
         print(f'new_fb.cog: {self.bot.user} (ID: {self.bot.user.id})')
-        
+    
     @tasks.loop(minutes=1)
     async def check_for_updates(self):
         try:
@@ -115,6 +116,31 @@ class NewFB(commands.Cog):
                 self.latest = [i['id'] for i in datas]
         except Exception as e:
             self.logger.error(f"Error checking for updates: {e}")
+
+    @tasks.loop(minutes=5)
+    async def check_for_reel(self):
+        try:
+            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=description,created_time,permalink_url,picture&access_token={self.FACEBOOK_TOKEN}&limit=3')
+            reels_data = response.json()
+            if self.reel != reels_data['data'][0]['id']:
+                self.reel = reels_data['data'][0]['id']
+                ID = reels_data['data'][0]['id']
+                reel = reels_data['data'][0]
+                url = f'https://www.facebook.com{reel['permalink_url'].replace('\\','')}'
+                message = reel.get('description', 'No description provided')
+                message = bytes(message,'utf-8').decode(encoding="utf-8", errors="ignore")
+                picture_url = reel.get('picture', {}).get('url', '')
+                with open(f'{ID}.jpg', 'wb') as f:
+                        f.write(requests.get(picture_url).content)
+                embed = discord.Embed(title='Anon Taiwan 更新了新 Reel！', url=url, color=discord.Color.blue())
+                file = discord.File(f"{ID}.jpg", filename=f"{ID}.jpg")
+                embed.set_image(url=f"attachment://{ID}.jpg")
+                embed.add_field(name='Reel連結', value=url, inline=False)
+                embed.add_field(name='Reel 內容', value=message or "（無內容）", inline=False)
+                msg = await self.channel.send(content = '', embed=embed, file=file)
+                await msg.publish()
+        except Exception as e:
+            self.logger.error(f"Error checking for reels: {e}")
 
     def _formatted_time_to_unix_timestamp(self, formatted_time):
         try:
@@ -159,10 +185,8 @@ class NewFB(commands.Cog):
             self.logger.error(f"Error sending daily message: {e}")
 
     @discord.slash_command(name="query", description="查看指定時間範圍內有幾篇貼文")
-    async def query(self, ctx: discord.ApplicationContext, \
-                    start_date: discord.Option(description="開始日期，格式為 YYYY-MM-DD HH:MM:SS", required=True), \
-                    end_date: discord.Option(default=None, description="結束日期，格式為 YYYY-MM-DD HH:MM:SS", required=False)):
-        
+    async def query(self, ctx: discord.ApplicationContext, start_date: discord.Option(description="開始日期，格式為 YYYY-MM-DD HH:MM:SS", required=True), end_date: discord.Option(default=None, description="結束日期，格式為 YYYY-MM-DD HH:MM:SS", required=False)): #type:ignore
+
         has_allowed_role = any(role.id == 1359938675768557719 for role in ctx.author.roles) # 小編身份組
         if ctx.author.id not in self.DEVELOPER and has_allowed_role is False:
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
