@@ -53,7 +53,7 @@ class Activity(commands.Cog):
             os.makedirs('logs')
             
         # 設置日誌文件名（包含日期）
-        log_filename = f'logs/activity_{datetime.now().strftime("%Y%m%d")}.log'
+        log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
         
         # 配置日誌格式
         log_format = '%(asctime)s - %(levelname)s - %(message)s'
