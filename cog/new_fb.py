@@ -185,11 +185,13 @@ class NewFB(commands.Cog):
             yesterday_timestamp = int(yesterday.timestamp())
 
             posts_count, reels_count = self._get_posts_and_reels_count(yesterday_timestamp, today_timestamp)
-            content = f"今日貼文數量：{posts_count} 篇\n今日 Reels 數量：{reels_count} 篇"
-            
+            embed = discord.Embed(title='今日統整', color=discord.Color.blue())
+            embed.add_field(name='Post:', value=posts_count, inline=False)
+            embed.add_field(name='Reels:', value=reels_count, inline=False)
+
             channel = self.bot.get_channel(1405253533540024340)
-            await channel.send(content)
-            self.logger.info("每日訊息已發送")
+            await channel.send(embed=embed)
+            self.logger.info(f"每日訊息已發送, 時間:{yesterday.strftime('%Y-%m-%d %H:%M:%S')} ~ {today.strftime('%Y-%m-%d %H:%M:%S')}")
             self.daily_message_sent = True
         except Exception as e:
             self.logger.error(f"Error sending daily message: {e}")
