@@ -34,15 +34,12 @@ class MyBot(commands.Bot):
 
     async def auto_shutdown_at_midnight(self):
         now = datetime.now()
-        if now.hour == 0:
-            print("已到 0 點，立即關機")
-        else:
-            # 算到下個 0 點還有幾秒
-            tomorrow = datetime.combine(date.today() + timedelta(days=1), time.min)
-            seconds_to_midnight = (tomorrow - now).seconds
-            print(f"將於 {seconds_to_midnight + 5:,} 秒後自動關機")
-            await asyncio.sleep(seconds_to_midnight + 5)
-            print('每日12點自動關機')
+        # 算到下個 0 點還有幾秒
+        tomorrow = datetime.combine(date.today() + timedelta(days=1), time.min)
+        seconds_to_midnight = (tomorrow - now).seconds
+        print(f"將於 {seconds_to_midnight + 5:,} 秒後自動關機")
+        await asyncio.sleep(seconds_to_midnight + 5)
+        print('每日12點自動關機')
         for ext in self.initial_extensions:
             self.unload_extension(ext)
             print(f"✅ 已卸載擴展: {ext}")
@@ -88,16 +85,6 @@ async def main():
     logger = None
     current_date = None
     while True:
-        now = datetime.now()
-        """
-        if 0 <= now.hour < 8:
-            # 算出距離8點還有幾秒
-            seconds_to_8 = (datetime.combine(now, time(8, 0, 0)) - now).seconds
-            print(f"夜間關機，將於 {seconds_to_8:,} 秒後自動開機")
-            sleep(seconds_to_8 + 5)
-            continue  # 跳過這次，等到8點再啟動
-        """
-        
         now = datetime.now()
         today = now.strftime("%Y%m%d")
         
