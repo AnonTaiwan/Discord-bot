@@ -12,7 +12,7 @@ class Activity(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.setup_logging()
-
+        self.offline_time = None
         self.cooldown_list = {}
 
         self._check_config_exist()
@@ -80,7 +80,7 @@ class Activity(commands.Cog):
             return format(self.length, '.1f')
 
     async def send_message(self):
-        content = f'偵測到 <@{JERRY_ID}> 偷打 LoL，歡迎用紅布條長度增加為 {self._format_length()} 公尺'
+        content = f'偵測到 <@{JERRY_ID}> 偷打 LoL，紅布條長度增加為 {self._format_length()} 公尺'
         await self.channel.send(content = content)
         
     @commands.Cog.listener()
@@ -98,6 +98,24 @@ class Activity(commands.Cog):
     async def on_presence_update(self, before, after):
         if before.id != JERRY_ID:
             return
+
+        if after.status == discord.Status.offline:
+            self.offline_time = datetime.now()
+            self.logger.info(f"Member {after.name} is offline")
+            content = f'偵測到 <@{JERRY_ID}> 下線，紅布條長度每秒增加 0.5 公尺'
+            self.channel = self.bot.get_channel(CHANNEL_ID)
+            await self.channel.send(content = content)
+            return
+
+        if after.status == discord.Status.online:
+            if self.offline_time:
+                offline_duration = datetime.now() - self.offline_time
+                self.length += offline_duration.total_seconds() * 0.5
+                self.logger.info(f"Member {after.name} was offline for {offline_duration}, length updated to {self.length}")
+                self._write_config()
+                content = f'<@{JERRY_ID}> 已上線，共下線{offline_duration.total_seconds()}秒，紅布條長度增加至 {self._format_length()} 公尺'
+                self.channel = self.bot.get_channel(CHANNEL_ID)
+                await self.channel.send(content = content)
 
         if not self._is_playing_league_of_legends(before) and self._is_playing_league_of_legends(after):
             if after.name not in self.cooldown_list or datetime.now() - self.cooldown_list[after.name] > timedelta(minutes=5):
