@@ -183,7 +183,7 @@ class NewFB(commands.Cog):
         coordinate = img.width // 2 - 100 , img.height // 2 -110
         draw.text(coordinate, f"{posts_count} 則貼文", font=font, fill=(0, 0, 0), anchor="mm")
         draw.text((coordinate[0], coordinate[1] + 400), f"{reels_count} 則Reels", font=font, fill=(0, 0, 0), anchor="mm")
-        output_path = os.path.join(current_dir, "output.png")
+        output_path = os.path.join("output.png")
         img.save(output_path, format='PNG', optimize=False)
         
     @tasks.loop(time=daily_message_time)
