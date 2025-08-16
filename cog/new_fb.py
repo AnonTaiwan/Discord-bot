@@ -9,7 +9,7 @@ import pytz
 from PIL import Image, ImageDraw, ImageFont
 
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
-daily_message_time = time(hour=16, minute=47, second=0, tzinfo=timezone)  # 每日訊息時間設定
+daily_message_time = time(hour=0, minute=30, second=0, tzinfo=timezone)  # 每日訊息時間設定
 
 class NewFB(commands.Cog):
     def __init__(self, bot):
@@ -75,7 +75,10 @@ class NewFB(commands.Cog):
             f.write(response.content)
 
     async def _send_update_message(self, data_id, embed, file):
-        msg = await self.channel.send(content = '', embed=embed, file=file)
+        # main
+        msg = await self.channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
+        # test
+        # msg = await self.channel.send(content = '', embed=embed, file=file)
         await msg.publish()
         self.logger.info(f"已發送新貼文通知: {data_id}")
         os.remove(f"{data_id}.jpg")
@@ -118,9 +121,9 @@ class NewFB(commands.Cog):
         self.check_post_updates.start()
         self.check_reel_updates.start()
         # main channel
-        # self.channel = self.bot.get_channel(1357294484903297127)
+        self.channel = self.bot.get_channel(1357294484903297127)
         # test channel
-        self.channel = self.bot.get_channel(1404889560068001864)
+        # self.channel = self.bot.get_channel(1404889560068001864)
 
         self.daily_message.start()
         print(f'new_fb.cog: {self.bot.user} (ID: {self.bot.user.id})')
@@ -182,7 +185,7 @@ class NewFB(commands.Cog):
         font = ImageFont.truetype(font_path, 150)
         coordinate = img.width // 2 - 100 , img.height // 2 -110
         draw.text(coordinate, f"{posts_count} 則貼文", font=font, fill=(0, 0, 0), anchor="mm")
-        draw.text((coordinate[0], coordinate[1] + 400), f"{reels_count} 則Reels", font=font, fill=(0, 0, 0), anchor="mm")
+        draw.text((coordinate[0], coordinate[1] + 400), f"{reels_count} 則短片", font=font, fill=(0, 0, 0), anchor="mm")
         output_path = os.path.join("output.png")
         img.save(output_path, format='PNG', optimize=False)
         
