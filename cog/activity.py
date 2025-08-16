@@ -99,7 +99,7 @@ class Activity(commands.Cog):
         if before.id != JERRY_ID:
             return
 
-        if after.status == discord.Status.offline:
+        if after.status == discord.Status.offline and before.status != discord.Status.offline:
             self.offline_time = datetime.now()
             self.logger.info(f"Member {after.name} is offline")
             content = f'偵測到 <@{JERRY_ID}> 下線，紅布條長度每秒增加 0.5 公尺'
@@ -107,7 +107,7 @@ class Activity(commands.Cog):
             await self.channel.send(content = content)
             return
 
-        if after.status == discord.Status.online:
+        if after.status == discord.Status.online and before.status == discord.Status.offline:
             if self.offline_time:
                 offline_duration = datetime.now() - self.offline_time
                 self.length += offline_duration.total_seconds() * 0.5
