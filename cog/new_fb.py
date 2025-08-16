@@ -9,7 +9,7 @@ import pytz
 from PIL import Image, ImageDraw, ImageFont
 
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
-daily_message_time = time(hour=16, minute=30, second=0, tzinfo=timezone)  # 每日訊息時間設定
+daily_message_time = time(hour=16, minute=35, second=0, tzinfo=timezone)  # 每日訊息時間設定
 
 class NewFB(commands.Cog):
     def __init__(self, bot):
@@ -206,7 +206,7 @@ class NewFB(commands.Cog):
             channel = self.bot.get_channel(1405253533540024340)
             await channel.send(embed=embed,file=file)
             self.logger.info(f"每日訊息已發送, 時間: {yesterday.strftime('%Y-%m-%d %H:%M:%S')} ~ {today.strftime('%Y-%m-%d %H:%M:%S')}")
-            
+            os.remove("output.png")
             # TODO: Remove after testing
             current_time = datetime.now(timezone).strftime("%Y-%m-%d %H:%M:%S")
             self.logger.info(f"當前時間: {current_time}")
