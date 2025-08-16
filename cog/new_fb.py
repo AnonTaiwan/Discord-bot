@@ -9,7 +9,7 @@ import pytz
 from PIL import Image, ImageDraw, ImageFont
 
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
-daily_message_time = time(hour=16, minute=35, second=0, tzinfo=timezone)  # 每日訊息時間設定
+daily_message_time = time(hour=16, minute=45, second=0, tzinfo=timezone)  # 每日訊息時間設定
 
 class NewFB(commands.Cog):
     def __init__(self, bot):
@@ -178,7 +178,7 @@ class NewFB(commands.Cog):
         background_path = os.path.join(current_dir, "../File/background.png")
         img = Image.open(background_path)
         draw = ImageDraw.Draw(img)
-        font_path = os.path.join(current_dir, "NotoSansTC-Bold.ttf")
+        font_path = os.path.join(current_dir, "../File/NotoSansTC-Bold.ttf")
         font = ImageFont.truetype(font_path, 150)
         coordinate = img.width // 2 - 100 , img.height // 2 -110
         draw.text(coordinate, f"{posts_count} 則貼文", font=font, fill=(0, 0, 0), anchor="mm")
@@ -194,10 +194,8 @@ class NewFB(commands.Cog):
         try:
             today = datetime.now(timezone).replace(hour=0, minute=0, second=0, microsecond=0)
             yesterday = today - timedelta(days=1)
-
             today_timestamp = int(today.timestamp())
             yesterday_timestamp = int(yesterday.timestamp())
-
             posts_count, reels_count = self._get_posts_and_reels_count(yesterday_timestamp, today_timestamp)
             embed = discord.Embed(title='今日統整', color=discord.Color.blue())
             self.generate_daily_post_picture(posts_count, reels_count)
