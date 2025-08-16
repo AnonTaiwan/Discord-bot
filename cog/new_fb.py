@@ -9,7 +9,7 @@ import pytz
 from PIL import Image, ImageDraw, ImageFont
 
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
-daily_message_time = time(hour=16, minute=45, second=0, tzinfo=timezone)  # 每日訊息時間設定
+daily_message_time = time(hour=16, minute=47, second=0, tzinfo=timezone)  # 每日訊息時間設定
 
 class NewFB(commands.Cog):
     def __init__(self, bot):
