@@ -113,7 +113,7 @@ class Activity(commands.Cog):
                 self.length += offline_duration.total_seconds() * 0.5
                 self.logger.info(f"Member {after.name} was offline for {offline_duration}, length updated to {self.length}")
                 self._write_config()
-                content = f'<@{JERRY_ID}> 已上線，共下線{offline_duration.total_seconds()}秒，紅布條長度增加至 {self._format_length()} 公尺'
+                content = f'<@{JERRY_ID}> 已上線，共下線 {offline_duration.total_seconds()} 秒，紅布條長度增加至 {self._format_length()} 公尺'
                 self.channel = self.bot.get_channel(CHANNEL_ID)
                 await self.channel.send(content = content)
 
