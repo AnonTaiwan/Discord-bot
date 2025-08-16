@@ -175,7 +175,7 @@ class NewFB(commands.Cog):
 
     def generate_daily_post_picture(self, posts_count, reels_count):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        background_path = os.path.join(current_dir, "File/background.png")
+        background_path = os.path.join(current_dir, "../File/background.png")
         img = Image.open(background_path)
         draw = ImageDraw.Draw(img)
         font_path = os.path.join(current_dir, "NotoSansTC-Bold.ttf")
