@@ -92,7 +92,7 @@ class Gacha(commands.Cog):
         result1 = [self._get_gacha_result() for _ in range(5)]
         result2 = [self._get_gacha_result() for _ in range(5)]
 
-        if result2 == gacha_result[0]:
+        if result2[4] == gacha_result[0]:
             result2[4] = gacha_result[1]  # 保底
 
         results = " ".join(result1) + "\n" + " ".join(result2)
