@@ -155,7 +155,7 @@ class NewFB(commands.Cog):
     def _formatted_time_to_unix_timestamp(self, formatted_time):
         try:
             dt = datetime.strptime(formatted_time, "%Y-%m-%d %H:%M:%S")
-            localized_dt = self.timezone.localize(dt)
+            localized_dt = timezone.localize(dt)
             return int(localized_dt.timestamp())
         except ValueError as e:
             self.logger.error(f"時間格式錯誤: {e}")
