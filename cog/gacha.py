@@ -7,6 +7,11 @@ import os
 import random
 
 gacha_rate = [785, 185, 30] # 各稀有度的抽中機率 N, R, SR
+gacha_result = [
+    "<:BA_gacha_N:1407235400346505226>",
+    "<:BA_gacha_R:1407235415446126663>",
+    "<:BA_gacha_SR:1407235426300858408>"
+]
 
 class Gacha(commands.Cog):
     def __init__(self, bot):
@@ -54,11 +59,11 @@ class Gacha(commands.Cog):
         """隨機抽取一個結果"""
         rand = random.randint(1, 1000)
         if rand <= gacha_rate[0]:
-            return "<:BA_gacha_N:1407235400346505226>"
+            return gacha_result[0]  # N
         elif rand <= gacha_rate[0] + gacha_rate[1]:
-            return "<:BA_gacha_R:1407235415446126663>"
+            return gacha_result[1]  # R
         else:
-            return "<:BA_gacha_SR:1407235426300858408>"
+            return gacha_result[2]  # SR
 
     @discord.slash_command(name="gacha", description="抽一抽")
     async def gacha(self, ctx: discord.ApplicationContext):
@@ -87,8 +92,8 @@ class Gacha(commands.Cog):
         result1 = [self._get_gacha_result() for _ in range(5)]
         result2 = [self._get_gacha_result() for _ in range(5)]
 
-        if all(result == "<:BA_gacha_N:1407235400346505226>" for result in result1 + result2):
-            result2[4] = "<:BA_gacha_R:1407235415446126663>"  # 保底
+        if result2 == gacha_result[0]:
+            result2[4] = gacha_result[1]  # 保底
 
         results = " ".join(result1) + "\n" + " ".join(result2)
         
