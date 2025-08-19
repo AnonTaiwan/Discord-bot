@@ -12,6 +12,7 @@ gacha_result = [
     "<:BA_gacha_R:1407235415446126663>",
     "<:BA_gacha_SR:1407235426300858408>"
 ]
+allowed_channels = [1407248459949543455]
 
 class Gacha(commands.Cog):
     def __init__(self, bot):
@@ -64,11 +65,19 @@ class Gacha(commands.Cog):
             return gacha_result[1]  # R
         else:
             return gacha_result[2]  # SR
+        
+    def _is_valid_request(self, ctx: discord.ApplicationContext):
+        if ctx.author.id in self.DEVELOPER:
+            return True
+        if any(role.id == 1359938675768557719 for role in ctx.author.roles): # 小編身份組
+            return True
+        if ctx.channel.id in allowed_channels:
+            return True
+        return False
 
     @discord.slash_command(name="gacha", description="抽一抽")
     async def gacha(self, ctx: discord.ApplicationContext):
-        has_allowed_role = any(role.id == 1359938675768557719 for role in ctx.author.roles) # 小編身份組
-        if ctx.author.id not in self.DEVELOPER and has_allowed_role is False:
+        if self._is_valid_request(ctx) is False:
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
             return
@@ -83,8 +92,7 @@ class Gacha(commands.Cog):
 
     @discord.slash_command(name="gacha10", description="抽十抽")
     async def gacha10(self, ctx: discord.ApplicationContext):
-        has_allowed_role = any(role.id == 1359938675768557719 for role in ctx.author.roles) # 小編身份組
-        if ctx.author.id not in self.DEVELOPER and has_allowed_role is False:
+        if self._is_valid_request(ctx) is False:
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
             return
