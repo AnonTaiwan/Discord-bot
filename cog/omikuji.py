@@ -2,9 +2,11 @@ import discord
 from discord.ext import commands, tasks
 from curl_cffi import requests
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, time
 import os
 import random
+import pytz
+import json
 
 #"大吉" Daikichi
 #"吉"   Kichi
@@ -20,6 +22,10 @@ omikuji_results = ["Daikichi",
                    "Suekichi", 
                    "Kyo",
                    "Daikyo"]
+
+
+timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
+daily_reset = time(hour=0, minute=30, second=0, tzinfo=timezone)  # 每日訊息時間設定
 
 class Omikuji(commands.Cog):
     def __init__(self, bot):
@@ -53,17 +59,23 @@ class Omikuji(commands.Cog):
         self.logger = logging.getLogger(__name__)
         self.logger.info("cog/omikuji.py: 日誌系統初始化完成")
 
+    def save_omikuji(self):
+        with open('JSON/Omikuji.json', 'w', encoding='utf-8') as f:
+            json.dump({"omikuji": self.omikuji}, f, ensure_ascii=False, indent=4)
+
     @commands.Cog.listener()
     async def on_ready(self):
-        self.channel = self.bot.get_channel(1354880766126985358) # 閒聊大廳
-        self.logger.info(f'cog_name.cog: {self.bot.user} (ID: {self.bot.user.id}) Ready!')
-        try:
-            await self.channel.send("CogName 已啟動！")
-        except Exception as e:
-            self.logger.error(f"Error sending ready message: {e}")
+        self.logger.info("Omikuji cog is ready.")
+        with open('JSON/Omikuji.json', 'r', encoding='utf-8') as f:
+            omikuji_data = json.load(f)
+        self.omikuji = omikuji_data.get("omikuji", [])
+        self.daily_message.start()
 
-    @discord.slash_command(name="omikuji", description="抽籤")
+    @discord.slash_command(name="omikuji", description="抽籤(此功能由)")
     async def draw_omikuji(self, ctx: discord.ApplicationContext):
+        if ctx.author.id in self.omikuji:
+            await ctx.respond("你今天已經抽過籤了！請明天再來。")
+            return
         weights = [0.05,0.1,0.2,0.3,0.2,0.1,0.05]  
         result = random.choices(omikuji_results, weights=weights)[0]
         emoji = discord.utils.get(self.bot.emojis, name=result)
@@ -73,9 +85,20 @@ class Omikuji(commands.Cog):
                 await ctx.respond(f"{emoji}")
             else:
                 await ctx.respond(f"抽到的籤是：{result}")
+            self.omikuji.append(ctx.author.id)
+            self.save_omikuji()
         except Exception as e:
             self.logger.error(f"Error responding to omikuji command: {e}")
             await ctx.respond("抽籤失敗，請稍後再試。")
+
+    @tasks.loop(time=daily_reset)
+    async def daily_message(self):
+        self.omikuji = []
+        channel = self.bot.get_channel(1405253533540024340) 
+        if channel:
+            await channel.send("每日運勢抽籤已重置！")
+        else:
+            self.logger.error("無法找到指定的頻道。")
 
 def setup(bot: commands.Bot):
     bot.add_cog(Omikuji(bot))
