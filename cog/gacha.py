@@ -62,7 +62,7 @@ class Gacha(commands.Cog):
         rand = random.randint(1, 1000)
 
         # Fes gacha
-        if self.is_fes:
+        if is_fes:
             if rand <= gacha_rate_fes[0]:
                 return gacha_result[0]  # N
             elif rand <= gacha_rate_fes[0] + gacha_rate_fes[1]:
