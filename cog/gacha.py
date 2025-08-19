@@ -41,7 +41,7 @@ class Gacha(commands.Cog):
         )
         
         self.logger = logging.getLogger(__name__)
-        self.logger.info("cog/draw.py: 日誌系統初始化完成")
+        self.logger.info("cog/gacha.py: 日誌系統初始化完成")
         
     @commands.Cog.listener()
     async def on_ready(self):
@@ -65,7 +65,7 @@ class Gacha(commands.Cog):
         has_allowed_role = any(role.id == 1359938675768557719 for role in ctx.author.roles) # 小編身份組
         if ctx.author.id not in self.DEVELOPER and has_allowed_role is False:
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
-            self.logger.warning(f"❌ {ctx.author.name} 嘗試使用查詢指令，但沒有權限。")
+            self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
             return
         
         result = self._get_gacha_result()
@@ -81,7 +81,7 @@ class Gacha(commands.Cog):
         has_allowed_role = any(role.id == 1359938675768557719 for role in ctx.author.roles) # 小編身份組
         if ctx.author.id not in self.DEVELOPER and has_allowed_role is False:
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
-            self.logger.warning(f"❌ {ctx.author.name} 嘗試使用查詢指令，但沒有權限。")
+            self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
             return
         
         result1 = [self._get_gacha_result() for _ in range(5)]
