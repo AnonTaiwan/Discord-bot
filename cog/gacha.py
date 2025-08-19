@@ -86,6 +86,10 @@ class Gacha(commands.Cog):
         
         result1 = [self._get_gacha_result() for _ in range(5)]
         result2 = [self._get_gacha_result() for _ in range(5)]
+
+        if all(result == "<:BA_gacha_N:1407235400346505226>" for result in result1 + result2):
+            result2[4] = "<:BA_gacha_R:1407235415446126663>"  # 保底
+
         results = " ".join(result1) + "\n" + " ".join(result2)
         
         try:
