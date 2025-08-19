@@ -7,6 +7,7 @@ import os
 import random
 
 gacha_rate = [785, 185, 30] # 各稀有度的抽中機率 N, R, SR
+gacha_rate_fes = [755, 185, 60] # FES 模式下的抽中機率 N, R, SR
 gacha_result = [
     "<:BA_gacha_N:1407235400346505226>",
     "<:BA_gacha_R:1407235415446126663>",
@@ -56,9 +57,20 @@ class Gacha(commands.Cog):
         # test channel
         self.channel = self.bot.get_channel(1405253533540024340)
 
-    def _get_gacha_result(self):
+    def _get_gacha_result(self, is_fes=False):
         """隨機抽取一個結果"""
         rand = random.randint(1, 1000)
+
+        # Fes gacha
+        if self.is_fes:
+            if rand <= gacha_rate_fes[0]:
+                return gacha_result[0]  # N
+            elif rand <= gacha_rate_fes[0] + gacha_rate_fes[1]:
+                return gacha_result[1]  # R
+            else:
+                return gacha_result[2]  # SR
+            
+        # Normal gacha
         if rand <= gacha_rate[0]:
             return gacha_result[0]  # N
         elif rand <= gacha_rate[0] + gacha_rate[1]:
@@ -66,16 +78,21 @@ class Gacha(commands.Cog):
         else:
             return gacha_result[2]  # SR
         
-    def _is_valid_request(self, ctx: discord.ApplicationContext):
+    def _is_operator(self, ctx: discord.ApplicationContext):
         if ctx.author.id in self.DEVELOPER:
             return True
         if any(role.id == 1359938675768557719 for role in ctx.author.roles): # 小編身份組
+            return True
+        return False
+        
+    def _is_valid_request(self, ctx: discord.ApplicationContext):
+        if self._is_operator(ctx):
             return True
         if ctx.channel.id in allowed_channels:
             return True
         return False
 
-    @discord.slash_command(name="gacha", description="抽一抽")
+    @discord.slash_command(name="gacha", description="抽一抽普通池")
     async def gacha(self, ctx: discord.ApplicationContext):
         if self._is_valid_request(ctx) is False:
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
@@ -90,7 +107,7 @@ class Gacha(commands.Cog):
             await ctx.respond(f"❌ 發生錯誤: {e}")
             self.logger.error(f"Error in query command: {e}")
 
-    @discord.slash_command(name="gacha10", description="抽十抽")
+    @discord.slash_command(name="gacha10", description="抽十抽普通池")
     async def gacha10(self, ctx: discord.ApplicationContext):
         if self._is_valid_request(ctx) is False:
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
@@ -99,6 +116,42 @@ class Gacha(commands.Cog):
         
         result1 = [self._get_gacha_result() for _ in range(5)]
         result2 = [self._get_gacha_result() for _ in range(5)]
+
+        if result2[4] == gacha_result[0]:
+            result2[4] = gacha_result[1]  # 保底
+
+        results = " ".join(result1) + "\n" + " ".join(result2)
+        
+        try:
+            await ctx.respond(results)
+        except Exception as e:
+            await ctx.respond(f"❌ 發生錯誤: {e}")
+            self.logger.error(f"Error in query command: {e}")
+
+    @discord.slash_command(name="fes_gacha", description="抽一抽 FES 池")
+    async def fes_gacha(self, ctx: discord.ApplicationContext):
+        if self._is_valid_request(ctx) is False:
+            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
+            self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
+            return
+        
+        result = self._get_gacha_result(is_fes=True)
+        
+        try:
+            await ctx.respond(result)
+        except Exception as e:
+            await ctx.respond(f"❌ 發生錯誤: {e}")
+            self.logger.error(f"Error in query command: {e}")
+
+    @discord.slash_command(name="fes_gacha10", description="抽十抽 FES 池")
+    async def fes_gacha10(self, ctx: discord.ApplicationContext):
+        if self._is_valid_request(ctx) is False:
+            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
+            self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
+            return
+        
+        result1 = [self._get_gacha_result(is_fes=True) for _ in range(5)]
+        result2 = [self._get_gacha_result(is_fes=True) for _ in range(5)]
 
         if result2[4] == gacha_result[0]:
             result2[4] = gacha_result[1]  # 保底
