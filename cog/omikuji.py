@@ -99,7 +99,7 @@ class Omikuji(commands.Cog):
         if ctx.author.id in self.omikuji:
             await ctx.respond("你今天已經抽過籤了！請明天再來。")
             return
-        weights = [0.05,0.1,0.2,0.3,0.2,0.1,0.05]  
+        weights = [0.05, 0.1, 0.2, 0.3, 0.2, 0.1, 0.05]  
         result = random.choices(omikuji_results, weights=weights)[0]
 
         try:
