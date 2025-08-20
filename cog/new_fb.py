@@ -147,23 +147,10 @@ class NewFB(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error fetching posts and reels count: {e}")
             return 0, 0
-
-    def generate_daily_post_picture(self, posts_count, reels_count):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        background_path = os.path.join(current_dir, "../static/background.png")
-        img = Image.open(background_path)
-        draw = ImageDraw.Draw(img)
-        font_path = os.path.join(current_dir, "../static/NotoSansTC-Bold.ttf")
-        font = ImageFont.truetype(font_path, 150)
-        coordinate = img.width // 2 - 100 , img.height // 2 -110
-        draw.text(coordinate, f"{posts_count} 則貼文", font=font, fill=(0, 0, 0), anchor="mm")
-        draw.text((coordinate[0], coordinate[1] + 400), f"{reels_count} 則短片", font=font, fill=(0, 0, 0), anchor="mm")
-        output_path = os.path.join("output.png")
-        img.save(output_path, format='PNG', optimize=False)
         
-    def generate_query_picture(self, posts_count, reels_count):
+    def _generate_picture_embed(self, posts_count, reels_count, background_picture_file):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        background_path = os.path.join(current_dir, "../static/postquery.png")
+        background_path = os.path.join(current_dir, background_picture_file)
         img = Image.open(background_path)
         draw = ImageDraw.Draw(img)
         font_path = os.path.join(current_dir, "../static/NotoSansTC-Bold.ttf")
@@ -173,6 +160,12 @@ class NewFB(commands.Cog):
         draw.text((coordinate[0], coordinate[1] + 400), f"{reels_count} 則短片", font=font, fill=(0, 0, 0), anchor="mm")
         output_path = os.path.join("output.png")
         img.save(output_path, format='PNG', optimize=False)
+
+    def _generate_daily_post_picture(self, posts_count, reels_count):
+        self._generate_picture_embed(posts_count, reels_count, "../static/background.png")
+        
+    def _generate_query_picture(self, posts_count, reels_count):
+        self._generate_picture_embed(posts_count, reels_count, "../static/postquery.png")
         
     @tasks.loop(time=daily_message_time)
     async def daily_message(self):
@@ -186,7 +179,7 @@ class NewFB(commands.Cog):
             yesterday_timestamp = int(yesterday.timestamp())
             posts_count, reels_count = self._get_posts_and_reels_count(yesterday_timestamp, today_timestamp)
             embed = discord.Embed(title='今日統整', color=discord.Color.blue())
-            self.generate_daily_post_picture(posts_count, reels_count)
+            self._generate_daily_post_picture(posts_count, reels_count)
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
             channel = self.bot.get_channel(1405253533540024340)
@@ -231,7 +224,7 @@ class NewFB(commands.Cog):
             start_date_str = datetime.fromtimestamp(start_timestamp).strftime("%Y-%m-%d %H:%M:%S") if start_timestamp else "<unknown>"
             end_date_str = datetime.fromtimestamp(end_timestamp).strftime("%Y-%m-%d %H:%M:%S") if end_timestamp else "<unknown>"
             embed = discord.Embed(title=f'在 {start_date_str} 到 {end_date_str} 之間：', color=discord.Color.blue())
-            self.generate_query_picture(posts_count, reels_count)
+            self._generate_query_picture(posts_count, reels_count)
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
             if posts_count == 100 or reels_count == 100:
