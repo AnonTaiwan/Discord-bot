@@ -95,7 +95,7 @@ class Omikuji(commands.Cog):
         try:
             self.omikuji.append(ctx.author.id)
             self.save_omikuji()
-            
+
             if emoji:
                 await ctx.respond(f"{emoji}")
             else:
@@ -103,6 +103,23 @@ class Omikuji(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error responding to omikuji command: {e}")
             await ctx.respond("抽籤失敗，請稍後再試。")
+
+    @discord.slash_command(name="reset-omikuji", description="查看今日抽籤名單")
+    async def reset_omikuji(self, ctx: discord.ApplicationContext,
+                            user: discord.Member = None):
+        if ctx.author.id not in self.bot.DEVELOPER:
+            await ctx.respond("你沒有權限使用這個指令。", ephemeral=True)
+            return
+        
+        if user is None:
+            await ctx.respond("請指定一個使用者來重置抽籤名單。", ephemeral=True)
+            return
+        
+        if user.id in self.omikuji:
+            self.omikuji.remove(user.id)
+            self.save_omikuji()
+        
+        await ctx.respond(f"<@{user.id}> 已被重置。")
 
     @tasks.loop(time=daily_reset)
     async def daily_message(self):
