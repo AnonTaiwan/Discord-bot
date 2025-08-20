@@ -1,12 +1,10 @@
 import discord
 from discord.ext import commands, tasks
 from curl_cffi import requests
-import json
-import logging
 from datetime import datetime, time
-from pathlib import Path
 import os
 import pytz
+import utils
 
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
 health_message_time = [
@@ -20,55 +18,17 @@ health_check_endpoints = [
     'https://urls.anontaiwan.meme',
 ]  # 網頁服務檢查端點
 
-# 專案路徑
-ROOT_DIR = Path(__file__).resolve().parent.parent
-LOGS_DIR = ROOT_DIR / 'logs'
-JSON_DIR = ROOT_DIR / 'JSON'
-
-config_file = JSON_DIR / 'bot.json'
-
 class Health(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.health_message_sent = False
-        self.setup_logging()
-        with open(config_file, 'r', encoding='utf-8') as f:
-            config = json.load(f)
-        self.DEVELOPER = config.get("DEVELOPER")
 
-    def setup_logging(self):
-        """設置日誌系統"""
-        # 創建 logs 目錄（如果不存在）
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
-            
-        # 設置日誌文件名（包含日期）
-        log_filename = LOGS_DIR / f'fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
-        
-        # 配置日誌格式
-        log_format = '%(asctime)s - %(levelname)s - %(message)s'
-        date_format = '%Y-%m-%d %H:%M:%S'
-        
-        # 配置日誌
-        logging.basicConfig(
-            level=logging.INFO,
-            format=log_format,
-            datefmt=date_format,
-            handlers=[
-                logging.FileHandler(log_filename, encoding='utf-8'),
-                logging.StreamHandler()  # 同時輸出到控制台
-            ]
-        )
-        
-        self.logger = logging.getLogger(__name__)
+        self.logger = utils.get_logger(__name__)
         self.logger.info("cog/health.py: 日誌系統初始化完成")
         
     @commands.Cog.listener()
     async def on_ready(self):
-        # main channel
-        self.channel = self.bot.get_channel(1357294484903297127)
-        # test channel
-        # self.channel = self.bot.get_channel(1404889560068001864)
+        self.channel = self.bot.get_channel(utils.TEST_CHANNEL_ID)
 
         self.health_message.start()
         
@@ -95,7 +55,7 @@ class Health(commands.Cog):
 
     @discord.slash_command(name='healthcheck', description='確認服務運作狀態')
     async def health_check_command(self, ctx: discord.ApplicationContext):
-        if ctx.author.id not in self.DEVELOPER:
+        if utils.is_developer(ctx.author):
             await ctx.respond("你沒有權限使用這個指令。", ephemeral=True)
             return
         

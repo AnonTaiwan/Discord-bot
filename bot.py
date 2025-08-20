@@ -7,6 +7,7 @@ import logging
 from datetime import datetime, timedelta, date, time
 from pathlib import Path
 import json
+import utils
 
 class MyBot(commands.Bot):
     def __init__(self):
@@ -60,7 +61,7 @@ def setup_daily_logger():
         log_dir.mkdir(parents=True, exist_ok=True)
     
     # 設定日誌檔案名稱
-    log_file = log_dir / f'fb_bot_{datetime.now():%Y%m%d}.log'
+    log_file = log_dir / f'bot_{datetime.now():%Y%m%d}.log'
     
     # 重新配置日誌
     logging.basicConfig(
@@ -77,11 +78,6 @@ def setup_daily_logger():
     return logging.getLogger()
 
 async def main():
-    with open("JSON/bot.json", "r", encoding="utf-8") as f:
-        config = json.load(f)
-    TOKEN = config.get("TOKEN")
-    DEVELOPER = config.get("DEVELOPER")
-
     logger = None
     current_date = None
     while True:
@@ -100,7 +96,7 @@ async def main():
                 await asyncio.sleep(30)
 
             bot.load_extensions()
-            await bot.start(TOKEN)
+            await bot.start(utils.BOT_TOKEN)
 
 if __name__ == "__main__":
     asyncio.run(main())

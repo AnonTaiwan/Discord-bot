@@ -1,11 +1,9 @@
 import discord
 from discord.ext import commands
-import json
-import logging
 from datetime import datetime
-from pathlib import Path
 import os
 import random
+import utils
 
 gacha_rate = [785, 185, 30] # 各稀有度的抽中機率 N, R, SR
 gacha_rate_fes = [755, 185, 60] # FES 模式下的抽中機率 N, R, SR
@@ -16,54 +14,16 @@ gacha_result = [
 ]
 allowed_channels = [1407248459949543455] # 機器人遊樂場
 
-# 專案路徑
-ROOT_DIR = Path(__file__).resolve().parent.parent
-LOGS_DIR = ROOT_DIR / 'logs'
-JSON_DIR = ROOT_DIR / 'JSON'
-
-config_file = JSON_DIR / 'bot.json'
-
 class Gacha(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.setup_logging()
-        with open(config_file, 'r', encoding='utf-8') as f:
-            config = json.load(f)
-        self.DEVELOPER = config.get("DEVELOPER")
 
-    def setup_logging(self):
-        """設置日誌系統"""
-        # 創建 logs 目錄（如果不存在）
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
-            
-        # 設置日誌文件名（包含日期）
-        log_filename = LOGS_DIR / f'fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
-        
-        # 配置日誌格式
-        log_format = '%(asctime)s - %(levelname)s - %(message)s'
-        date_format = '%Y-%m-%d %H:%M:%S'
-        
-        # 配置日誌
-        logging.basicConfig(
-            level=logging.INFO,
-            format=log_format,
-            datefmt=date_format,
-            handlers=[
-                logging.FileHandler(log_filename, encoding='utf-8'),
-                logging.StreamHandler()  # 同時輸出到控制台
-            ]
-        )
-        
-        self.logger = logging.getLogger(__name__)
+        self.logger = utils.get_logger(__name__)
         self.logger.info("cog/gacha.py: 日誌系統初始化完成")
         
     @commands.Cog.listener()
     async def on_ready(self):
-        # main channel
-        # self.channel = self.bot.get_channel(1354880766126985358)
-        # test channel
-        self.channel = self.bot.get_channel(1405253533540024340)
+        pass
 
     def _get_gacha_result(self, is_fes=False):
         """隨機抽取一個結果"""
@@ -86,25 +46,17 @@ class Gacha(commands.Cog):
         else:
             return gacha_result[2]  # SR
         
-    def _is_operator(self, ctx: discord.ApplicationContext):
-        if ctx.author.id in self.DEVELOPER:
-            return True
-        if any(role.id == 1359938675768557719 for role in ctx.author.roles): # 小編身份組
-            return True
-        return False
-        
     def _is_valid_request(self, ctx: discord.ApplicationContext):
-        if self._is_operator(ctx):
-            return True
-        if ctx.channel.id in allowed_channels:
-            return True
-        return False
+        return utils.is_developer(ctx.author) or utils.is_in_bot_playground(ctx.channel)
+    
+    async def _send_no_permission_message(self, ctx: discord.ApplicationContext):
+        await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
+        self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
 
     @discord.slash_command(name="gacha", description="抽一抽普通池")
     async def gacha(self, ctx: discord.ApplicationContext):
         if self._is_valid_request(ctx) is False:
-            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
-            self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
+            await self._send_no_permission_message(ctx)
             return
         
         result = self._get_gacha_result()
@@ -118,8 +70,7 @@ class Gacha(commands.Cog):
     @discord.slash_command(name="gacha10", description="抽十抽普通池")
     async def gacha10(self, ctx: discord.ApplicationContext):
         if self._is_valid_request(ctx) is False:
-            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
-            self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
+            await self._send_no_permission_message(ctx)
             return
         
         result1 = [self._get_gacha_result() for _ in range(5)]
@@ -139,8 +90,7 @@ class Gacha(commands.Cog):
     @discord.slash_command(name="fes_gacha", description="抽一抽 FES 池")
     async def fes_gacha(self, ctx: discord.ApplicationContext):
         if self._is_valid_request(ctx) is False:
-            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
-            self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
+            await self._send_no_permission_message(ctx)
             return
         
         result = self._get_gacha_result(is_fes=True)
@@ -154,8 +104,7 @@ class Gacha(commands.Cog):
     @discord.slash_command(name="fes_gacha10", description="抽十抽 FES 池")
     async def fes_gacha10(self, ctx: discord.ApplicationContext):
         if self._is_valid_request(ctx) is False:
-            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
-            self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
+            await self._send_no_permission_message(ctx)
             return
         
         result1 = [self._get_gacha_result(is_fes=True) for _ in range(5)]

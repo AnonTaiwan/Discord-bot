@@ -7,6 +7,7 @@ from pathlib import Path
 import random
 import pytz
 import json
+import utils
 
 #"大吉" Daikichi
 #"吉"   Kichi
@@ -25,73 +26,28 @@ omikuji_results = [
     "Daikyo"
 ]
 
-
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
 daily_reset = time(hour=0, minute=6, second=0, tzinfo=timezone)  # 每日訊息時間設定
 
-# 專案路徑
-ROOT_DIR = Path(__file__).resolve().parent.parent
-LOGS_DIR = ROOT_DIR / 'logs'
-JSON_DIR = ROOT_DIR / 'JSON'
-STATIC_DIR = ROOT_DIR / 'static'
-
-record_file = JSON_DIR / 'omikuji.json'
+RECORD_FILE = utils.JSON_DIR / 'omikuji.json'
+OMIKUJI_STATIC_DIR = utils.STATIC_DIR / 'omikuji'
 
 class Omikuji(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.setup_logging()
 
-        self._check_config_exist()
-
-        with open(JSON_DIR / 'bot.json', 'r', encoding='utf-8') as f:
-            config = json.load(f)
-        self.DEVELOPER = config.get("DEVELOPER", [])
-
-    def _check_config_exist(self):
-        if not record_file.exists():
-            record_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(record_file, 'w', encoding='utf-8') as f:
-                json.dump({ "omikuji": [] }, f, ensure_ascii=False, indent=4)
-            self.logger.info(f"{record_file} 不存在，已創建一個空的 {record_file}")
-        else:
-            self.logger.info(f"{record_file} 已存在")
-
-    def setup_logging(self):
-        """設置日誌系統"""
-        # 創建 logs 目錄（如果不存在）
-        LOGS_DIR.mkdir(parents=True, exist_ok=True)
-            
-        # 設置日誌文件名（包含日期）
-        log_filename = LOGS_DIR / f'fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
-        
-        # 配置日誌格式
-        log_format = '%(asctime)s - %(levelname)s - %(message)s'
-        date_format = '%Y-%m-%d %H:%M:%S'
-        
-        # 配置日誌
-        logging.basicConfig(
-            level=logging.INFO,
-            format=log_format,
-            datefmt=date_format,
-            handlers=[
-                logging.FileHandler(str(log_filename), encoding='utf-8'),
-                logging.StreamHandler()  # 同時輸出到控制台
-            ]
-        )
-        
-        self.logger = logging.getLogger(__name__)
+        self.logger = utils.get_logger(__name__)
         self.logger.info("cog/omikuji.py: 日誌系統初始化完成")
 
+        utils.check_exist_or_create_json(self.logger, RECORD_FILE, default_content={"omikuji": []})
+
+        self.omikuji = utils.read_json(self.logger, RECORD_FILE, default_content={"omikuji": []}).get("omikuji", [])
+
     def save_omikuji(self):
-        with open(record_file, 'w', encoding='utf-8') as f:
-            json.dump({"omikuji": self.omikuji}, f, ensure_ascii=False, indent=4)
+        utils.write_json(self.logger, RECORD_FILE, {"omikuji": self.omikuji})
 
     @commands.Cog.listener()
     async def on_ready(self):
-        with open(record_file, 'r', encoding='utf-8') as f:
-            omikuji_data = json.load(f)
-        self.omikuji = omikuji_data.get("omikuji", [])
         self.daily_message.start()
 
     @discord.slash_command(name="omikuji", description="抽籤 (此功能由 Kevin 提供)")
@@ -99,19 +55,19 @@ class Omikuji(commands.Cog):
         if ctx.author.id in self.omikuji:
             await ctx.respond("你今天已經抽過籤了！請明天再來。")
             return
+
         weights = [0.05, 0.1, 0.2, 0.3, 0.2, 0.1, 0.05]  
         result = random.choices(omikuji_results, weights=weights)[0]
 
         try:
-            pic_path = STATIC_DIR / 'omikuji' / f'{result}.jpg'
-            if pic_path.exists():
-                pic = discord.File(str(pic_path), filename=pic_path.name)
+            PIC_PATH = OMIKUJI_STATIC_DIR / f'{result}.jpg'
+            if PIC_PATH.exists():
+                pic = discord.File(str(PIC_PATH), filename=PIC_PATH.name)
                 await ctx.respond(file=pic,content = f"抽到的籤是：{result}")
             else:
                 await ctx.respond(f"抽到的籤是：{result}")
             self.omikuji.append(ctx.author.id)
             self.save_omikuji()
-
         except Exception as e:
             self.logger.error(f"Error responding to omikuji command: {e}")
             await ctx.respond("抽籤失敗，請稍後再試。")
@@ -119,7 +75,7 @@ class Omikuji(commands.Cog):
     @discord.slash_command(name="reset-omikuji", description="重置使用者抽籤")
     async def reset_omikuji(self, ctx: discord.ApplicationContext,
                             user: discord.Member = None):
-        if ctx.author.id not in self.DEVELOPER:
+        if utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
             return
         

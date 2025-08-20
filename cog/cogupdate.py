@@ -2,63 +2,25 @@ from discord.ext import commands, tasks
 from discord import Option, File
 import discord
 import os
-import asyncio
-import json
 import logging
 from datetime import datetime
-from pathlib import Path
-
-# 專案路徑
-ROOT_DIR = Path(__file__).resolve().parent.parent
-LOGS_DIR = ROOT_DIR / 'logs'
-JSON_DIR = ROOT_DIR / 'JSON'
-
-config_file = JSON_DIR / 'bot.json'
-
-with open(config_file, "r", encoding="utf-8") as f:
-    config = json.load(f)
-DEVELOPER = config.get("DEVELOPER")
+import utils
 
 class CogManager(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.setup_logging()
-        self.date = datetime.now().strftime("%Y%m%d")
-    
-    def setup_logging(self):
-        """設置日誌系統"""
-        # 創建 logs 目錄（如果不存在）
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
         
-        # 設置日誌文件名（包含日期）
-        log_filename = LOGS_DIR / f'fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
-        
-        # 配置日誌格式
-        log_format = '%(asctime)s - %(levelname)s - %(message)s'
-        date_format = '%Y-%m-%d %H:%M:%S'
-        
-        # 配置日誌
-        logging.basicConfig(
-            level=logging.INFO,
-            format=log_format,
-            datefmt=date_format,
-            handlers=[
-                logging.FileHandler(log_filename, encoding='utf-8'),
-                logging.StreamHandler()  # 同時輸出到控制台
-            ]
-        )
-        
-        self.logger = logging.getLogger(__name__)
+        self.logger = utils.get_logger(__name__)
         self.logger.info("cog/cogupdate.py: 日誌系統初始化完成")
-        
+
+        self.date = datetime.now().strftime("%Y%m%d")
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
 
-        if message.content == '!Cog_Update' and message.attachments and message.author.id in DEVELOPER:
+        if message.content == '!Cog_Update' and message.attachments and message.author.id in utils.DEVELOPER:
             # 檢查是否有附加檔案
             for attachment in message.attachments:
                 if attachment.filename.endswith('.py'):

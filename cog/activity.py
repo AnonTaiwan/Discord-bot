@@ -1,85 +1,32 @@
 import discord
 from discord.ext import commands, bridge, tasks
 import json
-import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 import os
+import utils
 
-CHANNEL_ID = 1354880766126985358
 JERRY_ID = 654273506921414656
 
-# 專案路徑
-ROOT_DIR = Path(__file__).resolve().parent.parent
-LOGS_DIR = ROOT_DIR / 'logs'
-JSON_DIR = ROOT_DIR / 'JSON'
-
-record_file = JSON_DIR / 'activity.json'
+RECORD_FILE = utils.JSON_DIR / 'activity.json'
 
 class Activity(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.setup_logging()
+        
+        self.logger = utils.get_logger(__name__)
+        self.logger.info("cog/activity.py: 日誌系統初始化完成")
+
         self.offline_time = None
         self.cooldown_list = {}
 
-        self._check_config_exist()
-        self._read_config()
+        utils.check_exist_or_create_json(self.logger, RECORD_FILE, default_content={"length": 0})
 
-    def _check_config_exist(self):
-        if not os.path.exists(record_file):
-            with open(record_file, 'w', encoding='utf-8') as f:
-                json.dump({ "length": 0 }, f, ensure_ascii=False, indent=4)
-            self.logger.info(f"{record_file} 不存在，已創建一個空的 {record_file}")
-        else:
-            self.logger.info(f"{record_file} 已存在")
-
-    def _read_config(self):
-        with open(record_file, 'r', encoding='utf-8') as f:
-            try:
-                config = json.load(f)
-                self.logger.info(f"已成功讀取 {record_file}")
-            except json.JSONDecodeError as e:
-                self.logger.error(f"讀取 {record_file} 時發生錯誤: {e}")
-                config = { "length": 0 }
-        self.length = config.get("length", 0)
-
+        self.length = utils.read_json(self.logger, RECORD_FILE, default_content={"length": 0}).get("length", 0)
         self.logger.info(f'Length: {self.length}')
 
     def _write_config(self):
-        with open(record_file, 'w', encoding='utf-8') as f:
-            try:
-                json.dump({ "length": self.length }, f, ensure_ascii=False, indent=4)
-                self.logger.info(f"已成功寫入 {record_file}")
-            except Exception as e:
-                self.logger.error(f"寫入 {record_file} 時發生錯誤: {e}")
-
-    def setup_logging(self):
-        """設置日誌系統"""
-        # 創建 logs 目錄（如果不存在）
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
-            
-        # 設置日誌文件名（包含日期）
-        log_filename = LOGS_DIR / f'fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
-        
-        # 配置日誌格式
-        log_format = '%(asctime)s - %(levelname)s - %(message)s'
-        date_format = '%Y-%m-%d %H:%M:%S'
-        
-        # 配置日誌
-        logging.basicConfig(
-            level=logging.INFO,
-            format=log_format,
-            datefmt=date_format,
-            handlers=[
-                logging.FileHandler(log_filename, encoding='utf-8'),
-                logging.StreamHandler()  # 同時輸出到控制台
-            ]
-        )
-        
-        self.logger = logging.getLogger(__name__)
-        self.logger.info("cog/activity.py: 日誌系統初始化完成")
+        utils.write_json(self.logger, RECORD_FILE, {"length": self.length})
 
     def _format_length(self):
         if int(self.length + 0.6) == int(self.length):
@@ -93,7 +40,7 @@ class Activity(commands.Cog):
         
     @commands.Cog.listener()
     async def on_ready(self):
-        self.channel = self.bot.get_channel(CHANNEL_ID)
+        self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 
     def _is_playing_league_of_legends(self, member):
         for activity in member.activities:
@@ -110,7 +57,7 @@ class Activity(commands.Cog):
             self.offline_time = datetime.now()
             self.logger.info(f"Member {after.name} is offline")
             content = f'偵測到 <@{JERRY_ID}> 下線，紅布條長度每秒增加 0.5 公尺'
-            self.channel = self.bot.get_channel(CHANNEL_ID)
+            self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
             await self.channel.send(content = content)
             return
 
@@ -121,7 +68,7 @@ class Activity(commands.Cog):
                 self.logger.info(f"Member {after.name} was offline for {offline_duration}, length updated to {self.length}")
                 self._write_config()
                 content = f'<@{JERRY_ID}> 已上線，共下線 {offline_duration.total_seconds()} 秒，紅布條長度增加至 {self._format_length()} 公尺'
-                self.channel = self.bot.get_channel(CHANNEL_ID)
+                self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
                 await self.channel.send(content = content)
 
         if not self._is_playing_league_of_legends(before) and self._is_playing_league_of_legends(after):

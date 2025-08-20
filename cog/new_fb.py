@@ -8,53 +8,18 @@ from pathlib import Path
 import os
 import pytz
 from PIL import Image, ImageDraw, ImageFont
+import utils
 
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
 daily_message_time = time(hour=0, minute=6, second=0, tzinfo=timezone)  # 每日訊息時間設定
-
-# 專案路徑
-ROOT_DIR = Path(__file__).resolve().parent.parent
-LOGS_DIR = ROOT_DIR / 'logs'
-JSON_DIR = ROOT_DIR / 'JSON'
-
-config_file = JSON_DIR / 'bot.json'
 
 class NewFB(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.latest = []
         self.daily_message_sent = False
-        self.setup_logging()
-        with open(config_file, 'r', encoding='utf-8') as f:
-            config = json.load(f)
-        self.FACEBOOK_TOKEN = config.get("FACEBOOK_TOKEN")
-        self.DEVELOPER = config.get("DEVELOPER")
 
-    def setup_logging(self):
-        """設置日誌系統"""
-        # 創建 logs 目錄（如果不存在）
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
-            
-        # 設置日誌文件名（包含日期）
-        log_filename = LOGS_DIR / f'fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
-        
-        # 配置日誌格式
-        log_format = '%(asctime)s - %(levelname)s - %(message)s'
-        date_format = '%Y-%m-%d %H:%M:%S'
-        
-        # 配置日誌
-        logging.basicConfig(
-            level=logging.INFO,
-            format=log_format,
-            datefmt=date_format,
-            handlers=[
-                logging.FileHandler(log_filename, encoding='utf-8'),
-                logging.StreamHandler()  # 同時輸出到控制台
-            ]
-        )
-        
-        self.logger = logging.getLogger(__name__)
+        self.logger = utils.get_logger(__name__)
         self.logger.info("cog/new_fb.py: 日誌系統初始化完成")
     
     def get_datas(self, limit=3):
@@ -84,7 +49,7 @@ class NewFB(commands.Cog):
 
     async def _send_update_message(self, data_id, embed, file):
         # main
-        msg = await self.channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
+        msg = await self.channel.send(content = f'<@&{utils.ANON_TAIWAN_SUBSCRIBER_ROLE_ID}>', embed=embed, file=file)
         # test
         # msg = await self.channel.send(content = '', embed=embed, file=file)
         await msg.publish()
@@ -129,7 +94,7 @@ class NewFB(commands.Cog):
         self.check_post_updates.start()
         self.check_reel_updates.start()
         # main channel
-        self.channel = self.bot.get_channel(1357294484903297127)
+        self.channel = self.bot.get_channel(utils.FB_NOTIFICATION_CHANNEL_ID)
         # test channel
         # self.channel = self.bot.get_channel(1404889560068001864)
 
@@ -155,7 +120,7 @@ class NewFB(commands.Cog):
             reels_data = response.json()
             if self.reel != reels_data['data'][0]['id']:
                 self.reel = reels_data['data'][0]['id']
-                self._send_reel_update_message(reels_data['data'][0])
+                await self._send_reel_update_message(reels_data['data'][0])
         except Exception as e:
             self.logger.error(f"Error checking for reels: {e}")
 
@@ -215,9 +180,6 @@ class NewFB(commands.Cog):
             await channel.send(embed=embed,file=file)
             self.logger.info(f"每日訊息已發送, 時間: {yesterday.strftime('%Y-%m-%d %H:%M:%S')} ~ {today.strftime('%Y-%m-%d %H:%M:%S')}")
             os.remove("output.png")
-            # TODO: Remove after testing
-            current_time = datetime.now(timezone).strftime("%Y-%m-%d %H:%M:%S")
-            self.logger.info(f"當前時間: {current_time}")
 
             self.daily_message_sent = True
         except Exception as e:
@@ -233,18 +195,16 @@ class NewFB(commands.Cog):
 
     @discord.slash_command(name="query", description="查看指定時間範圍內有幾篇貼文")
     async def query(self, ctx: discord.ApplicationContext, start_date: discord.Option(description="開始日期，格式為 YYYY-MM-DD HH:MM:SS", required=True), end_date: discord.Option(default=None, description="結束日期，格式為 YYYY-MM-DD HH:MM:SS", required=False)): #type:ignore
-
-        has_allowed_role = any(role.id == 1359938675768557719 for role in ctx.author.roles) # 小編身份組
-        if ctx.author.id not in self.DEVELOPER and has_allowed_role is False:
+        if utils.is_operator(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用查詢指令，但沒有權限。")
             return
-        
+
         if start_date is None:
             await ctx.respond("❌ 請提供開始日期，格式為 YYYY-MM-DD HH:MM:SS。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 未提供開始日期。")
             return
-        
+
         try:
             start_timestamp = self._formatted_time_to_unix_timestamp(start_date) if start_date else None
 
