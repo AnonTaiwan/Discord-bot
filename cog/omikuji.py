@@ -71,7 +71,7 @@ class Omikuji(commands.Cog):
     @discord.slash_command(name="reset-omikuji", description="重置使用者抽籤")
     async def reset_omikuji(self, ctx: discord.ApplicationContext,
                             user: discord.Member = None):
-        if utils.is_developer(ctx.author):
+        if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
             return
         
@@ -84,6 +84,17 @@ class Omikuji(commands.Cog):
             self.save_omikuji()
         
         await ctx.respond(f"<@{user.id}> 已被重置。")
+
+    @discord.slash_command(name="reset-omikuji-all", description="重置所有使用者抽籤")
+    async def reset_omikuji_all(self, ctx: discord.ApplicationContext):
+        if not utils.is_developer(ctx.author):
+            await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
+            return
+        
+        self.omikuji = []
+        self.save_omikuji()
+        
+        await ctx.respond("所有使用者的抽籤已被重置。")
 
     @tasks.loop(time=daily_reset)
     async def daily_message(self):

@@ -55,8 +55,8 @@ class Health(commands.Cog):
 
     @discord.slash_command(name='healthcheck', description='確認服務運作狀態')
     async def health_check_command(self, ctx: discord.ApplicationContext):
-        if utils.is_developer(ctx.author):
-            await ctx.respond("你沒有權限使用這個指令。", ephemeral=True)
+        if not utils.is_developer(ctx.author):
+            await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
             return
         
         message = await ctx.respond("正在確認服務運作狀態...")
