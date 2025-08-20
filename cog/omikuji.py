@@ -1,12 +1,8 @@
 import discord
 from discord.ext import commands, tasks
-from curl_cffi import requests
-import logging
-from datetime import datetime, timedelta, time
-from pathlib import Path
+from datetime import time
 import random
 import pytz
-import json
 import utils
 
 #"大吉" Daikichi
@@ -92,7 +88,9 @@ class Omikuji(commands.Cog):
     @tasks.loop(time=daily_reset)
     async def daily_message(self):
         self.omikuji = []
-        channel = self.bot.get_channel(1405253533540024340) 
+        self.save_omikuji()
+
+        channel = self.bot.get_channel(utils.TEST_CHANNEL_ID) 
         if channel:
             await channel.send("每日運勢抽籤已重置！")
         else:
