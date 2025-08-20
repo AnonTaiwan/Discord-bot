@@ -1,8 +1,6 @@
 from discord.ext import commands, tasks
 from discord import Option, File
 import discord
-import os
-import logging
 from datetime import datetime
 import utils
 
