@@ -84,7 +84,7 @@ class Health(commands.Cog):
                 self.health_message_sent = False
                 self.logger.info("Health Check 訊息已重置。")
 
-    @discord.slash.command(name='healthcheck', description='確認服務運作狀態')
+    @discord.slash_command(name='healthcheck', description='確認服務運作狀態')
     async def health_check_command(self, ctx: discord.ApplicationContext):
         if ctx.author.id not in self.DEVELOPER:
             await ctx.respond("你沒有權限使用這個指令。", ephemeral=True)
