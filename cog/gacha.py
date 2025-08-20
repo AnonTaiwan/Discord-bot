@@ -3,6 +3,7 @@ from discord.ext import commands
 import json
 import logging
 from datetime import datetime
+from pathlib import Path
 import os
 import random
 
@@ -15,11 +16,18 @@ gacha_result = [
 ]
 allowed_channels = [1407248459949543455] # 機器人遊樂場
 
+# 專案路徑
+ROOT_DIR = Path(__file__).resolve().parent.parent
+LOGS_DIR = ROOT_DIR / 'logs'
+JSON_DIR = ROOT_DIR / 'JSON'
+
+config_file = JSON_DIR / 'bot.json'
+
 class Gacha(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.setup_logging()
-        with open('JSON/bot.json', 'r', encoding='utf-8') as f:
+        with open(config_file, 'r', encoding='utf-8') as f:
             config = json.load(f)
         self.DEVELOPER = config.get("DEVELOPER")
 
@@ -30,7 +38,7 @@ class Gacha(commands.Cog):
             os.makedirs('logs')
             
         # 設置日誌文件名（包含日期）
-        log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
+        log_filename = LOGS_DIR / f'fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
         
         # 配置日誌格式
         log_format = '%(asctime)s - %(levelname)s - %(message)s'

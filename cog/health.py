@@ -4,6 +4,7 @@ from curl_cffi import requests
 import json
 import logging
 from datetime import datetime, time
+from pathlib import Path
 import os
 import pytz
 
@@ -19,12 +20,19 @@ health_check_endpoints = [
     'https://urls.anontaiwan.meme',
 ]  # 網頁服務檢查端點
 
+# 專案路徑
+ROOT_DIR = Path(__file__).resolve().parent.parent
+LOGS_DIR = ROOT_DIR / 'logs'
+JSON_DIR = ROOT_DIR / 'JSON'
+
+config_file = JSON_DIR / 'bot.json'
+
 class Health(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.health_message_sent = False
         self.setup_logging()
-        with open('JSON/bot.json', 'r', encoding='utf-8') as f:
+        with open(config_file, 'r', encoding='utf-8') as f:
             config = json.load(f)
         self.DEVELOPER = config.get("DEVELOPER")
 
@@ -35,7 +43,7 @@ class Health(commands.Cog):
             os.makedirs('logs')
             
         # 設置日誌文件名（包含日期）
-        log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
+        log_filename = LOGS_DIR / f'fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
         
         # 配置日誌格式
         log_format = '%(asctime)s - %(levelname)s - %(message)s'

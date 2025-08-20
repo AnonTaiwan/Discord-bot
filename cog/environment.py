@@ -6,10 +6,18 @@ import sys
 import asyncio
 import json
 import logging
+from pathlib import Path
 import os
 from datetime import datetime
 
-with open("JSON/bot.json", "r", encoding="utf-8") as f:
+# 專案路徑
+ROOT_DIR = Path(__file__).resolve().parent.parent
+LOGS_DIR = ROOT_DIR / 'logs'
+JSON_DIR = ROOT_DIR / 'JSON'
+
+config_file = JSON_DIR / 'bot.json'
+
+with open(config_file, "r", encoding="utf-8") as f:
     config = json.load(f)
 DEVELOPER = config.get("DEVELOPER")
 
@@ -55,7 +63,7 @@ class Environment(commands.Cog):
             os.makedirs('logs')
         
         # 設置日誌文件名（包含日期）
-        log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
+        log_filename = LOGS_DIR / f'fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
         
         # 配置日誌格式
         log_format = '%(asctime)s - %(levelname)s - %(message)s'

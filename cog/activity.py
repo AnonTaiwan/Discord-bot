@@ -3,10 +3,18 @@ from discord.ext import commands, bridge, tasks
 import json
 import logging
 from datetime import datetime, timedelta
+from pathlib import Path
 import os
 
 CHANNEL_ID = 1354880766126985358
 JERRY_ID = 654273506921414656
+
+# 專案路徑
+ROOT_DIR = Path(__file__).resolve().parent.parent
+LOGS_DIR = ROOT_DIR / 'logs'
+JSON_DIR = ROOT_DIR / 'JSON'
+
+record_file = JSON_DIR / 'activity.json'
 
 class Activity(commands.Cog):
     def __init__(self, bot):
@@ -19,32 +27,32 @@ class Activity(commands.Cog):
         self._read_config()
 
     def _check_config_exist(self):
-        if not os.path.exists('config.json'):
-            with open('config.json', 'w', encoding='utf-8') as f:
+        if not os.path.exists(record_file):
+            with open(record_file, 'w', encoding='utf-8') as f:
                 json.dump({ "length": 0 }, f, ensure_ascii=False, indent=4)
-            self.logger.info("config.json 不存在，已創建一個空的 config.json")
+            self.logger.info(f"{record_file} 不存在，已創建一個空的 {record_file}")
         else:
-            self.logger.info("config.json 已存在")
+            self.logger.info(f"{record_file} 已存在")
 
     def _read_config(self):
-        with open('config.json', 'r', encoding='utf-8') as f:
+        with open(record_file, 'r', encoding='utf-8') as f:
             try:
                 config = json.load(f)
-                self.logger.info("已成功讀取 config.json")
+                self.logger.info(f"已成功讀取 {record_file}")
             except json.JSONDecodeError as e:
-                self.logger.error(f"讀取 config.json 時發生錯誤: {e}")
+                self.logger.error(f"讀取 {record_file} 時發生錯誤: {e}")
                 config = { "length": 0 }
         self.length = config.get("length", 0)
 
         self.logger.info(f'Length: {self.length}')
 
     def _write_config(self):
-        with open('config.json', 'w', encoding='utf-8') as f:
+        with open(record_file, 'w', encoding='utf-8') as f:
             try:
                 json.dump({ "length": self.length }, f, ensure_ascii=False, indent=4)
-                self.logger.info("已成功寫入 config.json")
+                self.logger.info(f"已成功寫入 {record_file}")
             except Exception as e:
-                self.logger.error(f"寫入 config.json 時發生錯誤: {e}")
+                self.logger.error(f"寫入 {record_file} 時發生錯誤: {e}")
 
     def setup_logging(self):
         """設置日誌系統"""
@@ -53,7 +61,7 @@ class Activity(commands.Cog):
             os.makedirs('logs')
             
         # 設置日誌文件名（包含日期）
-        log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
+        log_filename = LOGS_DIR / f'fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
         
         # 配置日誌格式
         log_format = '%(asctime)s - %(levelname)s - %(message)s'

@@ -1,10 +1,13 @@
 /.venv/
 __pycache__/
 *.pyc
-JSON/bot.json
 Anon Taiwan.code-workspace
 
 .vscode/
 .DS_Store
 
 .*.*.swp
+
+JSON/activity.json
+JSON/bot.json
+JSON/omikuji.json
