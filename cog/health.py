@@ -70,9 +70,10 @@ class Health(commands.Cog):
             return
         
         try:
-            
-
+            message = await self.channel.send("正在確認服務運作狀態...")
             self.health_message_sent = True
+
+            await self._health_check(message)
         except Exception as e:
             self.logger.error(f"Error sending daily message: {e}")
 
@@ -90,7 +91,7 @@ class Health(commands.Cog):
             await ctx.respond("你沒有權限使用這個指令。", ephemeral=True)
             return
         
-        message = await ctx.respond("正在進行健康檢查...")
+        message = await ctx.respond("正在確認服務運作狀態...")
         await self._health_check(message)
 
     async def _health_check(self, message: discord.Message):
