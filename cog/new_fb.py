@@ -217,11 +217,14 @@ class NewFB(commands.Cog):
 
             start_date_str = datetime.fromtimestamp(start_timestamp).strftime("%Y-%m-%d %H:%M:%S") if start_timestamp else "<unknown>"
             end_date_str = datetime.fromtimestamp(end_timestamp).strftime("%Y-%m-%d %H:%M:%S") if end_timestamp else "<unknown>"
-
-            content = f"在 {start_date_str} 到 {end_date_str} 之間：\n- 貼文: {posts_count} 篇\n- Reels: {reels_count} 篇"
+            embed = discord.Embed(title=f' f"在 {start_date_str} 到 {end_date_str} 之間：', color=discord.Color.blue())
+            self.generate_daily_post_picture(posts_count, reels_count)
+            file = discord.File("output.png", filename="output.png")
+            embed.set_image(url="attachment://output.png")
             if posts_count == 100 or reels_count == 100:
-                content += "\n\n注意：因為 Facebook API 的限制，查詢結果至多為 100。"
-            await ctx.respond(content)
+                embed.description += "\n\n注意：因為 Facebook API 的限制，查詢結果至多為 100。"
+            await ctx.respond(embed=embed,file=file)
+            os.remove("output.png")
         except Exception as e:
             await ctx.respond(f"❌ 發生錯誤: {e}")
             self.logger.error(f"Error in query command: {e}")
