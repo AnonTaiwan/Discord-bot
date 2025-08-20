@@ -25,7 +25,7 @@ omikuji_results = ["Daikichi",
 
 
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
-daily_reset = time(hour=0, minute=30, second=0, tzinfo=timezone)  # 每日訊息時間設定
+daily_reset = time(hour=0, minute=6, second=0, tzinfo=timezone)  # 每日訊息時間設定
 
 record_file = 'JSON/omikuji.json'
 

@@ -9,9 +9,9 @@ import pytz
 
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
 health_message_time = [
-    time(hour=0, minute=0, second=0, tzinfo=timezone),
-    time(hour=8, minute=0, second=0, tzinfo=timezone),
-    time(hour=16, minute=0, second=0, tzinfo=timezone),
+    time(hour=0, minute=6, second=0, tzinfo=timezone),
+    time(hour=8, minute=6, second=0, tzinfo=timezone),
+    time(hour=16, minute=6, second=0, tzinfo=timezone),
 ]  # 每日訊息時間設定
 
 health_check_endpoints = [
