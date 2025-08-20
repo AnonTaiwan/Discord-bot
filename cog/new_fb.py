@@ -231,7 +231,7 @@ class NewFB(commands.Cog):
             start_date_str = datetime.fromtimestamp(start_timestamp).strftime("%Y-%m-%d %H:%M:%S") if start_timestamp else "<unknown>"
             end_date_str = datetime.fromtimestamp(end_timestamp).strftime("%Y-%m-%d %H:%M:%S") if end_timestamp else "<unknown>"
             embed = discord.Embed(title=f'在 {start_date_str} 到 {end_date_str} 之間：', color=discord.Color.blue())
-            self.generate_daily_post_picture(posts_count, reels_count)
+            self.generate_query_picture(posts_count, reels_count)
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
             if posts_count == 100 or reels_count == 100:
