@@ -36,6 +36,10 @@ class Omikuji(commands.Cog):
 
         self._check_config_exist()
 
+        with open('JSON/bot.json', 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        self.DEVELOPER = config.get("DEVELOPER", [])
+
     def _check_config_exist(self):
         if not os.path.exists(record_file):
             with open(record_file, 'w', encoding='utf-8') as f:
@@ -107,8 +111,8 @@ class Omikuji(commands.Cog):
     @discord.slash_command(name="reset-omikuji", description="查看今日抽籤名單")
     async def reset_omikuji(self, ctx: discord.ApplicationContext,
                             user: discord.Member = None):
-        if ctx.author.id not in self.bot.DEVELOPER:
-            await ctx.respond("你沒有權限使用這個指令。", ephemeral=True)
+        if ctx.author.id not in self.DEVELOPER:
+            await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
             return
         
         if user is None:
