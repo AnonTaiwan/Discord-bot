@@ -161,6 +161,19 @@ class NewFB(commands.Cog):
         output_path = os.path.join("output.png")
         img.save(output_path, format='PNG', optimize=False)
         
+    def generate_query_picture(self, posts_count, reels_count):
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        background_path = os.path.join(current_dir, "../static/postquery.png")
+        img = Image.open(background_path)
+        draw = ImageDraw.Draw(img)
+        font_path = os.path.join(current_dir, "../static/NotoSansTC-Bold.ttf")
+        font = ImageFont.truetype(font_path, 150)
+        coordinate = img.width // 2 - 100 , img.height // 2 -110
+        draw.text(coordinate, f"{posts_count} 則貼文", font=font, fill=(0, 0, 0), anchor="mm")
+        draw.text((coordinate[0], coordinate[1] + 400), f"{reels_count} 則短片", font=font, fill=(0, 0, 0), anchor="mm")
+        output_path = os.path.join("output.png")
+        img.save(output_path, format='PNG', optimize=False)
+        
     @tasks.loop(time=daily_message_time)
     async def daily_message(self):
         if self.daily_message_sent:
@@ -217,7 +230,7 @@ class NewFB(commands.Cog):
 
             start_date_str = datetime.fromtimestamp(start_timestamp).strftime("%Y-%m-%d %H:%M:%S") if start_timestamp else "<unknown>"
             end_date_str = datetime.fromtimestamp(end_timestamp).strftime("%Y-%m-%d %H:%M:%S") if end_timestamp else "<unknown>"
-            embed = discord.Embed(title=f' f"在 {start_date_str} 到 {end_date_str} 之間：', color=discord.Color.blue())
+            embed = discord.Embed(title=f'在 {start_date_str} 到 {end_date_str} 之間：', color=discord.Color.blue())
             self.generate_daily_post_picture(posts_count, reels_count)
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
