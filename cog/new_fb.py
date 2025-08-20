@@ -193,7 +193,7 @@ class NewFB(commands.Cog):
     async def daily_message(self):
         if self.daily_message_sent:
             return
-
+        
         try:
             today = datetime.now(timezone).replace(hour=0, minute=0, second=0, microsecond=0)
             yesterday = today - timedelta(days=1)

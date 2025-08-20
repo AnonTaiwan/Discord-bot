@@ -13,15 +13,17 @@ import json
 #"中吉" Chukichi
 #"小吉" Shokichi
 #"末吉" Suekichi
-#"凶"," Kyo
+#"凶"   Kyo
 #"大凶" Daikyo
-omikuji_results = ["Daikichi",
-                   "Kichi", 
-                   "Chukichi", 
-                   "Shokichi", 
-                   "Suekichi", 
-                   "Kyo",
-                   "Daikyo"]
+omikuji_results = [
+    "Daikichi",
+    "Kichi", 
+    "Chukichi", 
+    "Shokichi", 
+    "Suekichi", 
+    "Kyo",
+    "Daikyo"
+]
 
 
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
@@ -94,16 +96,16 @@ class Omikuji(commands.Cog):
             return
         weights = [0.05,0.1,0.2,0.3,0.2,0.1,0.05]  
         result = random.choices(omikuji_results, weights=weights)[0]
-        emoji = discord.utils.get(self.bot.emojis, name=result)
 
         try:
+            if os.path.exists(f"static/omikuji/{result}.jpg"):
+                pic = discord.File(f"static/omikuji/{result}.jpg", filename=f"{result}.jpg")
+                await ctx.respond(file=pic,content = f"抽到的籤是：{result}")
+            else:
+                await ctx.respond(f"抽到的籤是：{result}")
             self.omikuji.append(ctx.author.id)
             self.save_omikuji()
 
-            if emoji:
-                await ctx.respond(f"{emoji}")
-            else:
-                await ctx.respond(f"抽到的籤是：{result}")
         except Exception as e:
             self.logger.error(f"Error responding to omikuji command: {e}")
             await ctx.respond("抽籤失敗，請稍後再試。")
