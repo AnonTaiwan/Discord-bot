@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 from curl_cffi import requests
 import logging
 from datetime import datetime, timedelta, time
-import os
+from pathlib import Path
 import random
 import pytz
 import json
@@ -29,7 +29,13 @@ omikuji_results = [
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
 daily_reset = time(hour=0, minute=6, second=0, tzinfo=timezone)  # 每日訊息時間設定
 
-record_file = 'JSON/omikuji.json'
+# 專案路徑
+ROOT_DIR = Path(__file__).resolve().parent.parent
+LOGS_DIR = ROOT_DIR / 'logs'
+JSON_DIR = ROOT_DIR / 'JSON'
+STATIC_DIR = ROOT_DIR / 'static'
+
+record_file = JSON_DIR / 'omikuji.json'
 
 class Omikuji(commands.Cog):
     def __init__(self, bot):
@@ -38,12 +44,13 @@ class Omikuji(commands.Cog):
 
         self._check_config_exist()
 
-        with open('JSON/bot.json', 'r', encoding='utf-8') as f:
+        with open(JSON_DIR / 'bot.json', 'r', encoding='utf-8') as f:
             config = json.load(f)
         self.DEVELOPER = config.get("DEVELOPER", [])
 
     def _check_config_exist(self):
-        if not os.path.exists(record_file):
+        if not record_file.exists():
+            record_file.parent.mkdir(parents=True, exist_ok=True)
             with open(record_file, 'w', encoding='utf-8') as f:
                 json.dump({ "omikuji": [] }, f, ensure_ascii=False, indent=4)
             self.logger.info(f"{record_file} 不存在，已創建一個空的 {record_file}")
@@ -53,11 +60,10 @@ class Omikuji(commands.Cog):
     def setup_logging(self):
         """設置日誌系統"""
         # 創建 logs 目錄（如果不存在）
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
+        LOGS_DIR.mkdir(parents=True, exist_ok=True)
             
         # 設置日誌文件名（包含日期）
-        log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
+        log_filename = LOGS_DIR / f'fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
         
         # 配置日誌格式
         log_format = '%(asctime)s - %(levelname)s - %(message)s'
@@ -69,7 +75,7 @@ class Omikuji(commands.Cog):
             format=log_format,
             datefmt=date_format,
             handlers=[
-                logging.FileHandler(log_filename, encoding='utf-8'),
+                logging.FileHandler(str(log_filename), encoding='utf-8'),
                 logging.StreamHandler()  # 同時輸出到控制台
             ]
         )
@@ -98,8 +104,9 @@ class Omikuji(commands.Cog):
         result = random.choices(omikuji_results, weights=weights)[0]
 
         try:
-            if os.path.exists(f"static/omikuji/{result}.jpg"):
-                pic = discord.File(f"static/omikuji/{result}.jpg", filename=f"{result}.jpg")
+            pic_path = STATIC_DIR / 'omikuji' / f'{result}.jpg'
+            if pic_path.exists():
+                pic = discord.File(str(pic_path), filename=pic_path.name)
                 await ctx.respond(file=pic,content = f"抽到的籤是：{result}")
             else:
                 await ctx.respond(f"抽到的籤是：{result}")
