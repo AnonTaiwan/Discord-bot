@@ -34,6 +34,8 @@ class Omikuji(commands.Cog):
         self.bot = bot
         self.setup_logging()
 
+        self._check_config_exist()
+
     def _check_config_exist(self):
         if not os.path.exists(record_file):
             with open(record_file, 'w', encoding='utf-8') as f:
