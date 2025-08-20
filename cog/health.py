@@ -100,9 +100,9 @@ class Health(commands.Cog):
             for endpoint in health_check_endpoints:
                 response = requests.get(endpoint)
                 if response.status_code == 200:
-                    content += f'\n- ✅ {endpoint}'
+                    content += f'\n- ✅ <{endpoint}>'
                 else:
-                    content += f'\n- ❌ {endpoint}'
+                    content += f'\n- ❌ <{endpoint}>'
                 await message.edit(content=content)
         except Exception as e:
             self.logger.error(f"Health check failed: {e}")
