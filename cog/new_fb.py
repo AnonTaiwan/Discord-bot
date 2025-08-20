@@ -126,7 +126,6 @@ class NewFB(commands.Cog):
         # self.channel = self.bot.get_channel(1404889560068001864)
 
         self.daily_message.start()
-        print(f'new_fb.cog: {self.bot.user} (ID: {self.bot.user.id})')
     
     @tasks.loop(minutes=1)
     async def check_post_updates(self):

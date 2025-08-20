@@ -86,7 +86,6 @@ class Activity(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         self.channel = self.bot.get_channel(CHANNEL_ID)
-        print(f'activity.cog: {self.bot.user} (ID: {self.bot.user.id})')
 
     def _is_playing_league_of_legends(self, member):
         for activity in member.activities:

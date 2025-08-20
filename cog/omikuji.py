@@ -89,7 +89,6 @@ class Omikuji(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.logger.info("Omikuji cog is ready.")
         with open(record_file, 'r', encoding='utf-8') as f:
             omikuji_data = json.load(f)
         self.omikuji = omikuji_data.get("omikuji", [])
