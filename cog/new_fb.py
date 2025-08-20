@@ -178,10 +178,10 @@ class NewFB(commands.Cog):
 
     def generate_daily_post_picture(self, posts_count, reels_count):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        background_path = os.path.join(current_dir, "../File/background.png")
+        background_path = os.path.join(current_dir, "../static/background.png")
         img = Image.open(background_path)
         draw = ImageDraw.Draw(img)
-        font_path = os.path.join(current_dir, "../File/NotoSansTC-Bold.ttf")
+        font_path = os.path.join(current_dir, "../static/NotoSansTC-Bold.ttf")
         font = ImageFont.truetype(font_path, 150)
         coordinate = img.width // 2 - 100 , img.height // 2 -110
         draw.text(coordinate, f"{posts_count} 則貼文", font=font, fill=(0, 0, 0), anchor="mm")
@@ -193,7 +193,7 @@ class NewFB(commands.Cog):
     async def daily_message(self):
         if self.daily_message_sent:
             return
-        
+
         try:
             today = datetime.now(timezone).replace(hour=0, minute=0, second=0, microsecond=0)
             yesterday = today - timedelta(days=1)
