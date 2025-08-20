@@ -93,12 +93,13 @@ class Omikuji(commands.Cog):
         emoji = discord.utils.get(self.bot.emojis, name=result)
 
         try:
+            self.omikuji.append(ctx.author.id)
+            self.save_omikuji()
+            
             if emoji:
                 await ctx.respond(f"{emoji}")
             else:
                 await ctx.respond(f"抽到的籤是：{result}")
-            self.omikuji.append(ctx.author.id)
-            self.save_omikuji()
         except Exception as e:
             self.logger.error(f"Error responding to omikuji command: {e}")
             await ctx.respond("抽籤失敗，請稍後再試。")
