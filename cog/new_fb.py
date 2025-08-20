@@ -195,7 +195,7 @@ class NewFB(commands.Cog):
 
     @discord.slash_command(name="query", description="查看指定時間範圍內有幾篇貼文")
     async def query(self, ctx: discord.ApplicationContext, start_date: discord.Option(description="開始日期，格式為 YYYY-MM-DD HH:MM:SS", required=True), end_date: discord.Option(default=None, description="結束日期，格式為 YYYY-MM-DD HH:MM:SS", required=False)): #type:ignore
-        if utils.is_operator(ctx.author):
+        if not utils.is_operator(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用查詢指令，但沒有權限。")
             return
