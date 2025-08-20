@@ -95,7 +95,7 @@ class Omikuji(commands.Cog):
         self.omikuji = omikuji_data.get("omikuji", [])
         self.daily_message.start()
 
-    @discord.slash_command(name="omikuji", description="抽籤(此功能由)")
+    @discord.slash_command(name="omikuji", description="抽籤 (此功能由 Kevin 提供)")
     async def draw_omikuji(self, ctx: discord.ApplicationContext):
         if ctx.author.id in self.omikuji:
             await ctx.respond("你今天已經抽過籤了！請明天再來。")
@@ -117,7 +117,7 @@ class Omikuji(commands.Cog):
             self.logger.error(f"Error responding to omikuji command: {e}")
             await ctx.respond("抽籤失敗，請稍後再試。")
 
-    @discord.slash_command(name="reset-omikuji", description="查看今日抽籤名單")
+    @discord.slash_command(name="reset-omikuji", description="重置使用者抽籤")
     async def reset_omikuji(self, ctx: discord.ApplicationContext,
                             user: discord.Member = None):
         if ctx.author.id not in self.DEVELOPER:
