@@ -23,7 +23,7 @@ class NewFB(commands.Cog):
         self.logger.info("cog/new_fb.py: 日誌系統初始化完成")
     
     def get_datas(self, limit=3):
-        response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={self.FACEBOOK_TOKEN}&limit={limit}')
+        response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={utils.FACEBOOK_TOKEN}&limit={limit}')
         datas = json.loads(response.text)
         return datas['data']
             
@@ -116,7 +116,7 @@ class NewFB(commands.Cog):
     @tasks.loop(minutes=5)
     async def check_reel_updates(self):
         try:
-            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=description,created_time,permalink_url,picture&access_token={self.FACEBOOK_TOKEN}&limit=3')
+            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=description,created_time,permalink_url,picture&access_token={utils.FACEBOOK_TOKEN}&limit=3')
             reels_data = response.json()
             if self.reel != reels_data['data'][0]['id']:
                 self.reel = reels_data['data'][0]['id']
@@ -135,11 +135,11 @@ class NewFB(commands.Cog):
         
     def _get_posts_and_reels_count(self, start_timestamp, end_timestamp):
         try:
-            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=&access_token={self.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
+            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=&access_token={utils.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
             posts_data = json.loads(response.text)
             posts_count = len(posts_data.get('data', []))
 
-            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=&access_token={self.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
+            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=&access_token={utils.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
             reels_data = json.loads(response.text)
             reels_count = len(reels_data.get('data', []))
 
