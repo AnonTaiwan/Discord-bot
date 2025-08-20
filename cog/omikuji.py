@@ -27,10 +27,20 @@ omikuji_results = ["Daikichi",
 timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
 daily_reset = time(hour=0, minute=30, second=0, tzinfo=timezone)  # 每日訊息時間設定
 
+record_file = 'JSON/omikuji.json'
+
 class Omikuji(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.setup_logging()
+
+    def _check_config_exist(self):
+        if not os.path.exists(record_file):
+            with open(record_file, 'w', encoding='utf-8') as f:
+                json.dump({ "omikuji": [] }, f, ensure_ascii=False, indent=4)
+            self.logger.info(f"{record_file} 不存在，已創建一個空的 {record_file}")
+        else:
+            self.logger.info(f"{record_file} 已存在")
 
     def setup_logging(self):
         """設置日誌系統"""
@@ -60,13 +70,13 @@ class Omikuji(commands.Cog):
         self.logger.info("cog/omikuji.py: 日誌系統初始化完成")
 
     def save_omikuji(self):
-        with open('JSON/Omikuji.json', 'w', encoding='utf-8') as f:
+        with open(record_file, 'w', encoding='utf-8') as f:
             json.dump({"omikuji": self.omikuji}, f, ensure_ascii=False, indent=4)
 
     @commands.Cog.listener()
     async def on_ready(self):
         self.logger.info("Omikuji cog is ready.")
-        with open('JSON/Omikuji.json', 'r', encoding='utf-8') as f:
+        with open(record_file, 'r', encoding='utf-8') as f:
             omikuji_data = json.load(f)
         self.omikuji = omikuji_data.get("omikuji", [])
         self.daily_message.start()
