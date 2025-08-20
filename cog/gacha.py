@@ -13,7 +13,7 @@ gacha_result = [
     "<:BA_gacha_R:1407235415446126663>",
     "<:BA_gacha_SR:1407235426300858408>"
 ]
-allowed_channels = [1407248459949543455]
+allowed_channels = [1407248459949543455] # 機器人遊樂場
 
 class Gacha(commands.Cog):
     def __init__(self, bot):
