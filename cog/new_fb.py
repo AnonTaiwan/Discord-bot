@@ -2,9 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from curl_cffi import requests
 import json
-import logging
 from datetime import datetime, timedelta, time
-from pathlib import Path
 import os
 import pytz
 from PIL import Image, ImageDraw, ImageFont

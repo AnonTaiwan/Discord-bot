@@ -1,9 +1,6 @@
 import discord
-from discord.ext import commands, bridge, tasks
-import json
+from discord.ext import commands
 from datetime import datetime, timedelta
-from pathlib import Path
-import os
 import utils
 
 JERRY_ID = 654273506921414656
