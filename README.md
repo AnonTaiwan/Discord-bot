@@ -4,7 +4,7 @@ Anon Taiwan FaceBook 新貼文通知機器人
 
 ### Requirements
 
-- Python: 3.8+
+- Python: 3.8~3.12
 
 ## 📚 相關文檔
 
