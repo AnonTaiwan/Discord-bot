@@ -95,7 +95,7 @@ def read_json(logger: logging.Logger, file: Path, default_content: dict = {}) ->
             content = json.load(f)
             logger.info(f"已成功讀取 {file}")
         except json.JSONDecodeError as e:
-            logger.error(f"讀取 {file} 時發生錯誤: {e}")
+            logger.error(f"讀取 {file} 時發生錯誤：{e}")
             content = { "length": 0 }
     return content
 
@@ -106,5 +106,5 @@ def write_json(logger: logging.Logger, file: Path, data: dict) -> bool:
             logger.info(f"已成功寫入 {file}")
             return True
         except Exception as e:
-            logger.error(f"寫入 {file} 時發生錯誤: {e}")
+            logger.error(f"寫入 {file} 時發生錯誤：{e}")
             return False
