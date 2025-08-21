@@ -51,7 +51,7 @@ class NewFB(commands.Cog):
         # test
         # msg = await self.channel.send(content = '', embed=embed, file=file)
         await msg.publish()
-        self.logger.info(f"已發送新貼文通知: {data_id}")
+        self.logger.info(f"已發送新貼文通知：{data_id}")
         os.remove(f"{data_id}.jpg")
 
     async def _send_post_update_message(self, data):
@@ -128,7 +128,7 @@ class NewFB(commands.Cog):
             localized_dt = timezone.localize(dt)
             return int(localized_dt.timestamp())
         except ValueError as e:
-            self.logger.error(f"時間格式錯誤: {e}")
+            self.logger.error(f"時間格式錯誤：{e}")
             return None
         
     def _get_posts_and_reels_count(self, start_timestamp, end_timestamp):
@@ -182,7 +182,7 @@ class NewFB(commands.Cog):
             embed.set_image(url="attachment://output.png")
             channel = self.bot.get_channel(1405253533540024340)
             await channel.send(embed=embed,file=file)
-            self.logger.info(f"每日訊息已發送, 時間: {yesterday.strftime('%Y-%m-%d %H:%M:%S')} ~ {today.strftime('%Y-%m-%d %H:%M:%S')}")
+            self.logger.info(f"每日訊息已發送，時間：{yesterday.strftime('%Y-%m-%d %H:%M:%S')} ~ {today.strftime('%Y-%m-%d %H:%M:%S')}")
             os.remove("output.png")
 
             self.daily_message_sent = True
@@ -230,7 +230,7 @@ class NewFB(commands.Cog):
             await ctx.respond(embed=embed,file=file)
             os.remove("output.png")
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤: {e}")
+            await ctx.respond(f"❌ 發生錯誤：{e}")
             self.logger.error(f"Error in query command: {e}")
 
 def setup(bot: commands.Bot):
