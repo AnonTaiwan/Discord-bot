@@ -44,13 +44,14 @@ class Health(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error sending daily message: {e}")
 
+        self.logger.info("Health check completed and message sent.")
+
     @health_message.after_loop
     async def after_dayly_message(self):
         if self.health_message.is_running():
             now = datetime.now(timezone)
             if now not in health_message_time:
                 self.health_message_sent = False
-                self.logger.info("Health Check 訊息已重置。")
 
     @discord.slash_command(name='healthcheck', description='確認服務運作狀態')
     async def health_check_command(self, ctx: discord.ApplicationContext):

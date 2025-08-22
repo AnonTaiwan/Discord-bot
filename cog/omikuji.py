@@ -31,6 +31,8 @@ OMIKUJI_STATIC_DIR = utils.STATIC_DIR / 'omikuji'
 class Omikuji(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        
+        self.daily_message_sent = False
 
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/omikuji.py: 日誌系統初始化完成")
@@ -98,6 +100,9 @@ class Omikuji(commands.Cog):
 
     @tasks.loop(time=daily_reset)
     async def daily_message(self):
+        if self.daily_message_sent:
+            return
+
         self.omikuji = []
         self.save_omikuji()
 
@@ -106,6 +111,12 @@ class Omikuji(commands.Cog):
             await channel.send("每日運勢抽籤已重置！")
         else:
             self.logger.error("無法找到指定的頻道。")
+
+        self.daily_message_sent = True
+
+    @daily_message.after_loop
+    async def after_daily_message(self):
+        self.daily_message_sent = False
 
 def setup(bot: commands.Bot):
     bot.add_cog(Omikuji(bot))
