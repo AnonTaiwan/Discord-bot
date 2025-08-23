@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-from datetime import time
+from datetime import datetime, time
 import random
 import pytz
 import utils
@@ -116,7 +116,9 @@ class Omikuji(commands.Cog):
 
     @daily_message.after_loop
     async def after_daily_message(self):
-        self.daily_message_sent = False
+        now = datetime.now(timezone)
+        if now != daily_reset:
+            self.daily_message_sent = False
 
 def setup(bot: commands.Bot):
     bot.add_cog(Omikuji(bot))

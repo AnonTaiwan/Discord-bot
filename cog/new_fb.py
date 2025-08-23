@@ -193,7 +193,7 @@ class NewFB(commands.Cog):
     async def after_dayly_message(self):
         if self.daily_message.is_running():
             now = datetime.now(timezone)
-            if now.hour != 0 and now.minute != 0 and now.second != 0:
+            if now != daily_message_time:
                 self.daily_message_sent = False
                 self.logger.info("每日訊息已重置，將於明天午夜再次發送。")
 
