@@ -15,7 +15,6 @@ class NewFB(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.latest = []
-        self.daily_message_sent = False
 
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/new_fb.py: 日誌系統初始化完成")
@@ -89,14 +88,19 @@ class NewFB(commands.Cog):
         datas = self.get_datas()
         self.latest = [i['id'] for i in datas]
         self.reel = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=description,created_time,permalink_url&access_token={utils.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
-        self.check_post_updates.start()
-        self.check_reel_updates.start()
+        
+        if not self.check_post_updates.is_running():
+            self.check_post_updates.start()
+
+        if not self.check_reel_updates.is_running():
+            self.check_reel_updates.start()
         # main channel
         self.channel = self.bot.get_channel(utils.FB_NOTIFICATION_CHANNEL_ID)
         # test channel
         # self.channel = self.bot.get_channel(1404889560068001864)
 
-        self.daily_message.start()
+        if not self.daily_message.is_running():
+            self.daily_message.start()
     
     @tasks.loop(minutes=1)
     async def check_post_updates(self):
@@ -167,9 +171,6 @@ class NewFB(commands.Cog):
         
     @tasks.loop(time=daily_message_time)
     async def daily_message(self):
-        if self.daily_message_sent:
-            return
-        
         try:
             today = datetime.now(timezone).replace(hour=0, minute=0, second=0, microsecond=0)
             yesterday = today - timedelta(days=1)
@@ -184,18 +185,8 @@ class NewFB(commands.Cog):
             await channel.send(embed=embed,file=file)
             self.logger.info(f"每日訊息已發送，時間：{yesterday.strftime('%Y-%m-%d %H:%M:%S')} ~ {today.strftime('%Y-%m-%d %H:%M:%S')}")
             os.remove("output.png")
-
-            self.daily_message_sent = True
         except Exception as e:
             self.logger.error(f"Error sending daily message: {e}")
-
-    @daily_message.after_loop
-    async def after_dayly_message(self):
-        if self.daily_message.is_running():
-            now = datetime.now(timezone)
-            if now != daily_message_time:
-                self.daily_message_sent = False
-                self.logger.info("每日訊息已重置，將於明天午夜再次發送。")
 
     @discord.slash_command(name="query", description="查看指定時間範圍內有幾篇貼文")
     async def query(self, ctx: discord.ApplicationContext, start_date: discord.Option(description="開始日期，格式為 YYYY-MM-DD HH:MM:SS", required=True), end_date: discord.Option(default=None, description="結束日期，格式為 YYYY-MM-DD HH:MM:SS", required=False)): #type:ignore

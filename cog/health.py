@@ -20,7 +20,6 @@ health_check_endpoints = [
 class Health(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.health_message_sent = False
 
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/health.py: 日誌系統初始化完成")
@@ -29,29 +28,19 @@ class Health(commands.Cog):
     async def on_ready(self):
         self.channel = self.bot.get_channel(utils.TEST_CHANNEL_ID)
 
-        self.health_message.start()
+        if not self.health_message.is_running():
+            self.health_message.start()
         
     @tasks.loop(time=health_message_time)
     async def health_message(self):
-        if self.health_message_sent:
-            return
-        
         try:
             message = await self.channel.send("正在確認服務運作狀態...")
-            self.health_message_sent = True
 
             await self._health_check(message)
         except Exception as e:
             self.logger.error(f"Error sending daily message: {e}")
 
         self.logger.info("Health check completed and message sent.")
-
-    @health_message.after_loop
-    async def after_dayly_message(self):
-        if self.health_message.is_running():
-            now = datetime.now(timezone)
-            if now not in health_message_time:
-                self.health_message_sent = False
 
     @discord.slash_command(name='healthcheck', description='確認服務運作狀態')
     async def health_check_command(self, ctx: discord.ApplicationContext):
