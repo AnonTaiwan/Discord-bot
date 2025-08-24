@@ -5,7 +5,7 @@ import random
 import pytz
 import utils
 
-class Omikuji(commands.Cog):
+class Member(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -43,4 +43,4 @@ class Omikuji(commands.Cog):
             await ctx.respond("❌ 發生錯誤，無法取得成員列表。")
 
 def setup(bot: commands.Bot):
-    bot.add_cog(Omikuji(bot))
+    bot.add_cog(Member(bot))
