@@ -180,7 +180,7 @@ class NewFB(commands.Cog):
 
             posts_count, reels_count = self._get_posts_and_reels_count(yesterday_timestamp, today_timestamp)
 
-            embed = discord.Embed(title='今日統整', color=discord.Color.blue())
+            embed = discord.Embed(title=f'{yesterday.strftime('%Y-%m-%d')} 統整', color=discord.Color.blue())
             self._generate_daily_post_picture(posts_count, reels_count)
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
