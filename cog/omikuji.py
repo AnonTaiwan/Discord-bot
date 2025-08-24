@@ -44,7 +44,7 @@ class Omikuji(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        if self.daily_message.is_running():
+        if not self.daily_message.is_running():
             self.daily_message.start()
 
     @discord.slash_command(name="omikuji", description="抽籤 (此功能由 Kevin 提供)")
