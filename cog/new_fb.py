@@ -193,7 +193,7 @@ class NewFB(commands.Cog):
             self.logger.error(f"Error sending daily message: {e}")
         
     @discord.slash_command(name="query-today", description="查看今日有幾篇貼文")
-    async def daily_message(self, ctx: discord.ApplicationContext):
+    async def today_query(self, ctx: discord.ApplicationContext):
         try:
             now = datetime.now(timezone).replace(hour=0, minute=0, second=0, microsecond=0)
             midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
