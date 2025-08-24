@@ -14,6 +14,7 @@ class Omikuji(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        pass
 
     @discord.slash_command(name="non-mygo-members", description="取得所有未領取「迷失之人」身分組的人")
     async def non_mygo_members(self, ctx: discord.ApplicationContext):
