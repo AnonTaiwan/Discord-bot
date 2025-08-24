@@ -174,19 +174,45 @@ class NewFB(commands.Cog):
         try:
             today = datetime.now(timezone).replace(hour=0, minute=0, second=0, microsecond=0)
             yesterday = today - timedelta(days=1)
+
             today_timestamp = int(today.timestamp())
             yesterday_timestamp = int(yesterday.timestamp())
+
             posts_count, reels_count = self._get_posts_and_reels_count(yesterday_timestamp, today_timestamp)
+
             embed = discord.Embed(title='今日統整', color=discord.Color.blue())
             self._generate_daily_post_picture(posts_count, reels_count)
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
-            channel = self.bot.get_channel(1405253533540024340)
-            await channel.send(embed=embed,file=file)
+
+            channel = self.bot.get_channel(utils.TEST_CHANNEL_ID)
+            await channel.send(embed=embed, file=file)
             self.logger.info(f"每日訊息已發送，時間：{yesterday.strftime('%Y-%m-%d %H:%M:%S')} ~ {today.strftime('%Y-%m-%d %H:%M:%S')}")
             os.remove("output.png")
         except Exception as e:
             self.logger.error(f"Error sending daily message: {e}")
+        
+    @discord.slash_command(name="query-today", description="查看今日有幾篇貼文")
+    async def daily_message(self, ctx: discord.ApplicationContext):
+        try:
+            now = datetime.now(timezone).replace(hour=0, minute=0, second=0, microsecond=0)
+            midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+            now_timestamp = int(now.timestamp())
+            midnight_timestamp = int(midnight.timestamp())
+
+            posts_count, reels_count = self._get_posts_and_reels_count(midnight_timestamp, now_timestamp)
+
+            embed = discord.Embed(title='今日統整', color=discord.Color.blue())
+            self._generate_daily_post_picture(posts_count, reels_count)
+            file = discord.File("output.png", filename="output.png")
+            embed.set_image(url="attachment://output.png")
+            
+            await ctx.respond(embed=embed, file=file)
+            os.remove("output.png")
+        except Exception as e:
+            await ctx.respond(f"❌ 發生錯誤：{e}")
+            self.logger.error(f"Error in query-today command: {e}")
 
     @discord.slash_command(name="query", description="查看指定時間範圍內有幾篇貼文")
     async def query(self, ctx: discord.ApplicationContext, start_date: discord.Option(description="開始日期，格式為 YYYY-MM-DD HH:MM:SS", required=True), end_date: discord.Option(default=None, description="結束日期，格式為 YYYY-MM-DD HH:MM:SS", required=False)): #type:ignore
@@ -218,7 +244,8 @@ class NewFB(commands.Cog):
             embed.set_image(url="attachment://output.png")
             if posts_count == 100 or reels_count == 100:
                 embed.description += "\n\n注意：因為 Facebook API 的限制，查詢結果至多為 100。"
-            await ctx.respond(embed=embed,file=file)
+
+            await ctx.respond(embed=embed, file=file)
             os.remove("output.png")
         except Exception as e:
             await ctx.respond(f"❌ 發生錯誤：{e}")
