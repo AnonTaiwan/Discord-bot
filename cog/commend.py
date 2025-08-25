@@ -53,12 +53,12 @@ class Commend(commands.Cog):
                 user.timeout(timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵")
                 self.commendation[ctx.author.id] = 0
 
-            embed = discord.Embed(title="獲得禁言獎勵", color=discord.Color.gold())
+                embed = discord.Embed(title="獲得禁言獎勵", color=discord.Color.gold())
 
-            embed.add_field(name="成員", value=f"{ctx.author.mention}", inline=False)
-            embed.add_field(name="獎勵", value="達成三次表揚，獲得 60 秒的禁言獎勵", inline=False)
+                embed.add_field(name="成員", value=f"{ctx.author.mention}", inline=False)
+                embed.add_field(name="獎勵", value="達成三次表揚，獲得 60 秒的禁言獎勵", inline=False)
 
-            await ctx.send(embed=embed)
+                await ctx.send(embed=embed)
 
             await self.__save_commend()
         except Exception as e:
