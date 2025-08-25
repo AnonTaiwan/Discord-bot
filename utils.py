@@ -4,6 +4,11 @@ import json
 import logging
 import os
 from pathlib import Path
+import pytz
+
+# 時區設定
+
+TIME_ZONE = pytz.timezone('Asia/Taipei')
 
 # 專案路徑
 ROOT_DIR = Path(__file__).resolve().parent

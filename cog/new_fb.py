@@ -4,12 +4,10 @@ from curl_cffi import requests
 import json
 from datetime import datetime, timedelta, time
 import os
-import pytz
 from PIL import Image, ImageDraw, ImageFont
 import utils
 
-timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
-daily_message_time = time(hour=0, minute=6, second=0, tzinfo=timezone)  # 每日訊息時間設定
+daily_message_time = time(hour=0, minute=6, second=0, tzinfo=utils.TIME_ZONE)  # 每日訊息時間設定
 
 class NewFB(commands.Cog):
     def __init__(self, bot):
@@ -129,7 +127,7 @@ class NewFB(commands.Cog):
     def _formatted_time_to_unix_timestamp(self, formatted_time):
         try:
             dt = datetime.strptime(formatted_time, "%Y-%m-%d %H:%M:%S")
-            localized_dt = timezone.localize(dt)
+            localized_dt = utils.TIME_ZONE.localize(dt)
             return int(localized_dt.timestamp())
         except ValueError as e:
             self.logger.error(f"時間格式錯誤：{e}")
@@ -172,7 +170,7 @@ class NewFB(commands.Cog):
     @tasks.loop(time=daily_message_time)
     async def daily_message(self):
         try:
-            today = datetime.now(timezone).replace(hour=0, minute=0, second=0, microsecond=0)
+            today = datetime.now(utils.TIME_ZONE).replace(hour=0, minute=0, second=0, microsecond=0)
             yesterday = today - timedelta(days=1)
 
             today_timestamp = int(today.timestamp())
@@ -195,7 +193,7 @@ class NewFB(commands.Cog):
     @discord.slash_command(name="query-today", description="查看今日有幾篇貼文")
     async def today_query(self, ctx: discord.ApplicationContext):
         try:
-            now = datetime.now(timezone)
+            now = datetime.now(utils.TIME_ZONE)
             midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
             now_timestamp = int(now.timestamp())

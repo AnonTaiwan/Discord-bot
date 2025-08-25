@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands, tasks
 from datetime import datetime, time
 import random
-import pytz
 import utils
 
 #"大吉" Daikichi
@@ -22,8 +21,7 @@ omikuji_results = [
     "Daikyo"
 ]
 
-timezone = pytz.timezone('Asia/Taipei')  # 設定時區為台北時間
-daily_reset = time(hour=0, minute=6, second=0, tzinfo=timezone)  # 每日訊息時間設定
+daily_reset = time(hour=0, minute=6, second=0, tzinfo=utils.TIME_ZONE)  # 每日訊息時間設定
 
 RECORD_FILE = utils.JSON_DIR / 'omikuji.json'
 OMIKUJI_STATIC_DIR = utils.STATIC_DIR / 'omikuji'
