@@ -36,8 +36,13 @@ class Member(commands.Cog):
             if not non_mygo_members:
                 await ctx.respond("所有成員都已領取「迷失之人」身分組。")
                 return
+            
+            embed = discord.Embed(title="未領取「迷失之人」身分組的成員", color=discord.Color.blue())
+            for member in non_mygo_members:
+                join_time = member.joined_at.strftime("%Y-%m-%d %H:%M:%S") if member.joined_at else "未知"
+                embed.add_field(name=member.mention, value=f"加入時間: {join_time}", inline=False)
 
-            await ctx.respond(f"以下是未領取「迷失之人」身分組的成員：\n" + "\n".join(member.mention for member in non_mygo_members))
+            await ctx.respond(embed=embed)
         except Exception as e:
             self.logger.error(f"Error responding to non_mygo_members command: {e}")
             await ctx.respond("❌ 發生錯誤，無法取得成員列表。")
