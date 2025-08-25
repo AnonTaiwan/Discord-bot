@@ -36,7 +36,7 @@ class Commend(commands.Cog):
             await ctx.respond("請指定一個使用者來表揚。", ephemeral=True)
             return
         
-        if ctx.author.id not in self.commend:
+        if ctx.author.id not in self.commendation:
             self.commendation[ctx.author.id] = 0
 
         self.commendation[ctx.author.id] += 1
