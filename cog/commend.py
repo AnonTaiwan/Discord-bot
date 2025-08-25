@@ -65,12 +65,12 @@ class Commend(commands.Cog):
             if self.commendation[ctx.author.id] == 3:
                 self.commendation[ctx.author.id] = 0
 
-                if not await self.__timeout_user(ctx, ctx.author, timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵"):
+                if not await self.__timeout_user(ctx, user, timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵"):
                     return
 
                 embed = discord.Embed(title="獲得禁言獎勵", color=discord.Color.gold())
 
-                embed.add_field(name="成員", value=f"{ctx.author.mention}", inline=False)
+                embed.add_field(name="成員", value=f"{user.mention}", inline=False)
                 embed.add_field(name="獎勵", value="達成三次表揚，獲得 60 秒的禁言獎勵", inline=False)
 
                 await ctx.send(embed=embed)
