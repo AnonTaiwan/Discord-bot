@@ -73,7 +73,7 @@ class NewFB(commands.Cog):
         url = f'https://www.facebook.com{reel['permalink_url'].replace('\\','')}'
         message = reel.get('description', 'No description provided')
         message = bytes(message,'utf-8').decode(encoding="utf-8", errors="ignore")
-        picture_url = reel.get('picture', {}).get('url', '')
+        picture_url = reel.get('picture', {})
         with open(f'{reel_data_id}.jpg', 'wb') as f:
             f.write(requests.get(picture_url).content)
         embed = discord.Embed(title='Anon Taiwan 更新了新 Reel！', url=url, color=discord.Color.blue())
