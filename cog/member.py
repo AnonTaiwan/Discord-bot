@@ -188,8 +188,6 @@ class KickMenu(discord.ui.View):
             self.logger.error(f"Error creating kick confirmation page: {e}")
             await interaction.response.send_message("❌ 發生錯誤，無法執行指令。")
 
-
-
 class Member(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
