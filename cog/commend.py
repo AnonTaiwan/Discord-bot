@@ -49,10 +49,10 @@ class Commend(commands.Cog):
             await ctx.respond("請指定一個使用者來表揚。", ephemeral=True)
             return
         
-        if ctx.author.id not in self.commendation:
-            self.commendation[ctx.author.id] = 0
+        if user.id not in self.commendation:
+            self.commendation[user.id] = 0
 
-        self.commendation[ctx.author.id] += 1
+        self.commendation[user.id] += 1
 
         embed = discord.Embed(title="已表揚成員", color=discord.Color.green())
 
@@ -62,8 +62,8 @@ class Commend(commands.Cog):
         try:
             await ctx.respond(embed=embed)
 
-            if self.commendation[ctx.author.id] == 3:
-                self.commendation[ctx.author.id] = 0
+            if self.commendation[user.id] == 3:
+                self.commendation[user.id] = 0
 
                 if not await self.__timeout_user(ctx, user, timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵"):
                     return
@@ -78,7 +78,7 @@ class Commend(commands.Cog):
             await self.__save_commend()
         except Exception as e:
             self.logger.error(f"表揚成員時發生錯誤: {e}")
-            await ctx.respond("❌ 發生錯誤，無法完成表揚。", ephemeral=True)
+            await ctx.respond("❌ 發生錯誤，無法完成表揚。")
 
 def setup(bot: commands.Bot):
     bot.add_cog(Commend(bot))
