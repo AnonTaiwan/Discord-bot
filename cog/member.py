@@ -127,7 +127,7 @@ class KickMenu(discord.ui.View):
 
     async def kick_member(self, interaction: discord.Interaction):
         if not utils.is_developer(interaction.user):
-            await self.logger.error(f"Error updating member page: {e}")
+            self.logger.error(f"Error updating member page: {e}")
             await interaction.response.send_message("❌ 你沒有權限使用此功能。", ephemeral=True)
             return
 
