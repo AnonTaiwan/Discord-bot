@@ -143,17 +143,20 @@ class KickMenu(discord.ui.View):
         try:
             kicked = []
             for member in members_to_kick:
-                guild_member = discord.utils.get(interaction.guild.members, id=member.id)
-                if guild_member:
+                try:
+                    await member.kick(reason=f"未領取「迷失之人」身分組超過 {selected_days} 天")
                     kicked.append(member)
-                    # await guild_member.kick(reason=f"未領取「迷失之人」身分組超過 {selected_days} 天")
+                except discord.Forbidden:
+                    self.logger.warning(f"無法踢出成員 {member.name}，缺少權限。")
+                except Exception as e:
+                    self.logger.error(f"踢出成員 {member.name} 時發生錯誤: {e}")
 
             view = KickMemberPage(self.logger, kicked)
 
             await interaction.response.send_message(embed=view.get_page_embed(), view=view)
         except Exception as e:
             self.logger.error(f"Error kicking members: {e}")
-            await interaction.response.send_message("❌ 發生錯誤，無法踢出成員。", ephemeral=True)
+            await interaction.response.send_message("❌ 發生錯誤，無法執行指令。", ephemeral=True)
 
 class Member(commands.Cog):
     def __init__(self, bot):
