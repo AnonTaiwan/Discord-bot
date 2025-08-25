@@ -195,7 +195,7 @@ class NewFB(commands.Cog):
     @discord.slash_command(name="query-today", description="查看今日有幾篇貼文")
     async def today_query(self, ctx: discord.ApplicationContext):
         try:
-            now = datetime.now(timezone).replace(hour=0, minute=0, second=0, microsecond=0)
+            now = datetime.now(timezone)
             midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
             now_timestamp = int(now.timestamp())
