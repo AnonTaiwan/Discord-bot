@@ -34,7 +34,7 @@ class Health(commands.Cog):
         try:
             message = await self.channel.send("正在確認服務運作狀態...")
 
-            await self._health_check(message)
+            await self.__health_check(message)
         except Exception as e:
             self.logger.error(f"Error sending daily message: {e}")
 
@@ -47,9 +47,9 @@ class Health(commands.Cog):
             return
         
         message = await ctx.respond("正在確認服務運作狀態...")
-        await self._health_check(message)
+        await self.__health_check(message)
 
-    async def _health_check(self, message: discord.Message):
+    async def __health_check(self, message: discord.Message):
         try:
             content = '### Health Check:'
 

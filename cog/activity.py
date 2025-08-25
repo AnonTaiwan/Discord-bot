@@ -22,24 +22,24 @@ class Activity(commands.Cog):
         self.length = utils.read_json(self.logger, RECORD_FILE, default_content={"length": 0}).get("length", 0)
         self.logger.info(f'Length: {self.length}')
 
-    def _write_config(self):
+    def __write_config(self):
         utils.write_json(self.logger, RECORD_FILE, {"length": self.length})
 
-    def _format_length(self):
+    def __format_length(self):
         if int(self.length + 0.6) == int(self.length):
             return str(int(self.length))
         else:
             return format(self.length, '.1f')
 
     async def send_message(self):
-        content = f'偵測到 <@{JERRY_ID}> 偷打 LoL，紅布條長度增加為 {self._format_length()} 公尺'
+        content = f'偵測到 <@{JERRY_ID}> 偷打 LoL，紅布條長度增加為 {self.__format_length()} 公尺'
         await self.channel.send(content = content)
         
     @commands.Cog.listener()
     async def on_ready(self):
         self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 
-    def _is_playing_league_of_legends(self, member):
+    def __is_playing_league_of_legends(self, member):
         for activity in member.activities:
             if activity.type == discord.ActivityType.playing and activity.name == "League of Legends":
                 return True
@@ -63,20 +63,20 @@ class Activity(commands.Cog):
                 offline_duration = datetime.now() - self.offline_time
                 self.length += offline_duration.total_seconds() * 0.5
                 self.logger.info(f"Member {after.name} was offline for {offline_duration}, length updated to {self.length}")
-                self._write_config()
-                content = f'<@{JERRY_ID}> 已上線，共下線 {offline_duration.total_seconds()} 秒，紅布條長度增加至 {self._format_length()} 公尺'
+                self.__write_config()
+                content = f'<@{JERRY_ID}> 已上線，共下線 {offline_duration.total_seconds()} 秒，紅布條長度增加至 {self.__format_length()} 公尺'
                 self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
                 await self.channel.send(content = content)
 
-        if not self._is_playing_league_of_legends(before) and self._is_playing_league_of_legends(after):
+        if not self.__is_playing_league_of_legends(before) and self.__is_playing_league_of_legends(after):
             if after.name not in self.cooldown_list or datetime.now() - self.cooldown_list[after.name] > timedelta(minutes=5):
                 self.logger.info(f"Member {after.name} started playing League of Legends")
                 self.length += 1.5
                 self.logger.info(f"Length updated to {self.length}")
-                self._write_config()
+                self.__write_config()
                 await self.send_message()
 
-        if self._is_playing_league_of_legends(before) and not self._is_playing_league_of_legends(after):
+        if self.__is_playing_league_of_legends(before) and not self.__is_playing_league_of_legends(after):
             self.logger.info(f"Member {after.name} stopped playing League of Legends")
             self.cooldown_list[after.name] = datetime.now()
 

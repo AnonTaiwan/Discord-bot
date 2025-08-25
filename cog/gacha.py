@@ -23,7 +23,7 @@ class Gacha(commands.Cog):
     async def on_ready(self):
         pass
 
-    def _get_gacha_result(self, is_fes=False):
+    def __get_gacha_result(self, is_fes=False):
         """隨機抽取一個結果"""
         rand = random.randint(1, 1000)
 
@@ -44,20 +44,20 @@ class Gacha(commands.Cog):
         else:
             return gacha_result[2]  # SR
         
-    def _is_valid_request(self, ctx: discord.ApplicationContext):
+    def __is_valid_request(self, ctx: discord.ApplicationContext):
         return utils.is_developer(ctx.author) or utils.is_in_bot_playground(ctx.channel)
     
-    async def _send_no_permission_message(self, ctx: discord.ApplicationContext):
+    async def __send_no_permission_message(self, ctx: discord.ApplicationContext):
         await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
         self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
 
     @discord.slash_command(name="gacha", description="抽一抽普通池")
     async def gacha(self, ctx: discord.ApplicationContext):
-        if not self._is_valid_request(ctx):
-            await self._send_no_permission_message(ctx)
+        if not self.__is_valid_request(ctx):
+            await self.__send_no_permission_message(ctx)
             return
         
-        result = self._get_gacha_result()
+        result = self.__get_gacha_result()
         
         try:
             await ctx.respond(result)
@@ -67,12 +67,12 @@ class Gacha(commands.Cog):
 
     @discord.slash_command(name="gacha10", description="抽十抽普通池")
     async def gacha10(self, ctx: discord.ApplicationContext):
-        if self._is_valid_request(ctx) is False:
-            await self._send_no_permission_message(ctx)
+        if self.__is_valid_request(ctx) is False:
+            await self.__send_no_permission_message(ctx)
             return
         
-        result1 = [self._get_gacha_result() for _ in range(5)]
-        result2 = [self._get_gacha_result() for _ in range(5)]
+        result1 = [self.__get_gacha_result() for _ in range(5)]
+        result2 = [self.__get_gacha_result() for _ in range(5)]
 
         if result2[4] == gacha_result[0]:
             result2[4] = gacha_result[1]  # 保底
@@ -87,11 +87,11 @@ class Gacha(commands.Cog):
 
     @discord.slash_command(name="fes_gacha", description="抽一抽 FES 池")
     async def fes_gacha(self, ctx: discord.ApplicationContext):
-        if self._is_valid_request(ctx) is False:
-            await self._send_no_permission_message(ctx)
+        if self.__is_valid_request(ctx) is False:
+            await self.__send_no_permission_message(ctx)
             return
         
-        result = self._get_gacha_result(is_fes=True)
+        result = self.__get_gacha_result(is_fes=True)
         
         try:
             await ctx.respond(result)
@@ -101,12 +101,12 @@ class Gacha(commands.Cog):
 
     @discord.slash_command(name="fes_gacha10", description="抽十抽 FES 池")
     async def fes_gacha10(self, ctx: discord.ApplicationContext):
-        if self._is_valid_request(ctx) is False:
-            await self._send_no_permission_message(ctx)
+        if self.__is_valid_request(ctx) is False:
+            await self.__send_no_permission_message(ctx)
             return
         
-        result1 = [self._get_gacha_result(is_fes=True) for _ in range(5)]
-        result2 = [self._get_gacha_result(is_fes=True) for _ in range(5)]
+        result1 = [self.__get_gacha_result(is_fes=True) for _ in range(5)]
+        result2 = [self.__get_gacha_result(is_fes=True) for _ in range(5)]
 
         if result2[4] == gacha_result[0]:
             result2[4] = gacha_result[1]  # 保底

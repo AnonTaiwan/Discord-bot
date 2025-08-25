@@ -166,7 +166,7 @@ class Member(commands.Cog):
     async def on_ready(self):
         pass
 
-    async def _get_non_mygo_members(self, guild):
+    async def __get_non_mygo_members(self, guild):
         members = guild.members
         non_mygo_members = [member for member in members if
                             not any(role.id == utils.MYGO_ROLE_ID or role.id == utils.BOT_ROLE_ID
@@ -185,7 +185,7 @@ class Member(commands.Cog):
             return
 
         try:
-            non_mygo_members = await self._get_non_mygo_members(ctx.guild)
+            non_mygo_members = await self.__get_non_mygo_members(ctx.guild)
 
             if not non_mygo_members:
                 await ctx.respond("所有成員都已領取「迷失之人」身分組。")
@@ -208,7 +208,7 @@ class Member(commands.Cog):
             return
 
         try:
-            non_mygo_members = await self._get_non_mygo_members(ctx.guild)
+            non_mygo_members = await self.__get_non_mygo_members(ctx.guild)
 
             await ctx.respond("請選擇要踢出的成員條件：", view=KickMenu(self.logger, non_mygo_members))
         except Exception as e:

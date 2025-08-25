@@ -42,7 +42,7 @@ class NewFB(commands.Cog):
         with open(f'{data['id']}.jpg','wb') as f:
             f.write(response.content)
 
-    async def _send_update_message(self, data_id, embed, file):
+    async def __send_update_message(self, data_id, embed, file):
         # main
         msg = await self.channel.send(content = f'<@&{utils.ANON_TAIWAN_SUBSCRIBER_ROLE_ID}>', embed=embed, file=file)
         # test
@@ -51,7 +51,7 @@ class NewFB(commands.Cog):
         self.logger.info(f"已發送新貼文通知：{data_id}")
         os.remove(f"{data_id}.jpg")
 
-    async def _send_post_update_message(self, data):
+    async def __send_post_update_message(self, data):
         await self.get_photo(data)
         message = data.get('message', 'No message provided')
         message = bytes(message,'utf-8').decode(encoding="utf-8", errors="ignore")
@@ -64,9 +64,9 @@ class NewFB(commands.Cog):
         # main setting
         # msg = await self.channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
         # test setting
-        await self._send_update_message(data['id'], embed, file)
+        await self.__send_update_message(data['id'], embed, file)
     
-    async def _send_reel_update_message(self, reel):
+    async def __send_reel_update_message(self, reel):
         reel_data_id = reel['id']
         url = f'https://www.facebook.com{reel['permalink_url'].replace('\\','')}'
         message = reel.get('description', 'No description provided')
@@ -79,7 +79,7 @@ class NewFB(commands.Cog):
         embed.set_image(url=f"attachment://{reel_data_id}.jpg")
         embed.add_field(name='Reel 連結', value=url, inline=False)
         embed.add_field(name='Reel 內容', value=message or "（無內容）", inline=False)
-        await self._send_update_message(reel_data_id, embed, file)
+        await self.__send_update_message(reel_data_id, embed, file)
         
     @commands.Cog.listener()
     async def on_ready(self):
@@ -108,7 +108,7 @@ class NewFB(commands.Cog):
             if new_post:
                 self.logger.info(f"發現 {len(new_post)} 條新貼文")
                 for post in new_post:
-                    await self._send_post_update_message(post)
+                    await self.__send_post_update_message(post)
                 self.latest = [i['id'] for i in datas]
         except Exception as e:
             self.logger.error(f"Error checking for updates: {e}")
@@ -120,11 +120,11 @@ class NewFB(commands.Cog):
             reels_data = response.json()
             if self.reel != reels_data['data'][0]['id']:
                 self.reel = reels_data['data'][0]['id']
-                await self._send_reel_update_message(reels_data['data'][0])
+                await self.__send_reel_update_message(reels_data['data'][0])
         except Exception as e:
             self.logger.error(f"Error checking for reels: {e}")
 
-    def _formatted_time_to_unix_timestamp(self, formatted_time):
+    def __formatted_time_to_unix_timestamp(self, formatted_time):
         try:
             dt = datetime.strptime(formatted_time, "%Y-%m-%d %H:%M:%S")
             localized_dt = utils.TIME_ZONE.localize(dt)
@@ -133,7 +133,7 @@ class NewFB(commands.Cog):
             self.logger.error(f"時間格式錯誤：{e}")
             return None
         
-    def _get_posts_and_reels_count(self, start_timestamp, end_timestamp):
+    def __get_posts_and_reels_count(self, start_timestamp, end_timestamp):
         try:
             response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=&access_token={utils.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
             posts_data = json.loads(response.text)
@@ -148,7 +148,7 @@ class NewFB(commands.Cog):
             self.logger.error(f"Error fetching posts and reels count: {e}")
             return 0, 0
         
-    def _generate_picture_embed(self, posts_count, reels_count, background_picture_file):
+    def __generate_picture_embed(self, posts_count, reels_count, background_picture_file):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         background_path = os.path.join(current_dir, background_picture_file)
         img = Image.open(background_path)
@@ -161,11 +161,11 @@ class NewFB(commands.Cog):
         output_path = os.path.join("output.png")
         img.save(output_path, format='PNG', optimize=False)
 
-    def _generate_daily_post_picture(self, posts_count, reels_count):
-        self._generate_picture_embed(posts_count, reels_count, "../static/background.png")
+    def __generate_daily_post_picture(self, posts_count, reels_count):
+        self.__generate_picture_embed(posts_count, reels_count, "../static/background.png")
         
-    def _generate_query_picture(self, posts_count, reels_count):
-        self._generate_picture_embed(posts_count, reels_count, "../static/postquery.png")
+    def __generate_query_picture(self, posts_count, reels_count):
+        self.__generate_picture_embed(posts_count, reels_count, "../static/postquery.png")
         
     @tasks.loop(time=daily_message_time)
     async def daily_message(self):
@@ -176,10 +176,10 @@ class NewFB(commands.Cog):
             today_timestamp = int(today.timestamp())
             yesterday_timestamp = int(yesterday.timestamp())
 
-            posts_count, reels_count = self._get_posts_and_reels_count(yesterday_timestamp, today_timestamp)
+            posts_count, reels_count = self.__get_posts_and_reels_count(yesterday_timestamp, today_timestamp)
 
             embed = discord.Embed(title=f'{yesterday.strftime('%Y-%m-%d')} 統整', color=discord.Color.blue())
-            self._generate_daily_post_picture(posts_count, reels_count)
+            self.__generate_daily_post_picture(posts_count, reels_count)
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
 
@@ -199,10 +199,10 @@ class NewFB(commands.Cog):
             now_timestamp = int(now.timestamp())
             midnight_timestamp = int(midnight.timestamp())
 
-            posts_count, reels_count = self._get_posts_and_reels_count(midnight_timestamp, now_timestamp)
+            posts_count, reels_count = self.__get_posts_and_reels_count(midnight_timestamp, now_timestamp)
 
             embed = discord.Embed(title='今日統整', color=discord.Color.blue())
-            self._generate_daily_post_picture(posts_count, reels_count)
+            self.__generate_daily_post_picture(posts_count, reels_count)
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
             
@@ -225,19 +225,19 @@ class NewFB(commands.Cog):
             return
 
         try:
-            start_timestamp = self._formatted_time_to_unix_timestamp(start_date) if start_date else None
+            start_timestamp = self.__formatted_time_to_unix_timestamp(start_date) if start_date else None
 
             if end_date is None:
                 end_timestamp = int(datetime.now().timestamp())
             else:
-                end_timestamp = self._formatted_time_to_unix_timestamp(end_date)
+                end_timestamp = self.__formatted_time_to_unix_timestamp(end_date)
 
-            posts_count, reels_count = self._get_posts_and_reels_count(start_timestamp, end_timestamp)
+            posts_count, reels_count = self.__get_posts_and_reels_count(start_timestamp, end_timestamp)
 
             start_date_str = datetime.fromtimestamp(start_timestamp).strftime("%Y-%m-%d %H:%M:%S") if start_timestamp else "<unknown>"
             end_date_str = datetime.fromtimestamp(end_timestamp).strftime("%Y-%m-%d %H:%M:%S") if end_timestamp else "<unknown>"
             embed = discord.Embed(title=f'在 {start_date_str} 到 {end_date_str} 之間：', color=discord.Color.blue())
-            self._generate_query_picture(posts_count, reels_count)
+            self.__generate_query_picture(posts_count, reels_count)
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
             if posts_count == 100 or reels_count == 100:
