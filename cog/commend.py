@@ -20,6 +20,19 @@ class Commend(commands.Cog):
     async def __save_commend(self):
         utils.write_json(self.logger, RECORD_FILE, {"commend": self.commendation})
 
+    async def __timeout_user(self, ctx: discord.ApplicationContext, user: discord.Member, duration: timedelta, reason: str) -> bool:
+        try:
+            await user.timeout_for(duration, reason=reason)
+        except Exception as e:
+            if e == discord.Forbidden:
+                await ctx.send(f"❌ Cannot timeout {user.mention}")
+            else:
+                self.logger.error(f"禁言成員 {user} 時發生錯誤: {e}")
+                await ctx.send(f"❌ 發生錯誤，無法禁言 {user.mention}")
+            return False
+
+        return True
+
     @commands.Cog.listener()
     async def on_ready(self):
         pass
@@ -50,8 +63,10 @@ class Commend(commands.Cog):
             await ctx.respond(embed=embed)
 
             if self.commendation[ctx.author.id] == 3:
-                user.timeout(timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵")
                 self.commendation[ctx.author.id] = 0
+
+                if not await self.__timeout_user(ctx, ctx.author, timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵"):
+                    return
 
                 embed = discord.Embed(title="獲得禁言獎勵", color=discord.Color.gold())
 
