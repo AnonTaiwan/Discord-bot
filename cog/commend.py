@@ -18,7 +18,7 @@ class Commend(commands.Cog):
         self.commendation = utils.read_json(self.logger, RECORD_FILE, default_content={"commendation": {}}).get("commendation", {})
 
     async def __save_commend(self):
-        utils.write_json(self.logger, RECORD_FILE, {"commend": self.commend})
+        utils.write_json(self.logger, RECORD_FILE, {"commend": self.commendation})
 
     @commands.Cog.listener()
     async def on_ready(self):
