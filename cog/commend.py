@@ -25,7 +25,8 @@ class Commend(commands.Cog):
         pass
 
     @discord.slash_command(name="commend", description="表揚成員")
-    async def commend(self, ctx: discord.ApplicationContext, user: discord.Member = None,
+    async def commend(self, ctx: discord.ApplicationContext,
+                      user: discord.Option(discord.Member, description="要表揚的成員", required=True, default=None),
                       reason: discord.Option(description="表揚理由", required=False, default="")):
         if not utils.is_operator(ctx.author):
             await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)

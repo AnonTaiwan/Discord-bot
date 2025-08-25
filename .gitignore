@@ -9,6 +9,5 @@ Anon Taiwan.code-workspace
 
 .*.*.swp
 
-JSON/activity.json
-JSON/bot.json
-JSON/omikuji.json
+JSON/
+!JSON/bot.json.sample
