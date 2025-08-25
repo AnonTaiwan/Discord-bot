@@ -23,13 +23,11 @@ class Commend(commands.Cog):
     async def __timeout_user(self, ctx: discord.ApplicationContext, user: discord.Member, duration: timedelta, reason: str) -> bool:
         try:
             await user.timeout_for(duration, reason=reason)
+        except discord.Forbidden:
+            await ctx.send(f"❌ Cannot timeout {user.mention}")
         except Exception as e:
-            if e == discord.Forbidden:
-                await ctx.send(f"❌ Cannot timeout {user.mention}")
-            else:
-                self.logger.error(f"禁言成員 {user} 時發生錯誤: {e}")
-                await ctx.send(f"❌ 發生錯誤，無法禁言 {user.mention}")
-            return False
+            self.logger.error(f"禁言成員 {user} 時發生錯誤: {e}")
+            await ctx.send(f"❌ 發生錯誤，無法禁言 {user.mention}")
 
         return True
 
