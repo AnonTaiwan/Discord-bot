@@ -46,20 +46,24 @@ class Commend(commands.Cog):
         embed.add_field(name="被表揚成員", value=f"{user.mention}", inline=False)
         embed.add_field(name="表揚理由", value=reason if reason else "N/A", inline=False)
 
-        await ctx.respond(embed=embed)
+        try:
+            await ctx.respond(embed=embed)
 
-        if self.commendation[ctx.author.id] == 3:
-            user.timeout(timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵")
-            self.commendation[ctx.author.id] = 0
+            if self.commendation[ctx.author.id] == 3:
+                user.timeout(timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵")
+                self.commendation[ctx.author.id] = 0
 
-        embed = discord.Embed(title="獲得禁言獎勵", color=discord.Color.gold())
+            embed = discord.Embed(title="獲得禁言獎勵", color=discord.Color.gold())
 
-        embed.add_field(name="成員", value=f"{ctx.author.mention}", inline=False)
-        embed.add_field(name="獎勵", value="達成三次表揚，獲得 60 秒的禁言獎勵", inline=False)
+            embed.add_field(name="成員", value=f"{ctx.author.mention}", inline=False)
+            embed.add_field(name="獎勵", value="達成三次表揚，獲得 60 秒的禁言獎勵", inline=False)
 
-        ctx.send(embed=embed)
+            await ctx.send(embed=embed)
 
-        await self.__save_commend()
+            await self.__save_commend()
+        except Exception as e:
+            self.logger.error(f"表揚成員時發生錯誤: {e}")
+            await ctx.respond("❌ 發生錯誤，無法完成表揚。", ephemeral=True)
 
 def setup(bot: commands.Bot):
     bot.add_cog(Commend(bot))
