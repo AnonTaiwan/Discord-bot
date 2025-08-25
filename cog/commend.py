@@ -25,9 +25,11 @@ class Commend(commands.Cog):
             await user.timeout_for(duration, reason=reason)
         except discord.Forbidden:
             await ctx.send(f"❌ Cannot timeout {user.mention}")
+            return False
         except Exception as e:
             self.logger.error(f"禁言成員 {user} 時發生錯誤: {e}")
             await ctx.send(f"❌ 發生錯誤，無法禁言 {user.mention}")
+            return False
 
         return True
 
