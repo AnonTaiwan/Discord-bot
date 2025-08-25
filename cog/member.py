@@ -85,6 +85,47 @@ class NonMygoMemberPage(MemberPage):
             self.logger.error(f"Error invoking kick-non-mygo-members command from button: {e}")
             await interaction.response.send_message("❌ 發生錯誤，無法從 UI 執行踢出指令。", ephemeral=True)
 
+class KickComfirmPage(MemberPage):
+    def __init__(self, logger, days, members, per_page=25):
+        super().__init__(logger, members, per_page)
+
+        self.days = days
+
+    def get_page_embed(self):
+        embed = discord.Embed(title="確認要踢出以下成員嗎？", color=discord.Color.orange())
+
+        start = self.current_page * self.per_page
+        end = start + self.per_page
+
+        embed.add_field(name="Member", value="\n".join(member.mention for member in self.members[start:end]) or "N/A", inline=True)
+        embed.add_field(name="Join Time", value="\n".join(f"`{member.joined_at.strftime('%Y-%m-%d %H:%M:%S')}`"
+                                                        for member in self.members[start:end]) or "N/A", inline=True)
+    
+        embed.set_footer(text=f"共 {len(self.members)} 名成員")
+
+        embed.set_footer(text=f"Page {self.current_page + 1}/{(len(self.members) - 1) // self.per_page + 1}")
+        return embed
+    
+    @discord.ui.button(label="❌ Confirm Kick", style=discord.ButtonStyle.danger)
+    async def kick(self, button: discord.ui.Button, interaction: discord.Interaction):
+        try:
+            kicked = []
+            for member in self.members:
+                try:
+                    # await member.kick(reason=f"未領取「迷失之人」身分組超過 {self.days} 天")
+                    kicked.append(member)
+                except discord.Forbidden:
+                    self.logger.error(f"無法踢出成員 {member.name}，缺少權限。")
+                except Exception as e:
+                    self.logger.error(f"踢出成員 {member.name} 時發生錯誤: {e}")
+
+            view = KickMemberPage(self.logger, kicked)
+
+            await interaction.response.send_message(embed=view.get_page_embed(), view=view)
+        except Exception as e:
+            self.logger.error(f"Error kicking members: {e}")
+            await interaction.response.send_message("❌ 發生錯誤，無法執行指令。", ephemeral=True)
+
 class KickMemberPage(MemberPage):
     def __init__(self, logger, members, per_page=25):
         super().__init__(logger, members, per_page)
@@ -127,7 +168,6 @@ class KickMenu(discord.ui.View):
 
     async def kick_member(self, interaction: discord.Interaction):
         if not utils.is_developer(interaction.user):
-            self.logger.error(f"Error updating member page: {e}")
             await interaction.response.send_message("❌ 你沒有權限使用此功能。", ephemeral=True)
             return
 
@@ -139,24 +179,16 @@ class KickMenu(discord.ui.View):
         if not members_to_kick:
             await interaction.response.send_message("沒有成員符合踢出的條件。")
             return
-
+        
         try:
-            kicked = []
-            for member in members_to_kick:
-                try:
-                    await member.kick(reason=f"未領取「迷失之人」身分組超過 {selected_days} 天")
-                    kicked.append(member)
-                except discord.Forbidden:
-                    self.logger.warning(f"無法踢出成員 {member.name}，缺少權限。")
-                except Exception as e:
-                    self.logger.error(f"踢出成員 {member.name} 時發生錯誤: {e}")
-
-            view = KickMemberPage(self.logger, kicked)
+            view = KickComfirmPage(self.logger, selected_days, members_to_kick)
 
             await interaction.response.send_message(embed=view.get_page_embed(), view=view)
         except Exception as e:
-            self.logger.error(f"Error kicking members: {e}")
-            await interaction.response.send_message("❌ 發生錯誤，無法執行指令。", ephemeral=True)
+            self.logger.error(f"Error creating kick confirmation page: {e}")
+            await interaction.response.send_message("❌ 發生錯誤，無法執行指令。")
+
+
 
 class Member(commands.Cog):
     def __init__(self, bot):
