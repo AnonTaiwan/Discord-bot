@@ -112,7 +112,7 @@ class KickComfirmPage(MemberPage):
             kicked = []
             for member in self.members:
                 try:
-                    # await member.kick(reason=f"未領取「迷失之人」身分組超過 {self.days} 天")
+                    await member.kick(reason=f"未領取「迷失之人」身分組超過 {self.days} 天")
                     kicked.append(member)
                 except discord.Forbidden:
                     self.logger.error(f"無法踢出成員 {member.name}，缺少權限。")
