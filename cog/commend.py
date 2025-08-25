@@ -1,0 +1,64 @@
+import discord
+from discord.ext import commands
+from typing import List
+from datetime import datetime, timedelta, timezone
+import utils
+
+RECORD_FILE = utils.JSON_DIR / 'commend.json'
+
+class Commend(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        
+        self.logger = utils.get_logger(__name__)
+        self.logger.info("cog/commend.py: 日誌系統初始化完成")
+
+        utils.check_exist_or_create_json(self.logger, RECORD_FILE, default_content={"commendation": {}})
+
+        self.commendation = utils.read_json(self.logger, RECORD_FILE, default_content={"commendation": {}}).get("commendation", {})
+
+    async def __save_commend(self):
+        utils.write_json(self.logger, RECORD_FILE, {"commend": self.commend})
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        pass
+
+    @discord.slash_command(name="commend", description="表揚成員")
+    async def commend(self, ctx: discord.ApplicationContext, user: discord.Member = None,
+                      reason: discord.Option(description="表揚理由", required=False, default="")):
+        if not utils.is_operator(ctx.author):
+            await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
+            return
+
+        if user is None:
+            await ctx.respond("請指定一個使用者來表揚。", ephemeral=True)
+            return
+        
+        if ctx.author.id not in self.commend:
+            self.commendation[ctx.author.id] = 0
+
+        self.commendation[ctx.author.id] += 1
+
+        embed = discord.Embed(title="已表揚成員", color=discord.Color.green())
+
+        embed.add_field(name="被表揚成員", value=f"{user.mention}", inline=False)
+        embed.add_field(name="表揚理由", value=reason if reason else "N/A", inline=False)
+
+        await ctx.respond(embed=embed)
+
+        if self.commendation[ctx.author.id] == 3:
+            user.timeout(timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵")
+            self.commendation[ctx.author.id] = 0
+
+        embed = discord.Embed(title="獲得禁言獎勵", color=discord.Color.gold())
+
+        embed.add_field(name="成員", value=f"{ctx.author.mention}", inline=False)
+        embed.add_field(name="獎勵", value="達成三次表揚，獲得 60 秒的禁言獎勵", inline=False)
+
+        ctx.send(embed=embed)
+
+        await self.__save_commend()
+
+def setup(bot: commands.Bot):
+    bot.add_cog(Commend(bot))
