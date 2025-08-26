@@ -40,6 +40,13 @@ class Omikuji(commands.Cog):
     def save_omikuji(self):
         utils.write_json(self.logger, RECORD_FILE, {"omikuji": self.omikuji})
 
+    def __is_valid_request(self, ctx: discord.ApplicationContext):
+        return utils.is_developer(ctx.author) or utils.is_in_bot_playground(ctx.channel)
+    
+    async def __send_no_permission_message(self, ctx: discord.ApplicationContext):
+        await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
+        self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
+    
     @commands.Cog.listener()
     async def on_ready(self):
         if not self.daily_message.is_running():
@@ -47,6 +54,10 @@ class Omikuji(commands.Cog):
 
     @discord.slash_command(name="omikuji", description="抽籤 (此功能由 Kevin 提供)")
     async def draw_omikuji(self, ctx: discord.ApplicationContext):
+        if not self.__is_valid_request(ctx):
+            await self.__send_no_permission_message(ctx)
+            return
+
         if ctx.author.id in self.omikuji:
             await ctx.respond("你今天已經抽過籤了！請明天再來。")
             return
