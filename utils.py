@@ -105,7 +105,7 @@ def read_json(logger: logging.Logger, file: Path, default_content: dict = {}) ->
             logger.info(f"已成功讀取 {file}")
         except json.JSONDecodeError as e:
             logger.error(f"讀取 {file} 時發生錯誤：{e}")
-            content = { "length": 0 }
+            content = default_content
     return content
 
 def write_json(logger: logging.Logger, file: Path, data: dict) -> bool:
