@@ -67,7 +67,7 @@ class Gacha(commands.Cog):
 
     @discord.slash_command(name="gacha10", description="抽十抽普通池")
     async def gacha10(self, ctx: discord.ApplicationContext):
-        if self.__is_valid_request(ctx) is False:
+        if not self.__is_valid_request(ctx):
             await self.__send_no_permission_message(ctx)
             return
         
