@@ -1,14 +1,14 @@
 from datetime import datetime
 import discord
+from datetime import timedelta, timezone
 import json
 import logging
 import os
 from pathlib import Path
-import pytz
 
 # 時區設定
 
-TIME_ZONE = pytz.timezone('Asia/Taipei')
+TIME_ZONE = timezone(timedelta(hours=8))
 
 # 專案路徑
 

@@ -5,9 +5,9 @@ from datetime import time
 import utils
 
 health_message_time = [
-    time(hour=0, minute=6, second=0, tzinfo=utils.TIME_ZONE),
-    time(hour=8, minute=6, second=0, tzinfo=utils.TIME_ZONE),
-    time(hour=16, minute=6, second=0, tzinfo=utils.TIME_ZONE),
+    time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE),
+    time(hour=8, minute=0, second=0, tzinfo=utils.TIME_ZONE),
+    time(hour=16, minute=0, second=0, tzinfo=utils.TIME_ZONE),
 ]  # 每日訊息時間設定
 
 health_check_endpoints = [

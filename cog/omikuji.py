@@ -21,7 +21,7 @@ omikuji_results = [
     "Daikyo"
 ]
 
-daily_reset = time(hour=0, minute=6, second=0, tzinfo=utils.TIME_ZONE)  # 每日訊息時間設定
+daily_reset = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  # 每日訊息時間設定
 
 RECORD_FILE = utils.JSON_DIR / 'omikuji.json'
 OMIKUJI_STATIC_DIR = utils.STATIC_DIR / 'omikuji'
