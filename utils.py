@@ -11,12 +11,14 @@ import pytz
 TIME_ZONE = pytz.timezone('Asia/Taipei')
 
 # 專案路徑
+
 ROOT_DIR = Path(__file__).resolve().parent
 LOGS_DIR = ROOT_DIR / 'logs'
 JSON_DIR = ROOT_DIR / 'JSON'
 STATIC_DIR = ROOT_DIR / 'static'
 
 # Bot 相關配置
+
 BOT_CONFIG_FILE = JSON_DIR / 'bot.json'
 try:
     with open(JSON_DIR / 'bot.json', 'r', encoding='utf-8') as f:
