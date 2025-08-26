@@ -1,12 +1,10 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 import asyncio
 import os
-from time import sleep
 import logging
 from datetime import datetime, timedelta, date, time
 from pathlib import Path
-import json
 import utils
 
 class MyBot(commands.Bot):
