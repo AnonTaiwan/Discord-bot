@@ -199,7 +199,7 @@ class Member(commands.Cog):
     async def on_ready(self):
         pass
 
-    async def __get_non_mygo_members(self, guild):
+    async def __get_non_mygo_members(self, guild: discord.Guild) -> List[discord.Member]:
         members = guild.members
         non_mygo_members = [member for member in members if
                             not any(role.id == utils.MYGO_ROLE_ID or role.id == utils.BOT_ROLE_ID
