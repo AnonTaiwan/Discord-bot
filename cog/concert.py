@@ -20,7 +20,8 @@ class Concert(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.daily_message.start()
+        if not self.daily_message.is_running():
+            self.daily_message.start()
         pass
 
     @tasks.loop(time=daily_ask)
