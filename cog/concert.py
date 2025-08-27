@@ -4,8 +4,11 @@ from typing import List
 from datetime import datetime, timedelta, timezone, time
 import utils
 
-daily_ask = time(hour=10, minute=0, second=0,
-                 tzinfo=utils.TIME_ZONE)  # 每日訊息時間設定
+daily_ask = [
+    time(hour=10, minute=0, second=0, tzinfo=utils.TIME_ZONE),
+    time(hour=15, minute=0, second=0, tzinfo=utils.TIME_ZONE),
+    time(hour=22, minute=0, second=0, tzinfo=utils.TIME_ZONE),
+]  # 每日訊息時間設定
 
 
 class Concert(commands.Cog):
