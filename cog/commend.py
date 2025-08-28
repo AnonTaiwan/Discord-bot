@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
-from typing import List
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 import utils
 
 RECORD_FILE = utils.JSON_DIR / 'commend.json'
