@@ -10,7 +10,6 @@ daily_ask = [
     time(hour=22, minute=0, second=0, tzinfo=utils.TIME_ZONE),
 ]  # 每日訊息時間設定
 
-
 class Concert(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -28,7 +27,6 @@ class Concert(commands.Cog):
     async def daily_message(self):
         channel = self.bot.get_channel(1354880766126985358)
         await channel.send("店長：有人要去青木陽菜仙台場嗎？")
-
 
 def setup(bot: commands.Bot):
     bot.add_cog(Concert(bot))
