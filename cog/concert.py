@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-from typing import List
-from datetime import datetime, timedelta, timezone, time
+from datetime import time
 import utils
 
 daily_ask = [
@@ -21,11 +20,10 @@ class Concert(commands.Cog):
     async def on_ready(self):
         if not self.daily_message.is_running():
             self.daily_message.start()
-        pass
 
     @tasks.loop(time=daily_ask)
     async def daily_message(self):
-        channel = self.bot.get_channel(1354880766126985358)
+        channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
         await channel.send("店長：有人要去青木陽菜仙台場嗎？")
 
 def setup(bot: commands.Bot):
