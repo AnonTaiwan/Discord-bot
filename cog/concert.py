@@ -27,7 +27,7 @@ class Concert(commands.Cog):
     @tasks.loop(time=daily_ask)
     async def daily_message(self):
         channel = self.bot.get_channel(1354880766126985358)
-        await channel.send("店長:有人要去青木陽菜仙台場嗎?")
+        await channel.send("店長：有人要去青木陽菜仙台場嗎？")
 
 
 def setup(bot: commands.Bot):
