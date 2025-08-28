@@ -18,7 +18,7 @@ class Commend(commands.Cog):
         self.commendation = utils.read_json(self.logger, RECORD_FILE, default_content={"commendation": {}}).get("commendation", {})
 
     async def __save_commend(self):
-        utils.write_json(self.logger, RECORD_FILE, {"commend": self.commendation})
+        utils.write_json(self.logger, RECORD_FILE, {"commendation": self.commendation})
 
     async def __timeout_user(self, ctx: discord.ApplicationContext, user: discord.Member, duration: timedelta, reason: str) -> bool:
         try:
