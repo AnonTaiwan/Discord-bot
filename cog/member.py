@@ -117,7 +117,7 @@ class KickComfirmPage(MemberPage):
                 except discord.Forbidden:
                     self.logger.error(f"無法踢出成員 {member.name}，缺少權限。")
                 except Exception as e:
-                    self.logger.error(f"踢出成員 {member.name} 時發生錯誤: {e}")
+                    self.logger.error(f"踢出成員 {member.name} 時發生錯誤：{e}")
 
             view = KickMemberPage(self.logger, kicked)
 

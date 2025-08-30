@@ -37,16 +37,14 @@ class NewFB(commands.Cog):
             'upgrade-insecure-requests': '1',
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
         }
-        url = data['full_picture'].replace('\\','')
-        response = requests.get(url, headers=headers)
-        with open(f'{data['id']}.jpg','wb') as f:
-            f.write(response.content)
+        url = data.get('full_picture', None).replace('\\','')
+        if url:
+            response = requests.get(url, headers=headers)
+            with open(f'{data["id"]}.jpg','wb') as f:
+                f.write(response.content)
 
     async def __send_update_message(self, data_id, embed, file):
-        # main
-        msg = await self.channel.send(content = f'<@&{utils.ANON_TAIWAN_SUBSCRIBER_ROLE_ID}>', embed=embed, file=file)
-        # test
-        # msg = await self.channel.send(content = '', embed=embed, file=file)
+        msg = await self.channel.send(content=f'<@&{utils.ANON_TAIWAN_SUBSCRIBER_ROLE_ID}>', embed=embed, file=file if file else None)
         await msg.publish()
         self.logger.info(f"已發送新貼文通知：{data_id}")
         os.remove(f"{data_id}.jpg")
@@ -54,16 +52,17 @@ class NewFB(commands.Cog):
     async def __send_post_update_message(self, data):
         await self.get_photo(data)
         message = data.get('message', 'No message provided')
-        message = bytes(message,'utf-8').decode(encoding="utf-8", errors="ignore")
-        url = data.get('permalink_url', 'No URL provided').replace('\\','')
-        embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
+        message = bytes(message, 'utf-8').decode(encoding="utf-8", errors="ignore")
+        url = data.get('permalink_url', 'No URL provided').replace('\\', '')
+        embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url=url, color=0x00ff00)
         embed.add_field(name='貼文連結', value=url, inline=False)
         embed.add_field(name='貼文內容', value=message or "（無內容）", inline=False)
-        file = discord.File(f"{data['id']}.jpg", filename=f"{data['id']}.jpg")
-        embed.set_image(url=f"attachment://{data['id']}.jpg")
-        # main setting
-        # msg = await self.channel.send(content = '<@&1357315095235137636>', embed=embed, file=file)
-        # test setting
+        file_path = f"{data['id']}.jpg"
+        if os.path.exists(file_path):
+            file = discord.File(file_path, filename=file_path)
+            embed.set_image(url=f"attachment://{data['id']}.jpg")
+        else:
+            file = None
         await self.__send_update_message(data['id'], embed, file)
     
     async def __send_reel_update_message(self, reel):

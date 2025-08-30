@@ -62,7 +62,7 @@ class Gacha(commands.Cog):
         try:
             await ctx.respond(result)
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤: {e}")
+            await ctx.respond(f"❌ 發生錯誤：{e}")
             self.logger.error(f"Error in gacha command: {e}")
 
     @discord.slash_command(name="gacha10", description="抽十抽普通池")
@@ -82,7 +82,7 @@ class Gacha(commands.Cog):
         try:
             await ctx.respond(results)
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤: {e}")
+            await ctx.respond(f"❌ 發生錯誤：{e}")
             self.logger.error(f"Error in gacha10 command: {e}")
 
     @discord.slash_command(name="fes_gacha", description="抽一抽 FES 池")
@@ -96,7 +96,7 @@ class Gacha(commands.Cog):
         try:
             await ctx.respond(result)
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤: {e}")
+            await ctx.respond(f"❌ 發生錯誤：{e}")
             self.logger.error(f"Error in fes_gacha command: {e}")
 
     @discord.slash_command(name="fes_gacha10", description="抽十抽 FES 池")
@@ -116,7 +116,7 @@ class Gacha(commands.Cog):
         try:
             await ctx.respond(results)
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤: {e}")
+            await ctx.respond(f"❌ 發生錯誤：{e}")
             self.logger.error(f"Error in fes_gacha10 command: {e}")
 
 def setup(bot: commands.Bot):

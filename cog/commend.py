@@ -26,7 +26,7 @@ class Commend(commands.Cog):
             await ctx.send(f"❌ Cannot timeout {user.mention}")
             return False
         except Exception as e:
-            self.logger.error(f"禁言成員 {user} 時發生錯誤: {e}")
+            self.logger.error(f"禁言成員 {user} 時發生錯誤：{e}")
             await ctx.send(f"❌ 發生錯誤，無法禁言 {user.mention}")
             return False
 
@@ -38,8 +38,8 @@ class Commend(commands.Cog):
 
     @discord.slash_command(name="commend", description="表揚成員")
     async def commend(self, ctx: discord.ApplicationContext,
-                      user: discord.Option(discord.Member, description="要表揚的成員", required=True, default=None),
-                      reason: discord.Option(description="表揚理由", required=False, default="")):
+                      user: discord.Option(discord.Member, description="要表揚的成員", required=True, default=None), # type: ignore
+                      reason: discord.Option(description="表揚理由", required=False, default="")): # type: ignore
         if not utils.is_operator(ctx.author):
             await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
             return
@@ -76,7 +76,7 @@ class Commend(commands.Cog):
 
             await self.__save_commend()
         except Exception as e:
-            self.logger.error(f"表揚成員時發生錯誤: {e}")
+            self.logger.error(f"表揚成員時發生錯誤：{e}")
             await ctx.respond("❌ 發生錯誤，無法完成表揚。")
 
 def setup(bot: commands.Bot):

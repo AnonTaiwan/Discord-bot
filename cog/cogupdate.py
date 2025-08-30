@@ -44,8 +44,8 @@ class CogManager(commands.Cog):
                             self.logger.info(f'📥 已載入新的 Cog `{cog_name}`')
                             await message.channel.send(f"📥 已載入新的 Cog `{cog_name}`")
                     except Exception as e:
-                        self.logger.warning(f'❌ 加載失敗: `{e}`')
-                        await message.channel.send(f"❌ 加載失敗: `{e}`")
+                        self.logger.warning(f'❌ 加載失敗：`{e}`')
+                        await message.channel.send(f"❌ 加載失敗：`{e}`")
 
 def setup(bot: commands.Bot):
     bot.add_cog(CogManager(bot))
