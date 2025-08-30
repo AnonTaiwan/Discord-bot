@@ -88,10 +88,10 @@ class NewFB(commands.Cog):
         
     async def __check_comments(self, post_id, message, post_url):
         message = bytes(message, 'utf-8').decode(encoding="utf-8", errors="ignore")
-        POST_KEYWORDS = ["【聲優消息】","【pixiv分享】", "【推特圖文】"]
+        POST_KEYWORDS = ["【聲優消息】","【pixiv 分享】", "【推特圖文】"]
         COMMENT_KEYWORDS = ["創作分享", "圖文分享", "平台分享", "傳送門", "影片"]
         if any(keyword in message for keyword in POST_KEYWORDS) and post_id and post_url:
-            url = f"https://graph.facebook.com/v23.0/419295154604542_122173441778550554?fields=message,created_time,permalink_url,full_picture,comments&access_token={utils.FACEBOOK_TOKEN}"
+            url = f"https://graph.facebook.com/v23.0/{post_id}?fields=message,created_time,permalink_url,full_picture,comments&access_token={utils.FACEBOOK_TOKEN}"
             response = requests.get(url)
             response.encoding = "utf-8" 
             data = response.json()
