@@ -126,9 +126,8 @@ class NewFB(commands.Cog):
 
     def __formatted_time_to_unix_timestamp(self, formatted_time):
         try:
-            dt = datetime.strptime(formatted_time, "%Y-%m-%d %H:%M:%S")
-            localized_dt = utils.TIME_ZONE.localize(dt)
-            return int(localized_dt.timestamp())
+            dt = datetime.strptime(formatted_time, "%Y-%m-%d %H:%M:%S",).replace(tzinfo=utils.TIME_ZONE)
+            return int(dt.timestamp())
         except ValueError as e:
             self.logger.error(f"時間格式錯誤：{e}")
             return None
