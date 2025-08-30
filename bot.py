@@ -31,17 +31,20 @@ class MyBot(commands.Bot):
             except Exception as e:
                 print(f"❌ 無法加載擴展 {ext}: {e}")
 
+    def __unload_extensions(self):
+        for ext in self.initial_extensions:
+            self.unload_extension(ext)
+            print(f"✅ 已卸載擴展：{ext}")
+
     async def auto_shutdown_at_midnight(self):
         now = datetime.now()
         # 算到下個 0 點還有幾秒
         tomorrow = datetime.combine(date.today() + timedelta(days=1), time.min)
         seconds_to_midnight = (tomorrow - now).seconds
-        print(f"將於 {seconds_to_midnight - 5:,} 秒後自動關機")
-        await asyncio.sleep(seconds_to_midnight - 5)
+        print(f"將於 {seconds_to_midnight + 300:,} 秒後自動關機")
+        await asyncio.sleep(seconds_to_midnight + 300)
         print('每日 12 點自動關機')
-        for ext in self.initial_extensions:
-            self.unload_extension(ext)
-            print(f"✅ 已卸載擴展：{ext}")
+        self.__unload_extensions()
         await self.close()
 
 

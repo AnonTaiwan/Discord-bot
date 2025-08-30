@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, time
 import os
 from PIL import Image, ImageDraw, ImageFont
 import utils
+import asyncio
 
 daily_message_time = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  # 每日訊息時間設定
 
@@ -42,6 +43,11 @@ class NewFB(commands.Cog):
             response = requests.get(url, headers=headers)
             with open(f'{data["id"]}.jpg','wb') as f:
                 f.write(response.content)
+
+    async def __send_update_and_check_comments(self, data):
+        await self.__send_post_update_message(data)
+        await asyncio.sleep(10 * 60)
+        await self.__check_comments(data['id'], data.get('message', ''), data.get('permalink_url', '').replace('\\',''))
 
     async def __send_update_message(self, data_id, embed, file):
         msg = await self.channel.send(content=f'<@&{utils.ANON_TAIWAN_SUBSCRIBER_ROLE_ID}>', embed=embed, file=file if file else None)
@@ -80,6 +86,27 @@ class NewFB(commands.Cog):
         embed.add_field(name='Reel 內容', value=message or "（無內容）", inline=False)
         await self.__send_update_message(reel_data_id, embed, file)
         
+    async def __check_comments(self, post_id, message, post_url):
+        message = bytes(message, 'utf-8').decode(encoding="utf-8", errors="ignore")
+        POST_KEYWORDS = ["【聲優消息】","【pixiv分享】", "【推特圖文】"]
+        COMMENT_KEYWORDS = ["創作分享", "圖文分享", "平台分享", "傳送門", "影片"]
+        if any(keyword in message for keyword in POST_KEYWORDS) and post_id and post_url:
+            url = f"https://graph.facebook.com/v23.0/419295154604542_122173441778550554?fields=message,created_time,permalink_url,full_picture,comments&access_token={utils.FACEBOOK_TOKEN}"
+            response = requests.get(url)
+            response.encoding = "utf-8" 
+            data = response.json()
+            for i in data["comments"]["data"]:
+                if not any(word in i["message"] and i["from"]["id"] == "419295154604542" for word in COMMENT_KEYWORDS):
+                    await self.__send_comments_remind_message(post_id, post_url)
+                    self.logger.info(f"貼文 {post_id} 不包含留言來源，發送提醒。")
+
+    async def __send_comments_remind_message(self, post_id, post_url):
+        test_channel = self.bot.get_channel(utils.TEST_CHANNEL_ID)
+        embed = discord.Embed(title='Anon Taiwan 來源提醒', url=post_url, color=0xffa500)
+        embed.add_field(name='提醒內容', value='請記得查看貼文下方的留言，可能有圖片來源忘記發佈！', inline=False)
+        await test_channel.send(embed=embed)
+        self.logger.info(f"已發送留言提醒通知：{post_id}")
+    
     @commands.Cog.listener()
     async def on_ready(self):
         datas = self.get_datas()
@@ -107,7 +134,7 @@ class NewFB(commands.Cog):
             if new_post:
                 self.logger.info(f"發現 {len(new_post)} 條新貼文")
                 for post in new_post:
-                    await self.__send_post_update_message(post)
+                    await self.__send_update_and_check_comments(post)
                 self.latest = [i['id'] for i in datas]
         except Exception as e:
             self.logger.error(f"Error checking for updates: {e}")
