@@ -7,6 +7,7 @@ import heapq
 import os
 from PIL import Image, ImageDraw, ImageFont
 import utils
+import asyncio
 
 daily_message_time = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  # 每日訊息時間設定
 
@@ -34,6 +35,88 @@ class PriorityQueue:
     def pop(self):
         heapq.heappop(self.elements)
         self.__save()
+
+class ConfirmButton(discord.ui.View):
+    def __init__(self, post_id, link, type, original_msg):
+        super().__init__(timeout=None)
+        self.post_id = post_id
+        self.link = link
+        self.type = type
+        self.original_msg = original_msg
+
+    async def __send_comments(self):
+        url = f"https://graph.facebook.com/v23.0/{self.post_id}/comments"
+        payload = {
+            "message": f"{self.type} : \n{self.link}",
+            "access_token": utils.FACEBOOK_TOKEN
+        }
+        loop = asyncio.get_event_loop()
+        def sync_post():
+            return requests.post(url, data=payload)
+        response = await loop.run_in_executor(None, sync_post)
+        return response.status_code == 200
+
+    @discord.ui.button(label="確認", style=discord.ButtonStyle.danger)
+    async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
+        if await self.__send_comments():
+            await interaction.response.edit_message(content=f"已為 {self.type} 補上來源連結：{self.link}", embed=None, view=None)
+            await self.original_msg.delete()
+        else:
+            await interaction.response.edit_message(content=f"無法為 {self.type} 補上來源連結，請稍後再試。", embed=None, view=None)
+
+    @discord.ui.button(label="取消", style=discord.ButtonStyle.secondary)
+    async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.edit_message(content="已取消補上來源連結。", embed=None, view=None)
+
+class CommentLink(discord.ui.Modal, title="補上來源"):
+    def __init__(self, post_id, post_url, type, original_msg):
+        super().__init__()
+        self.post_id = post_id
+        self.post_url = post_url
+        self.type = type
+        self.original_msg = original_msg
+        self.add_item(discord.ui.InputText(label="請輸入來源連結", placeholder="https://example.com", required=True, style=discord.InputTextStyle.short))
+        
+    def create_embed(self):
+        embed = discord.Embed(title=f"補上來源 - {self.type}", url=self.post_url, color=discord.Color.blue())
+        embed.add_field(name="來源連結", value=self.link, inline=False)
+        return embed
+
+    async def callback(self, interaction: discord.Interaction):
+        self.link = self.children[0].value
+        embed = self.create_embed()
+        view = ConfirmButton(self.post_id, self.link, self.type, self.original_msg)
+        await interaction.response.edit_message(embed=embed, view=view)
+        
+class CommentType(discord.ui.View):
+    def __init__(self, post_id, url, original_msg):
+        super().__init__(timeout=None)
+        self.post_id = post_id
+        self.url = url
+        self.original_msg = original_msg
+
+    @discord.ui.select(placeholder="選擇留言類型", min_values=1, max_values=1, 
+        options = [
+            discord.SelectOption(label="創作分享"),
+            discord.SelectOption(label="圖文分享"),
+            discord.SelectOption(label="平台分享"),
+            discord.SelectOption(label="傳送門"),
+            discord.SelectOption(label="影片"),
+        ])
+    async def callback(self, select: discord.ui.Select, interaction: discord.Interaction):
+        type = select.values[0]
+        await interaction.response.send_modal(CommentLink(self.post_id, self.url, type, self.original_msg))
+
+class CommentButton(discord.ui.View):
+    def __init__(self, post_id, url):
+        super().__init__(timeout=None)
+        self.post_id = post_id
+        self.url = url
+
+    @discord.ui.button(label="補上來源", style=discord.ButtonStyle.primary)
+    async def view_comments(self, button: discord.ui.Button, interaction: discord.Interaction):
+        self.original_msg = interaction.message
+        await interaction.response.send_message(content="請選擇留言類型", view=CommentType(self.post_id, self.url, self.original_msg), ephemeral=True)
 
 class NewFB(commands.Cog):
     def __init__(self, bot):
@@ -136,7 +219,8 @@ class NewFB(commands.Cog):
         test_channel = self.bot.get_channel(utils.TEST_CHANNEL_ID)
         embed = discord.Embed(title='Anon Taiwan 來源提醒', url=post_url, color=0xffa500)
         embed.add_field(name='提醒內容', value='請記得查看貼文下方的留言，可能有圖片來源忘記發佈！', inline=False)
-        await test_channel.send(embed=embed)
+        view = CommentButton(post_id, post_url)
+        await test_channel.send(embed=embed, view=view)
         self.logger.info(f"已發送留言提醒通知：{post_id}")
     
     @commands.Cog.listener()
