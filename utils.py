@@ -29,6 +29,10 @@ try:
 except Exception as e:
     print(f"Error reading {BOT_CONFIG_FILE}: {e}")
 
+# Facebook 相關配置
+
+FB_PAGE_ID = '419295154604542'
+
 # Discord 相關配置
 
 OFFTOPIC_CHANNEL_ID = 1354880766126985358

@@ -3,20 +3,45 @@ from discord.ext import commands, tasks
 from curl_cffi import requests
 import json
 from datetime import datetime, timedelta, time
+import heapq
 import os
 from PIL import Image, ImageDraw, ImageFont
 import utils
-import asyncio
 
 daily_message_time = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  # 每日訊息時間設定
+
+RECORD_FILE = utils.JSON_DIR / 'new_fb.json'
+
+class PriorityQueue:
+    def __init__(self):
+        self.elements = []
+
+    def empty(self):
+        return not self.elements
+
+    def push(self, priority, item):
+        heapq.heappush(self.elements, (priority, item))
+
+    def top(self):
+        return self.elements[0]
+    
+    def pop(self):
+        heapq.heappop(self.elements)
 
 class NewFB(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.latest = []
+        self.comment_unchecked_posts = PriorityQueue()
 
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/new_fb.py: 日誌系統初始化完成")
+
+        utils.check_exist_or_create_json(self.logger, RECORD_FILE, {"comment_unchecked_posts": []})
+        record = utils.read_json(self.logger, RECORD_FILE, {"comment_unchecked_posts": []})
+        for item in record.get("comment_unchecked_posts", []):
+            created_time = datetime.strptime(item['created_time'], "%Y-%m-%dT%H:%M:%S%z")
+            self.comment_unchecked_posts.push(created_time, item)
     
     def get_datas(self, limit=3):
         response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={utils.FACEBOOK_TOKEN}&limit={limit}')
@@ -43,11 +68,6 @@ class NewFB(commands.Cog):
             response = requests.get(url, headers=headers)
             with open(f'{data["id"]}.jpg','wb') as f:
                 f.write(response.content)
-
-    async def __send_update_and_check_comments(self, data):
-        await self.__send_post_update_message(data)
-        await asyncio.sleep(10 * 60)
-        await self.__check_comments(data['id'], data.get('message', ''), data.get('permalink_url', '').replace('\\',''))
 
     async def __send_update_message(self, data_id, embed, file):
         msg = await self.channel.send(content=f'<@&{utils.ANON_TAIWAN_SUBSCRIBER_ROLE_ID}>', embed=embed, file=file if file else None)
@@ -93,10 +113,10 @@ class NewFB(commands.Cog):
         if any(keyword in message for keyword in POST_KEYWORDS) and post_id and post_url:
             url = f"https://graph.facebook.com/v23.0/{post_id}?fields=message,created_time,permalink_url,full_picture,comments&access_token={utils.FACEBOOK_TOKEN}"
             response = requests.get(url)
-            response.encoding = "utf-8" 
+            response.encoding = "utf-8"
             data = response.json()
             for i in data["comments"]["data"]:
-                if not any(word in i["message"] and i["from"]["id"] == "419295154604542" for word in COMMENT_KEYWORDS):
+                if not any(word in i["message"] and i["from"]["id"] == utils.FB_PAGE_ID for word in COMMENT_KEYWORDS):
                     await self.__send_comments_remind_message(post_id, post_url)
                     self.logger.info(f"貼文 {post_id} 不包含留言來源，發送提醒。")
 
@@ -118,13 +138,23 @@ class NewFB(commands.Cog):
 
         if not self.check_reel_updates.is_running():
             self.check_reel_updates.start()
-        # main channel
+
         self.channel = self.bot.get_channel(utils.FB_NOTIFICATION_CHANNEL_ID)
-        # test channel
-        # self.channel = self.bot.get_channel(1404889560068001864)
 
         if not self.daily_message.is_running():
             self.daily_message.start()
+
+    @tasks.loop(minutes=1)
+    async def check_comments_routine(self):
+        try:
+            if not self.comment_unchecked_posts.empty():
+                now = datetime.now(utils.TIME_ZONE)
+                created_time, data = self.comment_unchecked_posts.top()
+                if timedelta(minutes=10) <= now - created_time < timedelta(minutes=11):
+                    self.comment_unchecked_posts.pop()
+                    await self.__check_comments(data['id'], data.get('message', ''), data.get('permalink_url', '').replace('\\',''))
+        except Exception as e:
+            self.logger.error(f"Error checking comments: {e}")
     
     @tasks.loop(minutes=1)
     async def check_post_updates(self):
@@ -134,7 +164,8 @@ class NewFB(commands.Cog):
             if new_post:
                 self.logger.info(f"發現 {len(new_post)} 條新貼文")
                 for post in new_post:
-                    await self.__send_update_and_check_comments(post)
+                    await self.__send_post_update_message(post)
+                    self.comment_unchecked_posts.push(post.get('created_time', datetime.now(utils.TIME_ZONE)), post)
                 self.latest = [i['id'] for i in datas]
         except Exception as e:
             self.logger.error(f"Error checking for updates: {e}")
