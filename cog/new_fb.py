@@ -44,7 +44,7 @@ class NewFB(commands.Cog):
             self.comment_unchecked_posts.push(created_time, item)
     
     def get_datas(self, limit=3):
-        response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={utils.FACEBOOK_TOKEN}&limit={limit}')
+        response = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={utils.FACEBOOK_TOKEN}&limit={limit}')
         datas = json.loads(response.text)
         return datas['data']
             
@@ -131,7 +131,7 @@ class NewFB(commands.Cog):
     async def on_ready(self):
         datas = self.get_datas()
         self.latest = [i['id'] for i in datas]
-        self.reel = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=description,created_time,permalink_url&access_token={utils.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
+        self.reel = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url&access_token={utils.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
         
         if not self.check_post_updates.is_running():
             self.check_post_updates.start()
@@ -147,10 +147,13 @@ class NewFB(commands.Cog):
     @tasks.loop(minutes=1)
     async def check_comments_routine(self):
         try:
-            if not self.comment_unchecked_posts.empty():
-                now = datetime.now(utils.TIME_ZONE)
+            now = datetime.now(utils.TIME_ZONE)
+            while not self.comment_unchecked_posts.empty():
                 created_time, data = self.comment_unchecked_posts.top()
-                if timedelta(minutes=10) <= now - created_time < timedelta(minutes=11):
+                if now - created_time < timedelta(minutes=10):
+                    break
+
+                if now - created_time < timedelta(minutes=11):
                     self.comment_unchecked_posts.pop()
                     await self.__check_comments(data['id'], data.get('message', ''), data.get('permalink_url', '').replace('\\',''))
         except Exception as e:
@@ -173,7 +176,7 @@ class NewFB(commands.Cog):
     @tasks.loop(minutes=5)
     async def check_reel_updates(self):
         try:
-            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=description,created_time,permalink_url,picture&access_token={utils.FACEBOOK_TOKEN}&limit=3')
+            response = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url,picture&access_token={utils.FACEBOOK_TOKEN}&limit=3')
             reels_data = response.json()
             if self.reel != reels_data['data'][0]['id']:
                 self.reel = reels_data['data'][0]['id']
@@ -191,11 +194,11 @@ class NewFB(commands.Cog):
         
     def __get_posts_and_reels_count(self, start_timestamp, end_timestamp):
         try:
-            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/posts?fields=&access_token={utils.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
+            response = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/posts?fields=&access_token={utils.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
             posts_data = json.loads(response.text)
             posts_count = len(posts_data.get('data', []))
 
-            response = requests.get(f'https://graph.facebook.com/v23.0/419295154604542/video_reels?fields=&access_token={utils.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
+            response = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=&access_token={utils.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
             reels_data = json.loads(response.text)
             reels_count = len(reels_data.get('data', []))
 
