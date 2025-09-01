@@ -68,9 +68,9 @@ class ConfirmButton(discord.ui.View):
     async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.edit_message(content="已取消補上來源連結。", embed=None, view=None)
 
-class CommentLink(discord.ui.Modal, title="補上來源"):
+class CommentLink(discord.ui.Modal):
     def __init__(self, post_id, post_url, type, original_msg):
-        super().__init__()
+        super().__init__(title="補上來源")
         self.post_id = post_id
         self.post_url = post_url
         self.type = type
