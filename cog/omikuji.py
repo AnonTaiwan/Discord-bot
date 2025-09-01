@@ -118,7 +118,7 @@ class Omikuji(commands.Cog):
         self.save_omikuji()
 
         try: 
-            channel = self.bot.get_channel(utils.TEST_CHANNEL_ID) 
+            channel = self.bot.get_channel(utils.BOT_PLAYGROUND_CHANNEL_ID) 
             if channel:
                 await channel.send("每日運勢抽籤已重置！")
             else:
