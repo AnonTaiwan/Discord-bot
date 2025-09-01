@@ -1,8 +1,12 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from typing import List
 from datetime import datetime, timedelta, timezone
 import utils
+
+RECORD_FILE = utils.JSON_DIR / 'member.json'
+
+NOTIFY_USER_ROLE = None
 
 class MemberPage(discord.ui.View):
     def __init__(self, logger, members, per_page=25):
@@ -145,6 +149,23 @@ class KickMemberPage(MemberPage):
         embed.set_footer(text=f"Page {self.current_page + 1}/{(len(self.members) - 1) // self.per_page + 1}")
         return embed
 
+class RemoveNotifyRolePage(MemberPage):
+    def __init__(self, logger, members, per_page=25):
+        super().__init__(logger, members, per_page)
+
+    def get_page_embed(self):
+        embed = discord.Embed(title="已移除所有「通知用戶」身分組", color=discord.Color.green())
+
+        start = self.current_page * self.per_page
+        end = start + self.per_page
+
+        embed.add_field(name="Member", value="\n".join(member.mention for member in self.members[start:end]) or "N/A", inline=True)
+    
+        embed.set_footer(text=f"共 {len(self.members)} 名成員")
+
+        embed.set_footer(text=f"Page {self.current_page + 1}/{(len(self.members) - 1) // self.per_page + 1}")
+        return embed
+
 class KickMenu(discord.ui.View):
     def __init__(self, logger, members):
         super().__init__(timeout=None)
@@ -195,9 +216,18 @@ class Member(commands.Cog):
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/member.py: 日誌系統初始化完成")
 
+        utils.check_exist_or_create_json(self.logger, RECORD_FILE, default_content={"auto_detect": False})
+        self.auto_detect = utils.read_json(self.logger, RECORD_FILE, default_content={"auto_detect": False}).get("auto_detect", False)
+
     @commands.Cog.listener()
     async def on_ready(self):
-        pass
+        self.guild = self.bot.get_guild(utils.CRYCHIC_GUILD_ID)
+
+        global NOTIFY_USER_ROLE
+        NOTIFY_USER_ROLE = self.guild.get_role(utils.NOTIFY_USER_ROLE_ID)
+
+        if not self.auto_detect_non_mygo_members.is_running():
+            self.auto_detect_non_mygo_members.start()
 
     async def __get_non_mygo_members(self, guild: discord.Guild) -> List[discord.Member]:
         members = guild.members
@@ -206,6 +236,51 @@ class Member(commands.Cog):
                             for role in member.roles)]
         non_mygo_members.sort(key=lambda m: m.joined_at or discord.utils.snowflake_time(m.id))
         return non_mygo_members
+    
+    async def __get_mygo_members(self, guild: discord.Guild) -> List[discord.Member]:
+        members = guild.members
+        mygo_members = [member for member in members if
+                        any(role.id == utils.MYGO_ROLE_ID or role.id == utils.BOT_ROLE_ID
+                        for role in member.roles)]
+        mygo_members.sort(key=lambda m: m.joined_at or discord.utils.snowflake_time(m.id))
+        return mygo_members
+    
+    async def __get_notify_members(self, guild: discord.Guild) -> List[discord.Member]:
+        members = guild.members
+        notify_members = [member for member in members if NOTIFY_USER_ROLE in member.roles]
+        notify_members.sort(key=lambda m: m.joined_at or discord.utils.snowflake_time(m.id))
+        return notify_members
+    
+    @tasks.loop(minutes=1)
+    async def auto_detect_non_mygo_members(self):
+        if not self.auto_detect:
+            return
+
+        if self.guild is None:
+            self.logger.warning("Guild is not set. Cannot auto-detect non-mygo members.")
+            return
+        
+        try:
+            non_mygo_members = await self.__get_non_mygo_members(self.guild)
+
+            for member in non_mygo_members:
+                if NOTIFY_USER_ROLE not in member.roles:
+                    try:
+                        await member.add_roles(NOTIFY_USER_ROLE, reason="自動偵測未領取「迷失之人」身分組")
+                        self.logger.info(f"Added Notify role to {member.name}#{member.discriminator} ({member.id})")
+                    except Exception as e:
+                        self.logger.error(f"為成員 {member.name} 添加通知用戶身分組時發生錯誤：{e}")
+
+            mygo_members = await self.__get_mygo_members(self.guild)
+            for member in mygo_members:
+                if NOTIFY_USER_ROLE in member.roles:
+                    try:
+                        await member.remove_roles(NOTIFY_USER_ROLE, reason="自動偵測已領取「迷失之人」身分組")
+                        self.logger.info(f"Removed Notify role from {member.name}#{member.discriminator} ({member.id})")
+                    except Exception as e:
+                        self.logger.error(f"為成員 {member.name} 移除通知用戶身分組時發生錯誤：{e}")
+        except Exception as e:
+            self.logger.error(f"Error during auto-detection of non-mygo members: {e}")
 
     @discord.slash_command(name="non-mygo-members", description="取得所有未領取「迷失之人」身分組的人")
     async def non_mygo_members(self, ctx: discord.ApplicationContext):
@@ -247,6 +322,60 @@ class Member(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error responding to kick_non_mygo_members command: {e}")
             await ctx.respond("❌ 發生錯誤，無法取得成員列表。")
+
+    @discord.slash_command(name="detect-non-mygo-member",
+                           description="開啟或關閉自動偵測未領取「迷失之人」身分組的成員，並將他們加入「通知用戶」身份組")
+    async def detect_non_mygo_member(self, ctx: discord.ApplicationContext, toggle: bool):
+        if not utils.is_operator(ctx.author):
+            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
+            return
+
+        if ctx.guild is None:
+            await ctx.respond("此指令只能在伺服器中使用。", ephemeral=True)
+            return
+
+        try:
+            if toggle:
+                self.auto_detect = True
+                await ctx.respond("✅ 已啟用自動偵測未領取「迷失之人」身分組的成員功能。")
+            else:
+                self.auto_detect = False
+                await ctx.respond("✅ 已停用自動偵測未領取「迷失之人」身分組的成員功能。")
+        except Exception as e:
+            self.logger.error(f"Error toggling detect_non_mygo_member: {e}")
+            await ctx.respond("❌ 發生錯誤，無法更新設定。")
+
+    @discord.slash_command(name="remove-all-notify-role", description="移除所有成員的「通知用戶」身分組")
+    async def remove_all_notify_role(self, ctx: discord.ApplicationContext):
+        if not utils.is_developer(ctx.author):
+            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
+            return
+
+        if ctx.guild is None:
+            await ctx.respond("此指令只能在伺服器中使用。", ephemeral=True)
+            return
+
+        try:
+            members_with_notify = await self.__get_notify_members(ctx.guild)
+
+            if not members_with_notify:
+                await ctx.respond("沒有成員擁有「通知用戶」身分組。")
+                return
+
+            removed = []
+            for member in members_with_notify:
+                try:
+                    await member.remove_roles(NOTIFY_USER_ROLE, reason="移除所有成員的「通知用戶」身分組")
+                    removed.append(member)
+                except Exception as e:
+                    self.logger.error(f"移除成員 {member.name} 的通知用戶身分組時發生錯誤：{e}")
+
+            view = RemoveNotifyRolePage(self.logger, removed)
+
+            await ctx.respond(embed=view.get_page_embed(), view=view)
+        except Exception as e:
+            self.logger.error(f"Error removing all notify roles: {e}")
+            await ctx.respond("❌ 發生錯誤，無法執行指令。")
 
 def setup(bot: commands.Bot):
     bot.add_cog(Member(bot))
