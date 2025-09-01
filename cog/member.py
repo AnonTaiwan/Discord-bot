@@ -6,7 +6,8 @@ import utils
 
 RECORD_FILE = utils.JSON_DIR / 'member.json'
 
-NOTIFY_USER_ROLE = None
+NOTIFY_ROLE = None
+NO_MYGO_ROLE = None
 
 class MemberPage(discord.ui.View):
     def __init__(self, logger, members, per_page=25):
@@ -149,12 +150,13 @@ class KickMemberPage(MemberPage):
         embed.set_footer(text=f"Page {self.current_page + 1}/{(len(self.members) - 1) // self.per_page + 1}")
         return embed
 
-class RemoveNotifyRolePage(MemberPage):
-    def __init__(self, logger, members, per_page=25):
+class RemoveRolePage(MemberPage):
+    def __init__(self, logger, role, members, per_page=25):
         super().__init__(logger, members, per_page)
+        self.role = role
 
     def get_page_embed(self):
-        embed = discord.Embed(title="已移除所有「通知用戶」身分組", color=discord.Color.green())
+        embed = discord.Embed(title=f"已移除所有「{self.role}」身分組", color=discord.Color.green())
 
         start = self.current_page * self.per_page
         end = start + self.per_page
@@ -223,8 +225,11 @@ class Member(commands.Cog):
     async def on_ready(self):
         self.guild = self.bot.get_guild(utils.CRYCHIC_GUILD_ID)
 
-        global NOTIFY_USER_ROLE
-        NOTIFY_USER_ROLE = self.guild.get_role(utils.NOTIFY_USER_ROLE_ID)
+        global NOTIFY_ROLE
+        NOTIFY_ROLE = self.guild.get_role(utils.NOTIFY_ROLE_ID)
+
+        global NO_MYGO_ROLE
+        NO_MYGO_ROLE = self.guild.get_role(utils.NO_MYGO_ROLE_ID)
 
         if not self.auto_detect_non_mygo_members.is_running():
             self.auto_detect_non_mygo_members.start()
@@ -247,7 +252,7 @@ class Member(commands.Cog):
     
     async def __get_notify_members(self, guild: discord.Guild) -> List[discord.Member]:
         members = guild.members
-        notify_members = [member for member in members if NOTIFY_USER_ROLE in member.roles]
+        notify_members = [member for member in members if NO_MYGO_ROLE in member.roles]
         notify_members.sort(key=lambda m: m.joined_at or discord.utils.snowflake_time(m.id))
         return notify_members
     
@@ -264,19 +269,19 @@ class Member(commands.Cog):
             non_mygo_members = await self.__get_non_mygo_members(self.guild)
 
             for member in non_mygo_members:
-                if NOTIFY_USER_ROLE not in member.roles:
+                if NO_MYGO_ROLE not in member.roles:
                     try:
-                        await member.add_roles(NOTIFY_USER_ROLE, reason="自動偵測未領取「迷失之人」身分組")
-                        self.logger.info(f"Added Notify role to {member.name}#{member.discriminator} ({member.id})")
+                        await member.add_roles(NO_MYGO_ROLE, reason="自動偵測未領取「迷失之人」身分組")
+                        self.logger.info(f"Added No MyGO role to {member.name}#{member.discriminator} ({member.id})")
                     except Exception as e:
                         self.logger.error(f"為成員 {member.name} 添加通知用戶身分組時發生錯誤：{e}")
 
             mygo_members = await self.__get_mygo_members(self.guild)
             for member in mygo_members:
-                if NOTIFY_USER_ROLE in member.roles:
+                if NO_MYGO_ROLE in member.roles:
                     try:
-                        await member.remove_roles(NOTIFY_USER_ROLE, reason="自動偵測已領取「迷失之人」身分組")
-                        self.logger.info(f"Removed Notify role from {member.name}#{member.discriminator} ({member.id})")
+                        await member.remove_roles(NO_MYGO_ROLE, reason="自動偵測已領取「迷失之人」身分組")
+                        self.logger.info(f"Removed No MyGO role from {member.name}#{member.discriminator} ({member.id})")
                     except Exception as e:
                         self.logger.error(f"為成員 {member.name} 移除通知用戶身分組時發生錯誤：{e}")
         except Exception as e:
@@ -324,7 +329,7 @@ class Member(commands.Cog):
             await ctx.respond("❌ 發生錯誤，無法取得成員列表。")
 
     @discord.slash_command(name="detect-non-mygo-member",
-                           description="開啟或關閉自動偵測未領取「迷失之人」身分組的成員，並將他們加入「通知用戶」身份組")
+                           description="開啟或關閉自動偵測未領取「迷失之人」身分組的成員，並將他們加入「未領取必要身份組」身份組")
     async def detect_non_mygo_member(self, ctx: discord.ApplicationContext, toggle: bool):
         if not utils.is_operator(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
@@ -365,16 +370,48 @@ class Member(commands.Cog):
             removed = []
             for member in members_with_notify:
                 try:
-                    await member.remove_roles(NOTIFY_USER_ROLE, reason="移除所有成員的「通知用戶」身分組")
+                    await member.remove_roles(NOTIFY_ROLE, reason="移除所有成員的「通知用戶」身分組")
                     removed.append(member)
                 except Exception as e:
-                    self.logger.error(f"移除成員 {member.name} 的通知用戶身分組時發生錯誤：{e}")
+                    self.logger.error(f"移除成員 {member.name} 的「通知用戶」身分組時發生錯誤：{e}")
 
-            view = RemoveNotifyRolePage(self.logger, removed)
+            view = RemoveRolePage(self.logger, "通知用戶", removed)
 
             await ctx.respond(embed=view.get_page_embed(), view=view)
         except Exception as e:
             self.logger.error(f"Error removing all notify roles: {e}")
+            await ctx.respond("❌ 發生錯誤，無法執行指令。")
+
+    @discord.slash_command(name="remove-all-no-mygo-role", description="移除所有成員的「未領取必要身份組」身分組")
+    async def remove_all_no_mygo_role(self, ctx: discord.ApplicationContext):
+        if not utils.is_developer(ctx.author):
+            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
+            return
+
+        if ctx.guild is None:
+            await ctx.respond("此指令只能在伺服器中使用。", ephemeral=True)
+            return
+
+        try:
+            members_with_notify = await self.__get_notify_members(ctx.guild)
+
+            if not members_with_notify:
+                await ctx.respond("沒有成員擁有「未領取必要身份組」身分組。")
+                return
+
+            removed = []
+            for member in members_with_notify:
+                try:
+                    await member.remove_roles(NO_MYGO_ROLE, reason="移除所有成員的「未領取必要身份組」身分組")
+                    removed.append(member)
+                except Exception as e:
+                    self.logger.error(f"移除成員 {member.name} 的「未領取必要身份組」身分組時發生錯誤：{e}")
+
+            view = RemoveRolePage(self.logger, "未領取必要身份組", removed)
+
+            await ctx.respond(embed=view.get_page_embed(), view=view)
+        except Exception as e:
+            self.logger.error(f"Error removing all No MyGO roles: {e}")
             await ctx.respond("❌ 發生錯誤，無法執行指令。")
 
 def setup(bot: commands.Bot):
