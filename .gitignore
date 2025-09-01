@@ -1,6 +1,7 @@
 /.venv/
 __pycache__/
 logs/
+tmp/
 *.pyc
 Anon Taiwan.code-workspace
 
