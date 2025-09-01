@@ -255,9 +255,15 @@ class Member(commands.Cog):
     
     async def __get_notify_members(self, guild: discord.Guild) -> List[discord.Member]:
         members = guild.members
-        notify_members = [member for member in members if NO_MYGO_ROLE in member.roles]
+        notify_members = [member for member in members if NOTIFY_ROLE in member.roles]
         notify_members.sort(key=lambda m: m.joined_at or discord.utils.snowflake_time(m.id))
         return notify_members
+    
+    async def __get_no_mygo_members(self, guild: discord.Guild) -> List[discord.Member]:
+        members = guild.members
+        no_mygo_members = [member for member in members if NO_MYGO_ROLE in member.roles]
+        no_mygo_members.sort(key=lambda m: m.joined_at or discord.utils.snowflake_time(m.id))
+        return no_mygo_members
     
     @tasks.loop(minutes=1)
     async def auto_detect_non_mygo_members(self):
@@ -398,7 +404,7 @@ class Member(commands.Cog):
             return
 
         try:
-            members_with_notify = await self.__get_notify_members(ctx.guild)
+            members_with_notify = await self.__get_no_mygo_members(ctx.guild)
 
             if not members_with_notify:
                 await ctx.respond("沒有成員擁有「未領取必要身份組」身分組。")
