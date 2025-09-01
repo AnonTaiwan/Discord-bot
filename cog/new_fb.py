@@ -232,6 +232,9 @@ class NewFB(commands.Cog):
         self.latest = [i['id'] for i in datas]
         self.reel = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url&access_token={utils.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
         
+        if not self.check_comments_routine.is_running():
+            self.check_comments_routine.start()
+
         if not self.check_post_updates.is_running():
             self.check_post_updates.start()
 
@@ -252,9 +255,8 @@ class NewFB(commands.Cog):
                 if now - created_time < timedelta(minutes=10):
                     break
 
-                if now - created_time < timedelta(minutes=11):
-                    self.comment_unchecked_posts.pop()
-                    await self.__check_comments(data['id'], data.get('message', ''), data.get('permalink_url', '').replace('\\',''))
+                self.comment_unchecked_posts.pop()
+                await self.__check_comments(data['id'], data.get('message', ''), data.get('permalink_url', '').replace('\\',''))
         except Exception as e:
             self.logger.error(f"Error checking comments: {e}")
     
