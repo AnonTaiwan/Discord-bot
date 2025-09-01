@@ -16,6 +16,7 @@ ROOT_DIR = Path(__file__).resolve().parent
 LOGS_DIR = ROOT_DIR / 'logs'
 JSON_DIR = ROOT_DIR / 'JSON'
 STATIC_DIR = ROOT_DIR / 'static'
+TMP_DIR = ROOT_DIR / 'tmp'
 
 # Bot 相關配置
 
@@ -125,3 +126,6 @@ def write_json(logger: logging.Logger, file: Path, data: dict) -> bool:
         except Exception as e:
             logger.error(f"寫入 {file} 時發生錯誤：{e}")
             return False
+        
+def get_tmp_file(filename: str) -> str:
+    return str(TMP_DIR / filename)

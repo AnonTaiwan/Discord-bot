@@ -78,6 +78,12 @@ def setup_daily_logger():
     
     return logging.getLogger()
 
+def setup_tmp_dir():
+    """確保 tmp 目錄存在"""
+    tmp_dir = Path('tmp')
+    if not tmp_dir.is_dir():
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+
 async def main():
     logger = None
     current_date = None
@@ -90,6 +96,8 @@ async def main():
             logger = setup_daily_logger()
             current_date = today
             logger.info(f"日誌系統已更新至 {today}")
+
+        setup_tmp_dir()
             
         async with MyBot() as bot:
             if os.environ.get("CI_RUNNING") == "true":
