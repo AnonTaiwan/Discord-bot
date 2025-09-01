@@ -221,6 +221,9 @@ class Member(commands.Cog):
         utils.check_exist_or_create_json(self.logger, RECORD_FILE, default_content={"auto_detect": False})
         self.auto_detect = utils.read_json(self.logger, RECORD_FILE, default_content={"auto_detect": False}).get("auto_detect", False)
 
+    def save_member(self):
+        utils.write_json(self.logger, RECORD_FILE, {"auto_detect": self.auto_detect})
+
     @commands.Cog.listener()
     async def on_ready(self):
         self.guild = self.bot.get_guild(utils.CRYCHIC_GUILD_ID)
@@ -342,9 +345,11 @@ class Member(commands.Cog):
         try:
             if toggle:
                 self.auto_detect = True
+                self.save_member()
                 await ctx.respond("✅ 已啟用自動偵測未領取「迷失之人」身分組的成員功能。")
             else:
                 self.auto_detect = False
+                self.save_member()
                 await ctx.respond("✅ 已停用自動偵測未領取「迷失之人」身分組的成員功能。")
         except Exception as e:
             self.logger.error(f"Error toggling detect_non_mygo_member: {e}")
