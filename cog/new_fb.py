@@ -13,10 +13,15 @@ daily_message_time = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  #
 
 RECORD_FILE = utils.JSON_DIR / 'new_fb.json'
 
-class PriorityQueue:
+class PriorityQueue(json.JSONEncoder):
     def __init__(self, save_callback):
         self.elements = []
         self.save_callback = save_callback
+
+    def default(self, obj):
+        if isinstance(obj, PriorityQueue):
+            return obj.elements
+        raise TypeError(f'Type {type(obj)} not serializable')
 
     def __save(self):
         if self.save_callback:
