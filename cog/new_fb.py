@@ -18,6 +18,9 @@ class PriorityQueue():
         self.elements = []
         self.save_callback = save_callback
 
+    def get_raw_elements(self):
+        return [item for _, item in self.elements]
+
     def __save(self):
         if self.save_callback:
             self.save_callback()
@@ -135,7 +138,7 @@ class NewFB(commands.Cog):
 
     def __save_new_fb_record(self):
         utils.write_json(self.logger, RECORD_FILE, {
-            "comment_unchecked_posts": self.comment_unchecked_posts.elements
+            "comment_unchecked_posts": self.comment_unchecked_posts.get_raw_elements()
         })
     
     def get_datas(self, limit=3):
