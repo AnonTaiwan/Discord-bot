@@ -83,14 +83,21 @@ class Commend(commands.Cog):
     async def show_commendations(self, ctx: discord.ApplicationContext): # type: ignore
         embed = discord.Embed(title="所有表揚次數", color=discord.Color.purple())
         
+        commend_times = [[] for _ in range(3)]
         try:
             if not self.commendation:
-                embed.add_field(name="表揚次數", value="目前沒有任何表揚紀錄。", inline=False)
+                embed.add_field(name="目前沒有任何表揚紀錄。", value="\u200b", inline=False) # 使用零寬空格避免 Discord 不顯示欄位
             else:
                 for user_id, count in self.commendation.items():
-                    member = ctx.guild.get_member(user_id)
+                    member = await ctx.guild.fetch_member(user_id)
                     if member:
-                        embed.add_field(name=member.mention, value=f"表揚次數：{count}", inline=False)
+                        commend_times[count].append(member.mention)
+
+                for i in range(3):
+                    if commend_times[i]:
+                        embed.add_field(name=f"已被表揚 {i} 次", value="\n".join(commend_times[i]), inline=False)
+                    else:
+                        embed.add_field(name=f"已被表揚 {i} 次", value="無", inline=False)
 
             await ctx.respond(embed=embed, ephemeral=True)
         except Exception as e:
