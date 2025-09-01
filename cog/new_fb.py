@@ -13,15 +13,10 @@ daily_message_time = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  #
 
 RECORD_FILE = utils.JSON_DIR / 'new_fb.json'
 
-class PriorityQueue(json.JSONEncoder):
+class PriorityQueue():
     def __init__(self, save_callback):
         self.elements = []
         self.save_callback = save_callback
-
-    def default(self, obj):
-        if isinstance(obj, PriorityQueue):
-            return obj.elements
-        raise TypeError(f'Type {type(obj)} not serializable')
 
     def __save(self):
         if self.save_callback:
@@ -140,7 +135,7 @@ class NewFB(commands.Cog):
 
     def __save_new_fb_record(self):
         utils.write_json(self.logger, RECORD_FILE, {
-            "comment_unchecked_posts": self.comment_unchecked_posts
+            "comment_unchecked_posts": self.comment_unchecked_posts.elements
         })
     
     def get_datas(self, limit=3):
