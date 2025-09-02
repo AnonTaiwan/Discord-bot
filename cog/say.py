@@ -37,14 +37,16 @@ class Say(commands.Cog):
             if reply is not None:
                 msg = await ctx.channel.fetch_message(int(reply))
                 await msg.reply(message)
-                await ctx.respond(f"✅ 已成功回覆訊息。", ephemeral=True)
+                if msg.channel != ctx.channel:
+                    await ctx.respond(f"✅ 已成功回覆訊息。", ephemeral=True)
                 return
 
             if channel is None:
                 channel = ctx.channel
 
             await channel.send(message)
-            await ctx.respond(f"✅ 已成功在 {channel.mention} 傳送訊息。", ephemeral=True)
+            if channel != ctx.channel:
+                await ctx.respond(f"✅ 已成功在 {channel.mention} 傳送訊息。", ephemeral=True)
         except Exception as e:
             self.logger.error(f"在頻道 {channel.id} 傳送訊息時發生錯誤：{e}")
             await ctx.respond("❌ 發生錯誤，無法傳送訊息。", ephemeral=True)
