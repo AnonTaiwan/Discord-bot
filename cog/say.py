@@ -16,7 +16,7 @@ class Say(commands.Cog):
     @discord.slash_command(name="say", description="使用彩奈傳送訊息")
     async def say(self, ctx: discord.ApplicationContext,
                                message: discord.Option(str, description="輸入訊息", required=True), # type: ignore
-                               reply: discord.Option(int, description="選擇要回覆的訊息 ID", required=False, default=None), # type: ignore
+                               reply: discord.Option(str, description="選擇要回覆的訊息 ID", required=False, default=None), # type: ignore
                                channel: discord.Option(discord.TextChannel, description="選擇頻道", required=False)): # type: ignore
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
@@ -35,7 +35,7 @@ class Say(commands.Cog):
                 await ctx.respond("❌ 只能選擇頻道或回覆其中一個。", ephemeral=True)
 
             if reply is not None:
-                msg = await ctx.channel.fetch_message(reply)
+                msg = await ctx.channel.fetch_message(int(reply))
                 await msg.reply(message)
                 await ctx.respond(f"✅ 已成功回覆訊息。", ephemeral=True)
                 return
