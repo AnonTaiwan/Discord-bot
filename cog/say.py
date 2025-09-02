@@ -14,22 +14,34 @@ class Say(commands.Cog):
         pass
 
     @discord.slash_command(name="say", description="使用彩奈傳送訊息")
-    async def non_mygo_members(self, ctx: discord.ApplicationContext,
-                               channel: discord.Option(discord.TextChannel, description="選擇頻道", required=True), # type: ignore
-                               message: discord.Option(str, description="輸入訊息", required=True)): # type: ignore
+    async def say(self, ctx: discord.ApplicationContext,
+                               message: discord.Option(str, description="輸入訊息", required=True), # type: ignore
+                               reply: discord.Option(discord.Message, description="選擇要回覆的訊息", required=False, default=None), # type: ignore
+                               channel: discord.Option(discord.TextChannel, description="選擇頻道", required=False)): # type: ignore
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             return
         
-        if channel.guild.id != utils.CRYCHIC_GUILD_ID:
+        if channel and channel.guild.id != utils.CRYCHIC_GUILD_ID:
             await ctx.respond("❌ 只能在 CRYCHIC 伺服器使用此指令。", ephemeral=True)
             return
 
         if len(message) > 2000:
             await ctx.respond("❌ 訊息長度不能超過 2000 個字元。", ephemeral=True)
             return
-
+        
         try:
+            if channel and reply:
+                await ctx.respond("❌ 只能選擇頻道或回覆其中一個。", ephemeral=True)
+
+            if reply is not None:
+                await reply.reply(message)
+                await ctx.respond(f"✅ 已成功回覆訊息。", ephemeral=True)
+                return
+
+            if channel is None:
+                channel = ctx.channel
+
             await channel.send(message)
             await ctx.respond(f"✅ 已成功在 {channel.mention} 傳送訊息。", ephemeral=True)
         except Exception as e:
