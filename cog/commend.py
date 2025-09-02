@@ -93,7 +93,7 @@ class Commend(commands.Cog):
                     if member:
                         commend_times[count].append(member.mention)
 
-                for i in range(3):
+                for i in range(1, 3):
                     if commend_times[i]:
                         embed.add_field(name=f"已被表揚 {i} 次", value="\n".join(commend_times[i]), inline=False)
                     else:
