@@ -39,6 +39,9 @@ class Say(commands.Cog):
                 await msg.reply(message)
                 if msg.channel != ctx.channel:
                     await ctx.respond(f"✅ 已成功回覆訊息。", ephemeral=True)
+                else:
+                    await ctx.defer()
+                    await ctx.delete()
                 return
 
             if channel is None:
@@ -47,6 +50,9 @@ class Say(commands.Cog):
             await channel.send(message)
             if channel != ctx.channel:
                 await ctx.respond(f"✅ 已成功在 {channel.mention} 傳送訊息。", ephemeral=True)
+            else:
+                await ctx.defer()
+                await ctx.delete()
         except Exception as e:
             self.logger.error(f"在頻道 {channel.id} 傳送訊息時發生錯誤：{e}")
             await ctx.respond("❌ 發生錯誤，無法傳送訊息。", ephemeral=True)
