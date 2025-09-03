@@ -9,6 +9,7 @@ daily_ask = [
     time(hour=22, minute=0, second=0, tzinfo=utils.TIME_ZONE),
 ]  # 每日訊息時間設定
 
+
 class Concert(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -18,13 +19,15 @@ class Concert(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        if not self.daily_message.is_running():
-            self.daily_message.start()
+        return
+        # if not self.daily_message.is_running():
+        #     self.daily_message.start()
 
     @tasks.loop(time=daily_ask)
     async def daily_message(self):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
         await channel.send("店長：有人要去青木陽菜仙台場嗎？")
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Concert(bot))
