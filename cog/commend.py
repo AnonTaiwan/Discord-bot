@@ -14,7 +14,8 @@ class Commend(commands.Cog):
 
         utils.check_exist_or_create_json(self.logger, RECORD_FILE, default_content={"commendation": {}})
 
-        self.commendation = utils.read_json(self.logger, RECORD_FILE, default_content={"commendation": {}}).get("commendation", {})
+        commendation = utils.read_json(self.logger, RECORD_FILE, default_content={"commendation": {}}).get("commendation", {})
+        self.commendation = {int(k): v for k, v in commendation.items()}
 
     async def __save_commend(self):
         utils.write_json(self.logger, RECORD_FILE, {"commendation": self.commendation})
