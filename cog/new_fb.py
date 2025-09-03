@@ -352,7 +352,7 @@ class NewFB(commands.Cog):
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
 
-            channel = self.bot.get_channel(utils.TEST_CHANNEL_ID)
+            channel = self.bot.get_channel(utils.FB_PAGE_DAILY_MESSAGE_CHANNEL_ID)
             await channel.send(embed=embed, file=file)
             self.logger.info(f"每日訊息已發送，時間：{yesterday.strftime('%Y-%m-%d %H:%M:%S')} ~ {today.strftime('%Y-%m-%d %H:%M:%S')}")
             os.remove("output.png")
