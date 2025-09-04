@@ -164,14 +164,14 @@ class NewFB(commands.Cog):
         url = data.get('full_picture', None).replace('\\','')
         if url:
             response = requests.get(url, headers=headers)
-            with open(f'{data["id"]}.jpg','wb') as f:
+            with open(f'tmp/{data["id"]}.jpg','wb') as f:
                 f.write(response.content)
 
     async def __send_update_message(self, data_id, embed, file):
         msg = await self.channel.send(content=f'<@&{utils.ANON_TAIWAN_SUBSCRIBER_ROLE_ID}>', embed=embed, file=file if file else None)
         await msg.publish()
         self.logger.info(f"已發送新貼文通知：{data_id}")
-        os.remove(f"{data_id}.jpg")
+        os.remove(f"tmp/{data_id}.jpg")
 
     async def __send_post_update_message(self, data):
         await self.get_photo(data)
@@ -181,9 +181,9 @@ class NewFB(commands.Cog):
         embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url=url, color=0x00ff00)
         embed.add_field(name='貼文連結', value=url, inline=False)
         embed.add_field(name='貼文內容', value=message or "（無內容）", inline=False)
-        file_path = f"{data['id']}.jpg"
+        file_path = f"tmp/{data['id']}.jpg"
         if os.path.exists(file_path):
-            file = discord.File(file_path, filename=file_path)
+            file = discord.File(file_path, filename=f"{data['id']}.jpg")
             embed.set_image(url=f"attachment://{data['id']}.jpg")
         else:
             file = None
@@ -195,10 +195,10 @@ class NewFB(commands.Cog):
         message = reel.get('description', 'No description provided')
         message = bytes(message,'utf-8').decode(encoding="utf-8", errors="ignore")
         picture_url = reel.get('picture', {})
-        with open(f'{reel_data_id}.jpg', 'wb') as f:
+        with open(f'tmp/{reel_data_id}.jpg', 'wb') as f:
             f.write(requests.get(picture_url).content)
         embed = discord.Embed(title='Anon Taiwan 更新了新 Reel！', url=url, color=discord.Color.blue())
-        file = discord.File(f"{reel_data_id}.jpg", filename=f"{reel_data_id}.jpg")
+        file = discord.File(f"tmp/{reel_data_id}.jpg", filename=f"{reel_data_id}.jpg")
         embed.set_image(url=f"attachment://{reel_data_id}.jpg")
         embed.add_field(name='Reel 連結', value=url, inline=False)
         embed.add_field(name='Reel 內容', value=message or "（無內容）", inline=False)
@@ -228,6 +228,8 @@ class NewFB(commands.Cog):
     
     @commands.Cog.listener()
     async def on_ready(self):
+        if not os.path.exists("tmp"):
+            os.makedirs("tmp")
         datas = self.get_datas()
         self.latest = [i['id'] for i in datas]
         self.reel = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url&access_token={utils.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
