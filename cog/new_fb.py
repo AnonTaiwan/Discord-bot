@@ -354,7 +354,7 @@ class NewFB(commands.Cog):
             await ctx.respond(embed=embed, file=file)
             os.remove("output.png")
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤：{e}")
+            await ctx.respond(f"❌ 發生錯誤")
             self.logger.error(f"Error in query-today command: {e}")
 
     @discord.slash_command(name="query", description="查看指定時間範圍內有幾篇貼文")
@@ -391,7 +391,7 @@ class NewFB(commands.Cog):
             await ctx.respond(embed=embed, file=file)
             os.remove("output.png")
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤：{e}")
+            await ctx.respond(f"❌ 發生錯誤")
             self.logger.error(f"Error in query command: {e}")
 
 def setup(bot: commands.Bot):
