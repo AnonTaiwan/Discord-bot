@@ -39,10 +39,10 @@ class Voice(commands.Cog):
         if user.voice and user.voice.channel:
             voice_channel = user.voice.channel
             await user.move_to(None)
-            self.logger.info(f"已將使用者 {user.username} 從語音頻道 {voice_channel} 中踢出")
+            self.logger.info(f"已將使用者 {user.name} 從語音頻道 {voice_channel} 中踢出")
             return
 
-        self.logger.info(f"使用者 {user.username} 不在任何語音頻道中，無需踢出")
+        self.logger.info(f"使用者 {user.name} 不在任何語音頻道中，無需踢出")
 
     @commands.Cog.listener()
     async def on_ready(self):
