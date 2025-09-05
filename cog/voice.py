@@ -91,17 +91,19 @@ class Voice(commands.Cog):
             reservation_time = datetime.now(utils.TIME_ZONE) + timedelta(minutes=minutes)
         else:
             try:
+                now = datetime.now(utils.TIME_ZONE)
                 reservation_time = datetime.strptime(until, "%H:%M").replace(tzinfo=utils.TIME_ZONE)
-                if reservation_time < datetime.now(utils.TIME_ZONE):
+                reservation_time = reservation_time.replace(year=now.year, month=now.month, day=now.day)
+                if reservation_time < now:
                     reservation_time += timedelta(days=1)
-                if reservation_time <= datetime.now(utils.TIME_ZONE):
+                if reservation_time <= now:
                     await ctx.respond("❌ 指定的時間必須在未來", ephemeral=True)
                     return
-                if reservation_time > datetime.now(utils.TIME_ZONE) + timedelta(days=1):
+                if reservation_time > now + timedelta(days=1):
                     await ctx.respond("❌ 指定的時間不能超過 24 小時", ephemeral=True)
                     return
             except ValueError:
-                await ctx.respond("❌ 時間格式錯誤，請使用 HH:MM 格式", ephemeral=True)
+                await ctx.respond("❌ 時間格式錯誤，請使用 HH:MM 格式 (24 小時制)", ephemeral=True)
                 return
             
         self.kick_reservation.push(reservation_time, {
