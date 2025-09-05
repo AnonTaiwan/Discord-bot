@@ -70,7 +70,7 @@ class Voice(commands.Cog):
     @discord.slash_command(name="kick-reserve", description="新增語音頻道踢出預約 (minutes 或 until 只能擇一)")
     async def add_reservation(self, ctx: discord.ApplicationContext,
                               minutes: discord.Option(int, "多少分鐘後踢出 (< 1440)", min_value=1, max_value=1440, required=False), # type: ignore
-                              until: discord.Option(str, "指定時間踢出 (格式: HH:MM)", required=False)): # type: ignore
+                              until: discord.Option(str, "指定時間踢出，格式為 HH:MM (24 小時制)", required=False)): # type: ignore
         if not self.__is_valid_request(ctx):
             await ctx.respond("❌ 你沒有權限使用此指令", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限")
@@ -131,7 +131,7 @@ class Voice(commands.Cog):
                 reservation.append(item)
         
         try:
-            embed = discord.Embed(title="語音頻道踢出預約列表", color=discord.Color.blue())
+            embed = discord.Embed(title="我的語音頻道踢出預約列表", color=discord.Color.blue())
             if not reservation:
                 embed.description = "目前沒有任何預約"
                 await ctx.respond(embed=embed, ephemeral=True)
