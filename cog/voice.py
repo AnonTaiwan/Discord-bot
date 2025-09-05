@@ -40,10 +40,10 @@ class Voice(commands.Cog):
         if user.voice and user.voice.channel:
             voice_channel = user.voice.channel
             await user.move_to(None)
-            self.logger.info(f"已將使用者 {user} 從語音頻道 {voice_channel} 中踢出")
+            self.logger.info(f"已將使用者 {user.username} 從語音頻道 {voice_channel} 中踢出")
             return
 
-        self.logger.info(f"使用者 {user} 不在任何語音頻道中，無需踢出")
+        self.logger.info(f"使用者 {user.username} 不在任何語音頻道中，無需踢出")
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -66,7 +66,7 @@ class Voice(commands.Cog):
 
                 await self.__kick_from_voice_channel(data['user_id'])
         except Exception as e:
-            self.logger.error(f"Error checking comments: {e}")
+            self.logger.error(f"Error checking kick reservation: {e}")
 
     @discord.slash_command(name="kick-reserve", description="新增語音頻道踢出預約 (minutes 或 until 只能擇一)")
     async def add_reservation(self, ctx: discord.ApplicationContext,
