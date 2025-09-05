@@ -62,6 +62,7 @@ class Voice(commands.Cog):
                     break
 
                 self.kick_reservation.pop()
+                self.__save_kick_reservation()
 
                 await self.__kick_from_voice_channel(data['user_id'])
         except Exception as e:
@@ -110,7 +111,7 @@ class Voice(commands.Cog):
         })
 
         try:
-            await ctx.respond(f"✅ 已預約在 <t:{int(reservation_time.timestamp())}> 將你從語音頻道中踢出")
+            await ctx.respond(f"✅ 已預約在 <t:{int(reservation_time.timestamp())}> 將你從語音頻道中踢出", ephemeral=True)
         except Exception as e:
             self.logger.error(f"Error in kick-from-voice-reservation command: {e}")
 
@@ -171,7 +172,7 @@ class Voice(commands.Cog):
         self.__save_kick_reservation()
 
         try:
-            await ctx.respond(f"✅ 已移除 {removed_count} 筆預約")
+            await ctx.respond(f"✅ 已移除 {removed_count} 筆預約", ephemeral=True)
         except Exception as e:
             self.logger.error(f"Error in remove-kick-from-voice-reservation command: {e}")
 
