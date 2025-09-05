@@ -17,7 +17,6 @@ class Voice(commands.Cog):
         record = utils.read_json(self.logger, RECORD_FILE, {"kick_reservation": []}).get("kick_reservation", [])
         for item in record:
             reservation_time = datetime.strptime(item['reservation_time'], "%Y-%m-%dT%H:%M:%S%z")
-            item['user_id'] = int(item['user_id'])
             self.kick_reservation.push(reservation_time, item)
 
     def __save_kick_reservation(self):
