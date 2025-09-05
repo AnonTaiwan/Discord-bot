@@ -32,7 +32,7 @@ class Voice(commands.Cog):
         return utils.is_developer(ctx.author) or utils.is_in_bot_playground(ctx.channel)
 
     async def __kick_from_voice_channel(self, user_id):
-        user = self.guild.fetch_member(user_id)
+        user = await self.guild.fetch_member(user_id)
         if not user:
             self.logger.warning(f"無法找到使用者 ID {user_id}，無法將其踢出語音頻道")
             return
