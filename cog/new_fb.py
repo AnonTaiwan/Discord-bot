@@ -3,7 +3,6 @@ from discord.ext import commands, tasks
 from curl_cffi import requests
 import json
 from datetime import datetime, timedelta, time
-import heapq
 import os
 from PIL import Image, ImageDraw, ImageFont
 import utils
@@ -13,31 +12,6 @@ daily_message_time = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  #
 
 RECORD_FILE = utils.JSON_DIR / 'new_fb.json'
 
-class PriorityQueue():
-    def __init__(self, save_callback):
-        self.elements = []
-        self.save_callback = save_callback
-
-    def get_raw_elements(self):
-        return [item for _, item in self.elements]
-
-    def __save(self):
-        if self.save_callback:
-            self.save_callback()
-
-    def empty(self):
-        return not self.elements
-
-    def push(self, priority, item):
-        heapq.heappush(self.elements, (priority, item))
-        self.__save()
-
-    def top(self):
-        return self.elements[0]
-    
-    def pop(self):
-        heapq.heappop(self.elements)
-        self.__save()
 
 class ConfirmButton(discord.ui.View):
     def __init__(self, post_id, link, type, original_msg):
@@ -125,7 +99,7 @@ class NewFB(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.latest = []
-        self.comment_unchecked_posts = PriorityQueue(self.__save_new_fb_record)
+        self.comment_unchecked_posts = utils.PriorityQueue(self.__save_new_fb_record)
 
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/new_fb.py: 日誌系統初始化完成")
@@ -183,7 +157,7 @@ class NewFB(commands.Cog):
         embed.add_field(name='貼文內容', value=message or "（無內容）", inline=False)
         file_path = f"tmp/{data['id']}.jpg"
         if os.path.exists(file_path):
-            file = discord.File(file_path, filename=f"{data['id']}.jpg")
+            file = discord.File(file_path, filename=file_path)
             embed.set_image(url=f"attachment://{data['id']}.jpg")
         else:
             file = None
