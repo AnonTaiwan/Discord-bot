@@ -82,6 +82,13 @@ class Commend(commands.Cog):
 
     @discord.slash_command(name="commendations", description="查看成員的表揚次數")
     async def show_commendations(self, ctx: discord.ApplicationContext): # type: ignore
+        try:
+            await ctx.defer(ephemeral=True)
+        except Exception as e:
+            self.logger.error(f"Error deferring response in show_commendations: {e}")
+            await ctx.respond("❌ 發生錯誤", ephemeral=True)
+            return
+
         embed = discord.Embed(title="所有表揚次數", color=discord.Color.purple())
         
         commend_times = [[] for _ in range(3)]
