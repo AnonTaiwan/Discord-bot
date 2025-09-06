@@ -39,6 +39,8 @@ class Omikuji(commands.Cog):
 
     omikuji_command_group = discord.SlashCommandGroup("omikuji", "每日運勢抽籤相關指令")
 
+    omikuji_admin_command_group = discord.SlashCommandGroup("omikuji-admin", "每日運勢抽籤管理員指令")
+
     def save_omikuji(self):
         utils.write_json(self.logger, RECORD_FILE, {"omikuji": self.omikuji})
 
@@ -80,7 +82,7 @@ class Omikuji(commands.Cog):
             self.logger.error(f"Error responding to omikuji command: {e}")
             await ctx.respond("抽籤失敗，請稍後再試。")
 
-    @omikuji_command_group.command(name="reset", description="重置指定使用者抽籤")
+    @omikuji_admin_command_group.command(name="reset", description="重置指定使用者抽籤")
     async def reset_omikuji(self, ctx: discord.ApplicationContext,
                             user: discord.Member = None):
         try:
@@ -100,7 +102,7 @@ class Omikuji(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error responding to reset-omikuji command: {e}")
 
-    @omikuji_command_group.command(name="reset-all", description="重置所有使用者抽籤")
+    @omikuji_admin_command_group.command(name="reset-all", description="重置所有使用者抽籤")
     async def reset_omikuji_all(self, ctx: discord.ApplicationContext):
         try:
             if not utils.is_developer(ctx.author):
