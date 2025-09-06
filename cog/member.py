@@ -83,11 +83,11 @@ class NonMygoMemberPage(MemberPage):
     @discord.ui.button(label="❌ kick", style=discord.ButtonStyle.danger)
     async def kick(self, button: discord.ui.Button, interaction: discord.Interaction):
         try:
-            kick_cmd = self.bot.get_application_command("kick-non-mygo-members")
+            kick_cmd = self.bot.get_application_command("member non-mygo kick")
             await interaction.response.defer()
             await kick_cmd(self.ctx)
         except Exception as e:
-            self.logger.error(f"Error invoking kick-non-mygo-members command from button: {e}")
+            self.logger.error(f"Error invoking member non-mygo kick command from button: {e}")
             await interaction.response.send_message("❌ 發生錯誤，無法從 UI 執行踢出指令。", ephemeral=True)
 
 class KickComfirmPage(MemberPage):
