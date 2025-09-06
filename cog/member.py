@@ -221,6 +221,12 @@ class Member(commands.Cog):
         utils.check_exist_or_create_json(self.logger, RECORD_FILE, default_content={"auto_detect": False})
         self.auto_detect = utils.read_json(self.logger, RECORD_FILE, default_content={"auto_detect": False}).get("auto_detect", False)
 
+    member_command_group = discord.SlashCommandGroup(name="member", description="成員相關指令")
+
+    non_mygo_command_group = member_command_group.create_subgroup(name="non-mygo", description="未領取「迷失之人」身分組相關指令")
+
+    notify_command_group = member_command_group.create_subgroup(name="notify", description="「通知用戶」身分組相關指令")
+
     def save_member(self):
         utils.write_json(self.logger, RECORD_FILE, {"auto_detect": self.auto_detect})
 
@@ -296,7 +302,7 @@ class Member(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error during auto-detection of non-mygo members: {e}")
 
-    @discord.slash_command(name="non-mygo-members", description="取得所有未領取「迷失之人」身分組的人")
+    @non_mygo_command_group.command(name="list", description="取得所有未領取「迷失之人」身分組的人")
     async def non_mygo_members(self, ctx: discord.ApplicationContext):
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
@@ -319,7 +325,7 @@ class Member(commands.Cog):
             self.logger.error(f"Error responding to non_mygo_members command: {e}")
             await ctx.respond("❌ 發生錯誤，無法取得成員列表。")
 
-    @discord.slash_command(name="kick-non-mygo-members", description="踢出未領取「迷失之人」身分組的人")
+    @non_mygo_command_group.command(name="kick", description="踢出未領取「迷失之人」身分組的人")
     async def kick_non_mygo_members(self, ctx: discord.ApplicationContext):
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
@@ -337,8 +343,8 @@ class Member(commands.Cog):
             self.logger.error(f"Error responding to kick_non_mygo_members command: {e}")
             await ctx.respond("❌ 發生錯誤，無法取得成員列表。")
 
-    @discord.slash_command(name="detect-non-mygo-member",
-                           description="開啟或關閉自動偵測未領取「迷失之人」身分組的成員，並將他們加入「未領取必要身份組」身份組")
+    @non_mygo_command_group.command(name="auto-detect",
+                                    description="開啟或關閉自動偵測未領取「迷失之人」身分組的成員，並將他們加入「未領取必要身份組」身份組")
     async def detect_non_mygo_member(self, ctx: discord.ApplicationContext, toggle: bool):
         if not utils.is_operator(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
@@ -361,7 +367,7 @@ class Member(commands.Cog):
             self.logger.error(f"Error toggling detect_non_mygo_member: {e}")
             await ctx.respond("❌ 發生錯誤，無法更新設定。")
 
-    @discord.slash_command(name="remove-all-notify-role", description="移除所有成員的「通知用戶」身分組")
+    @notify_command_group.command(name="remove-role", description="移除所有成員的「通知用戶」身分組")
     async def remove_all_notify_role(self, ctx: discord.ApplicationContext):
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
@@ -393,7 +399,7 @@ class Member(commands.Cog):
             self.logger.error(f"Error removing all notify roles: {e}")
             await ctx.respond("❌ 發生錯誤，無法執行指令。")
 
-    @discord.slash_command(name="remove-all-no-mygo-role", description="移除所有成員的「未領取必要身份組」身分組")
+    @non_mygo_command_group.command(name="remove-role", description="移除所有成員的「未領取必要身份組」身分組")
     async def remove_all_no_mygo_role(self, ctx: discord.ApplicationContext):
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)

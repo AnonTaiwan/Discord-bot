@@ -19,6 +19,8 @@ class Gacha(commands.Cog):
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/gacha.py: 日誌系統初始化完成")
         
+    gacha_command_group = discord.SlashCommandGroup("gacha", "蔚藍檔案抽卡模擬相關指令")
+        
     @commands.Cog.listener()
     async def on_ready(self):
         pass
@@ -51,7 +53,7 @@ class Gacha(commands.Cog):
         await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
         self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
 
-    @discord.slash_command(name="gacha", description="抽一抽普通池")
+    @gacha_command_group.command(name="normal", description="抽一抽普通池")
     async def gacha(self, ctx: discord.ApplicationContext):
         if not self.__is_valid_request(ctx):
             await self.__send_no_permission_message(ctx)
@@ -65,7 +67,7 @@ class Gacha(commands.Cog):
             await ctx.respond(f"❌ 發生錯誤：{e}")
             self.logger.error(f"Error in gacha command: {e}")
 
-    @discord.slash_command(name="gacha10", description="抽十抽普通池")
+    @gacha_command_group.command(name="normal10", description="抽十抽普通池")
     async def gacha10(self, ctx: discord.ApplicationContext):
         if not self.__is_valid_request(ctx):
             await self.__send_no_permission_message(ctx)
@@ -85,7 +87,7 @@ class Gacha(commands.Cog):
             await ctx.respond(f"❌ 發生錯誤：{e}")
             self.logger.error(f"Error in gacha10 command: {e}")
 
-    @discord.slash_command(name="fes_gacha", description="抽一抽 FES 池")
+    @gacha_command_group.command(name="fes", description="抽一抽 FES 池")
     async def fes_gacha(self, ctx: discord.ApplicationContext):
         if self.__is_valid_request(ctx) is False:
             await self.__send_no_permission_message(ctx)
@@ -99,7 +101,7 @@ class Gacha(commands.Cog):
             await ctx.respond(f"❌ 發生錯誤：{e}")
             self.logger.error(f"Error in fes_gacha command: {e}")
 
-    @discord.slash_command(name="fes_gacha10", description="抽十抽 FES 池")
+    @gacha_command_group.command(name="fes10", description="抽十抽 FES 池")
     async def fes_gacha10(self, ctx: discord.ApplicationContext):
         if self.__is_valid_request(ctx) is False:
             await self.__send_no_permission_message(ctx)

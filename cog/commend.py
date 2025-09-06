@@ -17,6 +17,8 @@ class Commend(commands.Cog):
         commendation = utils.read_json(self.logger, RECORD_FILE, default_content={"commendation": {}}).get("commendation", {})
         self.commendation = {int(k): v for k, v in commendation.items()}
 
+    commend_command_group = discord.SlashCommandGroup(name="commend", description="表揚相關指令")
+
     async def __save_commend(self):
         utils.write_json(self.logger, RECORD_FILE, {"commendation": self.commendation})
 
@@ -37,7 +39,7 @@ class Commend(commands.Cog):
     async def on_ready(self):
         pass
 
-    @discord.slash_command(name="commend", description="表揚成員")
+    @commend_command_group.command(name="new", description="表揚成員")
     async def commend(self, ctx: discord.ApplicationContext,
                       user: discord.Option(discord.Member, description="要表揚的成員", required=True, default=None), # type: ignore
                       reason: discord.Option(description="表揚理由", required=False, default="")): # type: ignore
@@ -80,7 +82,7 @@ class Commend(commands.Cog):
             self.logger.error(f"表揚成員時發生錯誤：{e}")
             await ctx.respond("❌ 發生錯誤，無法完成表揚。")
 
-    @discord.slash_command(name="commendations", description="查看成員的表揚次數")
+    @commend_command_group.command(name="list", description="查看成員的表揚次數")
     async def show_commendations(self, ctx: discord.ApplicationContext): # type: ignore
         try:
             await ctx.defer(ephemeral=True)
@@ -111,5 +113,6 @@ class Commend(commands.Cog):
         except Exception as e:
             self.logger.error(f"查看表揚次數時發生錯誤：{e}")
             await ctx.respond("❌ 發生錯誤", ephemeral=True)
+
 def setup(bot: commands.Bot):
     bot.add_cog(Commend(bot))

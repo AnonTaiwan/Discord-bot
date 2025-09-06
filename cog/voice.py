@@ -19,6 +19,8 @@ class Voice(commands.Cog):
             reservation_time = datetime.strptime(item['reservation_time'], "%Y-%m-%dT%H:%M:%S%z")
             self.kick_reservation.push(reservation_time, item)
 
+    voice_kick_command_group = discord.SlashCommandGroup(name="voice-kick", description="語音頻道踢出預約相關指令")
+
     def __save_kick_reservation(self):
         utils.write_json(self.logger, RECORD_FILE, {
             "kick_reservation": self.kick_reservation.get_raw_elements()
@@ -67,7 +69,7 @@ class Voice(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error checking kick reservation: {e}")
 
-    @discord.slash_command(name="kick-reserve", description="新增語音頻道踢出預約 (minutes 或 until 只能擇一)")
+    @voice_kick_command_group.command(name="reserve", description="新增語音頻道踢出預約 (minutes 或 until 只能擇一)")
     async def add_reservation(self, ctx: discord.ApplicationContext,
                               minutes: discord.Option(int, "多少分鐘後踢出 (< 1440)", min_value=1, max_value=1440, required=False), # type: ignore
                               until: discord.Option(str, "指定時間踢出，格式為 HH:MM (24 小時制)", required=False)): # type: ignore
@@ -116,7 +118,7 @@ class Voice(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error in kick-from-voice-reservation command: {e}")
 
-    @discord.slash_command(name="list-kick-reservation", description="列出我的語音頻道踢出預約")
+    @voice_kick_command_group.command(name="list", description="列出我的語音頻道踢出預約")
     async def list_reservation(self, ctx: discord.ApplicationContext):
         if not self.__is_valid_request(ctx):
             await ctx.respond("❌ 你沒有權限使用此指令", ephemeral=True)
@@ -145,7 +147,7 @@ class Voice(commands.Cog):
             ctx.respond("❌ 發生錯誤", ephemeral=True)
             self.logger.error(f"Error in list-kick-from-voice-reservation command: {e}")
 
-    @discord.slash_command(name="remove-kick-reservation", description="移除所有我的語音頻道踢出預約")
+    @voice_kick_command_group.command(name="remove-all", description="移除所有我的語音頻道踢出預約")
     async def remove_reservation(self, ctx: discord.ApplicationContext):
         if not self.__is_valid_request(ctx):
             await ctx.respond("❌ 你沒有權限使用此指令", ephemeral=True)

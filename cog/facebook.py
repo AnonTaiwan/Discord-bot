@@ -109,6 +109,8 @@ class NewFB(commands.Cog):
             created_time = datetime.strptime(item['created_time'], "%Y-%m-%dT%H:%M:%S%z")
             self.comment_unchecked_posts.push(created_time, item)
 
+    fb_command_group = discord.SlashCommandGroup(name="fb", description="Facebook 相關指令")
+
     def __save_facebook_record(self):
         utils.write_json(self.logger, RECORD_FILE, {
             "comment_unchecked_posts": self.comment_unchecked_posts.get_raw_elements()
@@ -335,7 +337,7 @@ class NewFB(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error sending daily message: {e}")
         
-    @discord.slash_command(name="query-today", description="查看今日有幾篇貼文")
+    @fb_command_group.command(name="query-today", description="查看今日有幾篇貼文")
     async def today_query(self, ctx: discord.ApplicationContext):
         try:
             now = datetime.now(utils.TIME_ZONE)
@@ -357,7 +359,7 @@ class NewFB(commands.Cog):
             await ctx.respond(f"❌ 發生錯誤")
             self.logger.error(f"Error in query-today command: {e}")
 
-    @discord.slash_command(name="query", description="查看指定時間範圍內有幾篇貼文")
+    @fb_command_group.command(name="query", description="查看指定時間範圍內有幾篇貼文")
     async def query(self, ctx: discord.ApplicationContext, start_date: discord.Option(description="開始日期，格式為 YYYY-MM-DD HH:MM:SS", required=True), end_date: discord.Option(default=None, description="結束日期，格式為 YYYY-MM-DD HH:MM:SS", required=False)): #type:ignore
         if not utils.is_operator(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
