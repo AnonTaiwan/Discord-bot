@@ -97,7 +97,7 @@ class Commend(commands.Cog):
                 embed.add_field(name="目前沒有任何表揚紀錄。", value="\u200b", inline=False) # 使用零寬空格避免 Discord 不顯示欄位
             else:
                 for user_id, count in self.commendation.items():
-                    member = await ctx.guild.fetch_member(user_id)
+                    member = ctx.guild.get_member(user_id)
                     if member:
                         commend_times[count].append(member.mention)
 
@@ -110,6 +110,6 @@ class Commend(commands.Cog):
             await ctx.respond(embed=embed, ephemeral=True)
         except Exception as e:
             self.logger.error(f"查看表揚次數時發生錯誤：{e}")
-            await ctx.respond("❌ 發生錯誤，無法查看表揚次數。", ephemeral=True)
+            await ctx.respond("❌ 發生錯誤", ephemeral=True)
 def setup(bot: commands.Bot):
     bot.add_cog(Commend(bot))
