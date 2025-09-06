@@ -156,7 +156,7 @@ class NewFB(commands.Cog):
         embed.add_field(name='貼文內容', value=message or "（無內容）", inline=False)
         file_path = f"tmp/{data['id']}.jpg"
         if os.path.exists(file_path):
-            file = discord.File(file_path, filename=file_path)
+            file = discord.File(file_path, filename=f"{data['id']}.jpg")
             embed.set_image(url=f"attachment://{data['id']}.jpg")
         else:
             file = None
@@ -168,10 +168,11 @@ class NewFB(commands.Cog):
         message = reel.get('description', 'No description provided')
         message = bytes(message,'utf-8').decode(encoding="utf-8", errors="ignore")
         picture_url = reel.get('picture', {})
-        with open(f'tmp/{reel_data_id}.jpg', 'wb') as f:
+        file_path = f"tmp/{reel_data_id}.jpg"
+        with open(file_path, 'wb') as f:
             f.write(requests.get(picture_url).content)
         embed = discord.Embed(title='Anon Taiwan 更新了新 Reel！', url=url, color=discord.Color.blue())
-        file = discord.File(f"tmp/{reel_data_id}.jpg", filename=f"{reel_data_id}.jpg")
+        file = discord.File(file_path, filename=f"{reel_data_id}.jpg")
         embed.set_image(url=f"attachment://{reel_data_id}.jpg")
         embed.add_field(name='Reel 連結', value=url, inline=False)
         embed.add_field(name='Reel 內容', value=message or "（無內容）", inline=False)
