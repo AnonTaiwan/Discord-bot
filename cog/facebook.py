@@ -10,7 +10,7 @@ import asyncio
 
 daily_message_time = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  # 每日訊息時間設定
 
-RECORD_FILE = utils.JSON_DIR / 'new_fb.json'
+RECORD_FILE = utils.JSON_DIR / 'facebook.json'
 
 
 class ConfirmButton(discord.ui.View):
@@ -99,10 +99,10 @@ class NewFB(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.latest = []
-        self.comment_unchecked_posts = utils.PriorityQueue(self.__save_new_fb_record)
+        self.comment_unchecked_posts = utils.PriorityQueue(self.__save_facebook_record)
 
         self.logger = utils.get_logger(__name__)
-        self.logger.info("cog/new_fb.py: 日誌系統初始化完成")
+        self.logger.info("cog/facebook.py: 日誌系統初始化完成")
 
         utils.check_exist_or_create_json(self.logger, RECORD_FILE, {"comment_unchecked_posts": []})
         record = utils.read_json(self.logger, RECORD_FILE, {"comment_unchecked_posts": []})
@@ -110,7 +110,7 @@ class NewFB(commands.Cog):
             created_time = datetime.strptime(item['created_time'], "%Y-%m-%dT%H:%M:%S%z")
             self.comment_unchecked_posts.push(created_time, item)
 
-    def __save_new_fb_record(self):
+    def __save_facebook_record(self):
         utils.write_json(self.logger, RECORD_FILE, {
             "comment_unchecked_posts": self.comment_unchecked_posts.get_raw_elements()
         })
