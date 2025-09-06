@@ -12,7 +12,6 @@ daily_message_time = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  #
 
 RECORD_FILE = utils.JSON_DIR / 'facebook.json'
 
-
 class ConfirmButton(discord.ui.View):
     def __init__(self, post_id, link, type, original_msg):
         super().__init__(timeout=None)
