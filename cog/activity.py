@@ -45,18 +45,20 @@ class Activity(commands.Cog):
             if activity.type == discord.ActivityType.playing and activity.name == "League of Legends":
                 return True
         return False
-        
+    
     @commands.Cog.listener()
-    async def on_presence_update(self, before, after):
-        if before.id != JERRY_ID and before.id != FABAO_ID:
-            return
-        
+    async def on_member_update(self, before, after):
         if before.id == FABAO_ID:
             if before.display_name != after.display_name:
                 self.logger.info(f"Member {after.name} changed nickname from {before.display_name} to {after.display_name}")
                 content = f'📢 <@{FABAO_ID}> 的暱稱變更為 {after.display_name}'
                 self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
                 await self.channel.send(content = content)
+            return
+        
+    @commands.Cog.listener()
+    async def on_presence_update(self, before, after):
+        if before.id != JERRY_ID:
             return
 
         if after.status == discord.Status.offline and before.status != discord.Status.offline:
