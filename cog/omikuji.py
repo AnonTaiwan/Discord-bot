@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-from datetime import time
+from datetime import datetime, time
 import random
 import utils
 
@@ -50,6 +50,20 @@ class Omikuji(commands.Cog):
     async def __send_no_permission_message(self, ctx: discord.ApplicationContext):
         await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
         self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
+
+    async def __fun_event(self, ctx: discord.ApplicationContext) -> bool:
+        now = datetime.now(utils.TIME_ZONE)
+        if now.month != 9 or now.day != 8:
+            return False
+
+        sticker = await ctx.guild.fetch_sticker(1406691976765771856) # 鬼娃摸頭
+        try:
+            await ctx.respond(content="抽到的籤是：愛音\n祝愛音生日快樂")
+            await ctx.channel.send(stickers=[sticker])
+            return True
+        except Exception as e:
+            self.logger.error(f"Error sending sticker: {e}")
+            return True
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -73,8 +87,12 @@ class Omikuji(commands.Cog):
             PIC_PATH = OMIKUJI_STATIC_DIR / f'{result}.jpg'
             if PIC_PATH.exists():
                 pic = discord.File(str(PIC_PATH), filename=PIC_PATH.name)
-                await ctx.respond(file=pic,content = f"抽到的籤是：{result}")
+                if await self.__fun_event(ctx):
+                    return
+                await ctx.respond(file=pic, content=f"抽到的籤是：{result}")
             else:
+                if await self.__fun_event(ctx):
+                    return
                 await ctx.respond(f"抽到的籤是：{result}")
             self.omikuji.append(ctx.author.id)
             self.save_omikuji()
