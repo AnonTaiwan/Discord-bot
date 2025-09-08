@@ -53,7 +53,7 @@ class Omikuji(commands.Cog):
 
     async def __fun_event(self, ctx: discord.ApplicationContext) -> bool:
         now = datetime.now(utils.TIME_ZONE)
-        if (now.month != 10 or now.day != 1) and not utils.is_developer(ctx.author):
+        if now.month != 10 or now.day != 1:
             return False
 
         try:
