@@ -33,7 +33,7 @@ class Activity(commands.Cog):
             return format(self.length, '.1f')
 
     async def send_message(self):
-        content = f'偵測到 <@{JERRY_ID}> 偷打 LoL，紅布條長度增加為 {self.__format_length()} 公尺'
+        content = f'偵測到 <@{JERRY_ID}> 偷打 LoL，紅地毯長度增加為 {self.__format_length()} 公尺'
         await self.channel.send(content = content)
         
     @commands.Cog.listener()
@@ -64,7 +64,7 @@ class Activity(commands.Cog):
         if after.status == discord.Status.offline and before.status != discord.Status.offline:
             self.offline_time = datetime.now()
             self.logger.info(f"Member {after.name} is offline")
-            content = f'偵測到 <@{JERRY_ID}> 下線，紅布條長度每秒增加 0.5 公尺'
+            content = f'偵測到 <@{JERRY_ID}> 下線，紅地毯長度每秒增加 0.5 公尺'
             self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
             await self.channel.send(content = content)
             return
@@ -75,7 +75,7 @@ class Activity(commands.Cog):
                 self.length += offline_duration.total_seconds() * 0.5
                 self.logger.info(f"Member {after.name} was offline for {offline_duration}, length updated to {self.length}")
                 self.__write_config()
-                content = f'<@{JERRY_ID}> 已上線，共下線 {offline_duration.total_seconds()} 秒，紅布條長度增加至 {self.__format_length()} 公尺'
+                content = f'<@{JERRY_ID}> 已上線，共下線 {offline_duration.total_seconds()} 秒，紅地毯長度增加至 {self.__format_length()} 公尺'
                 self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
                 await self.channel.send(content = content)
 
