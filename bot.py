@@ -106,7 +106,7 @@ async def main():
 
             bot.load_extensions()
 
-            await bot.start(utils.BOT_TOKEN)
+            await bot.start(utils.BOT_TOKEN, reconnect=True)
         await asyncio.sleep(10)  # 確保在重啟前有短暫的延遲
 
 if __name__ == "__main__":
