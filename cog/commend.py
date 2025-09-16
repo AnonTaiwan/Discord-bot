@@ -42,7 +42,8 @@ class Commend(commands.Cog):
     @commend_command_group.command(name="new", description="表揚成員")
     async def commend(self, ctx: discord.ApplicationContext,
                       user: discord.Option(discord.Member, description="要表揚的成員", required=True, default=None), # type: ignore
-                      reason: discord.Option(description="表揚理由", required=False, default="")): # type: ignore
+                      reason: discord.Option(description="表揚理由", required=False, default=""), # type: ignore
+                      record: discord.Option(bool, description="是否紀錄", required=False, default=True)): # type: ignore
         if not utils.is_operator(ctx.author):
             await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
             return
@@ -54,7 +55,8 @@ class Commend(commands.Cog):
         if user.id not in self.commendation:
             self.commendation[user.id] = 0
 
-        self.commendation[user.id] += 1
+        if record:
+            self.commendation[user.id] += 1
 
         embed = discord.Embed(title="已表揚成員", color=discord.Color.green())
 
