@@ -32,5 +32,12 @@ class RoutineMessage(commands.Cog):
         
         await channel.send(message)
 
+        if now.hour == 14:
+            message = "每日監督霧冥修圖 (1/2)"
+        elif now.hour == 20:
+            message = "每日監督霧冥修圖 (2/2)"
+        
+        await channel.send(message)
+
 def setup(bot: commands.Bot):
     bot.add_cog(RoutineMessage(bot))
