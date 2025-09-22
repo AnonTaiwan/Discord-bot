@@ -57,27 +57,34 @@ class Activity(commands.Cog):
             return
         
         fabao_keywords = ["法堡", "Fabao", "fabao", "FABAO"]
+        keyword_in_before = False
+        keyword_in_after = False
         for keyword in fabao_keywords:
-            if keyword in after.display_name and keyword not in before.display_name:
-                self.logger.info(f"Member {after.name} changed nickname to include keyword '{keyword}'")
-                content = f'📢 <@{after.id}> 新開了一間法堡分店「{after.display_name}」'
-                self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
-                await self.channel.send(content = content)
-                return
+            if keyword in before.display_name:
+                keyword_in_before = True
+            if keyword in after.display_name:
+                keyword_in_after = True
 
-            if keyword not in after.display_name and keyword in before.display_name:
-                self.logger.info(f"Member {after.name} changed nickname to remove keyword '{keyword}'")
-                content = f'📢 <@{after.id}> 的法堡分店「{before.display_name}」歇業了'
-                self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
-                await self.channel.send(content = content)
-                return
-            
-            if keyword in after.display_name and keyword in before.display_name and after.display_name != before.display_name:
-                self.logger.info(f"Member {after.name} changed nickname but still includes keyword '{keyword}'")
-                content = f'📢 <@{after.id}> 的法堡分店改名為「{after.display_name}」'
-                self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
-                await self.channel.send(content = content)
-                return
+        if not keyword_in_before and keyword_in_after:
+            self.logger.info(f"Member {after.name} changed nickname to include keyword '{keyword}'")
+            content = f'📢 <@{after.id}> 新開了一間法堡分店「{after.display_name}」'
+            self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+            await self.channel.send(content = content)
+            return
+
+        if keyword_in_before and not keyword_in_after:
+            self.logger.info(f"Member {after.name} changed nickname to remove keyword '{keyword}'")
+            content = f'📢 <@{after.id}> 的法堡分店「{before.display_name}」歇業了'
+            self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+            await self.channel.send(content = content)
+            return
+        
+        if keyword_in_before and keyword_in_after and after.display_name != before.display_name:
+            self.logger.info(f"Member {after.name} changed nickname but still includes keyword '{keyword}'")
+            content = f'📢 <@{after.id}> 的法堡分店改名為「{after.display_name}」'
+            self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+            await self.channel.send(content = content)
+            return
         
     @commands.Cog.listener()
     async def on_presence_update(self, before, after):
