@@ -40,7 +40,7 @@ class Fabao(commands.Cog):
             await ctx.respond(embed=embed)
         except Exception as e:
             self.logger.error(f"Error responding to fabao get-branches command: {e}")
-            await ctx.respond("發生錯誤，請稍後再試。", ephemeral=True)
+            await ctx.respond("發生錯誤，請稍後再試", ephemeral=True)
 
 def setup(bot: commands.Bot):
     bot.add_cog(Fabao(bot))
