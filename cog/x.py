@@ -35,9 +35,11 @@ class X(commands.Cog):
             await asyncio.sleep(3) 
         await asyncio.sleep(300)
         if not self.check_post_updates.is_running():
+            self.logger.info("啟動 X 貼文檢查任務")
             self.check_post_updates.start()
         if not self.update_gt_cookies.is_running():
             await asyncio.sleep(2 * 3600)
+            self.logger.info("啟動 X gt 和 cookies 更新任務")
             self.update_gt_cookies.start()
     
     @tasks.loop(hours=2)
