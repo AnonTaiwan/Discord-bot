@@ -21,6 +21,7 @@ class X(commands.Cog):
             config = json.load(f)
         self.GEMINI_TOKEN = config.get("GEMINI_TOKEN")
         self.X_ID_TO_NAME = utils.X_ID_TO_NAME
+        self.x_stop = False
         
     @commands.Cog.listener()
     async def on_ready(self):
@@ -55,11 +56,14 @@ class X(commands.Cog):
     
     @tasks.loop(minutes=5)
     async def check_post_updates(self):
+        if self.x_stop:
+            return
         channel = self.bot.get_channel(self.channel)
         for post in self.users:
             post = str(post)
             data = await self.__fetch_tweets(post)
             if data is None:
+                self.x_stop = True
                 return
             if data['id_str'] != self.new_post.get(post):
                 text = data['full_text']
