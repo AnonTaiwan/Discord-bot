@@ -25,8 +25,7 @@ class X(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         self.logger.info("cog/x.py: Bot 已準備就緒")
-        if not self.update_gt_cookies.is_running():
-            self.update_gt_cookies.start()
+        self.gt_value, self.cookies = self.__get_gt_cookies()
         self.new_post = {}
         for post in self.users:
             post = str(post)
@@ -36,6 +35,9 @@ class X(commands.Cog):
         await asyncio.sleep(300)
         if not self.check_post_updates.is_running():
             self.check_post_updates.start()
+        if not self.update_gt_cookies.is_running():
+            await asyncio.sleep(2 * 3600)
+            self.update_gt_cookies.start()
     
     @tasks.loop(hours=2)
     async def update_gt_cookies(self):
