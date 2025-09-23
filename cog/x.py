@@ -31,6 +31,7 @@ class X(commands.Cog):
             post = str(post)
             data = self.__fetch_tweets(post)
             self.new_post[post] = data['id_str']
+            self.logger.info(f"初始貼文 - 使用者 ID: {post}, 使用者：{self.X_ID_TO_NAME.get(post, 'Unknown')} 貼文 ID: {data['id_str']}")
             await asyncio.sleep(3) 
         await asyncio.sleep(300)
         if not self.check_post_updates.is_running():
