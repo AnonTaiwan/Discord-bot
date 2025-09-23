@@ -25,11 +25,13 @@ class X(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         self.logger.info("cog/x.py: Bot 已準備就緒")
-        self.gt_value, self.cookies = self.__get_gt_cookies()
+        # self.gt_value, self.cookies = self.__get_gt_cookies()
         self.new_post = {}
         for post in self.users:
             post = str(post)
-            data = self.__fetch_tweets(post)
+            data = await self.__fetch_tweets(post)
+            if data is None:
+                return
             self.new_post[post] = data['id_str']
             self.logger.info(f"初始貼文 - 使用者 ID: {post}, 使用者：{self.X_ID_TO_NAME.get(post, 'Unknown')} 貼文 ID: {data['id_str']}")
             await asyncio.sleep(3) 
@@ -37,26 +39,28 @@ class X(commands.Cog):
         if not self.check_post_updates.is_running():
             self.logger.info("啟動 X 貼文檢查任務")
             self.check_post_updates.start()
-        if not self.update_gt_cookies.is_running():
-            await asyncio.sleep(2 * 3600)
-            self.logger.info("啟動 X gt 和 cookies 更新任務")
-            self.update_gt_cookies.start()
+        # if not self.update_gt_cookies.is_running():
+        #     await asyncio.sleep(2 * 3600)
+        #     self.logger.info("啟動 X gt 和 cookies 更新任務")
+        #     self.update_gt_cookies.start()
     
-    @tasks.loop(hours=2)
-    async def update_gt_cookies(self):
-        self.logger.info("開始更新 X 的 gt 和 cookies")
-        self.gt_value, self.cookies = self.__get_gt_cookies()
-        if self.gt_value and self.cookies:
-            self.logger.info(f"成功獲取 gt: {self.gt_value} 和 cookies")
-        else:
-            self.logger.error("獲取 gt 或 cookies 失敗")
+    # @tasks.loop(hours=2)
+    # async def update_gt_cookies(self):
+    #     self.logger.info("開始更新 X 的 gt 和 cookies")
+    #     self.gt_value, self.cookies = self.__get_gt_cookies()
+    #     if self.gt_value and self.cookies:
+    #         self.logger.info(f"成功獲取 gt: {self.gt_value} 和 cookies")
+    #     else:
+    #         self.logger.error("獲取 gt 或 cookies 失敗")
     
     @tasks.loop(minutes=5)
     async def check_post_updates(self):
         channel = self.bot.get_channel(self.channel)
         for post in self.users:
             post = str(post)
-            data = self.__fetch_tweets(post)
+            data = await self.__fetch_tweets(post)
+            if data is None:
+                return
             if data['id_str'] != self.new_post.get(post):
                 text = data['full_text']
                 translated_text = self.__translate_text(text)
@@ -101,28 +105,29 @@ class X(commands.Cog):
             print("gt value:", gt_value)
             return gt_value, response.cookies.get_dict()
 
-    def __fetch_tweets(self, userId):
-        headers = {
-            'accept': '*/*',
-            'accept-language': 'zh-TW,zh;q=0.9',
-            'authorization': 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
-            'content-type': 'application/json',
-            'origin': 'https://x.com',
-            'priority': 'u=1, i',
-            'referer': 'https://x.com/',
-            'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-site',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
-            'x-client-transaction-id': 'H0Xv7rsi3t39O920V62HLXluEdkzsRZ8xKPk6wDgjcze2+jArCaLBttE9hHKbXRM9IWAYhvRsh7J2tMymsJOYWx4akQOHA',
-            'x-guest-token': self.gt_value,
-            'x-twitter-active-user': 'yes',
-            'x-twitter-client-language': 'zh-tw',
-            'x-xp-forwarded-for': '2431e16dad132fc1950a60089592b1330445c792e033c76c121647bbe77d00d094641f2934314a69cdbae4dccb4cfc16be72e7496927618aa8d3c533c2626a50d0debe88f47b0daae91f15341c78cec143acc85c814b827d31679bdcac7dade2530c1c8a9b2fcb0d09dfbe2555e685994992d2b09e490982fd4d34028eaa6ad9ad267b056f5be3849c78bff635d6809ceb9571d1bf555c1506929a0592449b807cfd0dee420a1de847c04e9e976176d27a93dc5f6bc49c90d8e9f7e515cd14d1b23c29fb9d97e2eb1b6a229f034a5d611efb8fb9ac0418598ed5513ce514a3852c988a5376754941feb7decf2ae9d03bc1ef3047aa453d0244add6',
-        }
+    async def __fetch_tweets(self, userId):
+        
+        # headers = {
+        #     'accept': '*/*',
+        #     'accept-language': 'zh-TW,zh;q=0.9',
+        #     'authorization': 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
+        #     'content-type': 'application/json',
+        #     'origin': 'https://x.com',
+        #     'priority': 'u=1, i',
+        #     'referer': 'https://x.com/',
+        #     'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
+        #     'sec-ch-ua-mobile': '?0',
+        #     'sec-ch-ua-platform': '"Windows"',
+        #     'sec-fetch-dest': 'empty',
+        #     'sec-fetch-mode': 'cors',
+        #     'sec-fetch-site': 'same-site',
+        #     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+        #     'x-client-transaction-id': 'H0Xv7rsi3t39O920V62HLXluEdkzsRZ8xKPk6wDgjcze2+jArCaLBttE9hHKbXRM9IWAYhvRsh7J2tMymsJOYWx4akQOHA',
+        #     'x-guest-token': self.gt_value,
+        #     'x-twitter-active-user': 'yes',
+        #     'x-twitter-client-language': 'zh-tw',
+        #     'x-xp-forwarded-for': '2431e16dad132fc1950a60089592b1330445c792e033c76c121647bbe77d00d094641f2934314a69cdbae4dccb4cfc16be72e7496927618aa8d3c533c2626a50d0debe88f47b0daae91f15341c78cec143acc85c814b827d31679bdcac7dade2530c1c8a9b2fcb0d09dfbe2555e685994992d2b09e490982fd4d34028eaa6ad9ad267b056f5be3849c78bff635d6809ceb9571d1bf555c1506929a0592449b807cfd0dee420a1de847c04e9e976176d27a93dc5f6bc49c90d8e9f7e515cd14d1b23c29fb9d97e2eb1b6a229f034a5d611efb8fb9ac0418598ed5513ce514a3852c988a5376754941feb7decf2ae9d03bc1ef3047aa453d0244add6',
+        # }
         variables = {
         "userId": userId,
         "count": 20,
@@ -135,7 +140,47 @@ class X(commands.Cog):
             'features': '{"rweb_video_screen_enabled":false,"payments_enabled":false,"profile_label_improvements_pcf_label_in_post_enabled":true,"rweb_tipjar_consumption_enabled":true,"verified_phone_label_enabled":false,"creator_subscriptions_tweet_preview_api_enabled":true,"responsive_web_graphql_timeline_navigation_enabled":true,"responsive_web_graphql_skip_user_profile_image_extensions_enabled":false,"premium_content_api_read_enabled":false,"communities_web_enable_tweet_community_results_fetch":true,"c9s_tweet_anatomy_moderator_badge_enabled":true,"responsive_web_grok_analyze_button_fetch_trends_enabled":false,"responsive_web_grok_analyze_post_followups_enabled":false,"responsive_web_jetfuel_frame":true,"responsive_web_grok_share_attachment_enabled":true,"articles_preview_enabled":true,"responsive_web_edit_tweet_api_enabled":true,"graphql_is_translatable_rweb_tweet_is_translatable_enabled":true,"view_counts_everywhere_api_enabled":true,"longform_notetweets_consumption_enabled":true,"responsive_web_twitter_article_tweet_consumption_enabled":true,"tweet_awards_web_tipping_enabled":false,"responsive_web_grok_show_grok_translated_post":false,"responsive_web_grok_analysis_button_from_backend":false,"creator_subscriptions_quote_tweet_preview_enabled":false,"freedom_of_speech_not_reach_fetch_enabled":true,"standardized_nudges_misinfo":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"longform_notetweets_inline_media_enabled":true,"responsive_web_grok_image_annotation_enabled":true,"responsive_web_grok_imagine_annotation_enabled":true,"responsive_web_grok_community_note_auto_translation_is_enabled":false,"responsive_web_enhance_cards_enabled":false}',
             'fieldToggles': '{"withArticlePlainText":false}',
         }
-        url = 'https://api.x.com/graphql/VfoNveT-zJPGVZMPydZUfQ/UserTweets'
+
+        self.cookies = {
+            'guest_id': 'v1%3A175863182367345795',
+            'gt': '1970470803126038950',
+            '__cuid': 'cd7f6cbe6159429da3ecba3837242efb',
+            'guest_id_marketing': 'v1%3A175863182367345795',
+            'guest_id_ads': 'v1%3A175863182367345795',
+            'personalization_id': '"v1_B4/jnJNfTFYjDICZPBlvPA=="',
+            'external_referer': 'padhuUp37zjgzgv1mFWxJ12Ozwit7owX|0|8e8t2xd8A2w%3D',
+            'kdt': 'p7ul6ZC79b5Rk9kRhsnwTSd9C3zM3sqjGKCU8XrZ',
+            'auth_token': '009534c3d8e268c934128d4850532d2eb0f7da92',
+            'ct0': '5a6178903c5cf2badda3c6b3cdc82908b5a168ce00a80bbb7370e03b78020f10b534774fa90b81fe1c70d45da9311328c691f6353d57e0530ca681fdd55d286dd4c0ef2c70ecd698deb156f31304edd8',
+            'att': '1-iIBgO8tGX84ZHhzIhsBYBCEfDLVEu6tNBCsBUsza',
+            'lang': 'en',
+            'twid': 'u%3D1970448308545167360',
+        }
+
+        headers = {
+            'accept': '*/*',
+            'accept-language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+            'authorization': 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
+            'content-type': 'application/json',
+            'priority': 'u=1, i',
+            'referer': 'https://x.com/Hina_Youmiya',
+            'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+            'x-client-transaction-id': 'qRySG4y9W1rZk8l5WsQ11M34/TpGF2L8Mcj1gqmBZuvgc6hbCvt1U7IS/zWZZpH6KuKdKq256aBw0wb58e0Wapal0OrVqg',
+            'x-csrf-token': '5a6178903c5cf2badda3c6b3cdc82908b5a168ce00a80bbb7370e03b78020f10b534774fa90b81fe1c70d45da9311328c691f6353d57e0530ca681fdd55d286dd4c0ef2c70ecd698deb156f31304edd8',
+            'x-twitter-active-user': 'yes',
+            'x-twitter-auth-type': 'OAuth2Session',
+            'x-twitter-client-language': 'en',
+            'x-xp-forwarded-for': '03f7f04023e307f493584c7e80f2dbbbed2f65a427dfcc4884b8d35eaec09769efc14efa41b9202c320067ee03fb281ef79f964f48e9973df8d1d0343f9d5f6568e0d6ff7c1d34c52c295fab105862accab1092b4dcdefb29a367021aac25f152877ff32adcb77a07d6a7fe4c1c694547de70c4aad5151f5be38912510a7032ca837ef9a8de0383d607dd8038834029202dc6f1b5bc4a0cfb29f3c5e35491d3f547304403fc15bef92a6cc45160e1a85fb6aec41fe7e65d7d950361b54d8b9b6959addd509eb87f315fe8a690376e14d8d43ebc29f891ff7754f671138641211a725e6462f0f9f1f15d1505cc43491a5ec4b734d13088456e86d7a',
+            # 'cookie': 'guest_id=v1%3A175863182367345795; gt=1970470803126038950; __cuid=cd7f6cbe6159429da3ecba3837242efb; guest_id_marketing=v1%3A175863182367345795; guest_id_ads=v1%3A175863182367345795; personalization_id="v1_B4/jnJNfTFYjDICZPBlvPA=="; external_referer=padhuUp37zjgzgv1mFWxJ12Ozwit7owX|0|8e8t2xd8A2w%3D; kdt=p7ul6ZC79b5Rk9kRhsnwTSd9C3zM3sqjGKCU8XrZ; auth_token=009534c3d8e268c934128d4850532d2eb0f7da92; ct0=5a6178903c5cf2badda3c6b3cdc82908b5a168ce00a80bbb7370e03b78020f10b534774fa90b81fe1c70d45da9311328c691f6353d57e0530ca681fdd55d286dd4c0ef2c70ecd698deb156f31304edd8; att=1-iIBgO8tGX84ZHhzIhsBYBCEfDLVEu6tNBCsBUsza; lang=en; twid=u%3D1970448308545167360',
+        }
+
+        url = 'https://x.com/i/api/graphql/VfoNveT-zJPGVZMPydZUfQ/UserTweets'
         session = requests.Session()
         session.headers.update(headers)
         session.cookies.update(self.cookies)
@@ -147,14 +192,9 @@ class X(commands.Cog):
 
         if response.status_code != 200:
             print("Initial request failed, trying to refresh cookies...")
-            time.sleep(2)
-            session.cookies.clear()
-            response = session.get('https://x.com/Hina_Youmiya')
-            cookies = response.cookies.get_dict()
-            response = session.get(
-                url,
-                params=params,
-            )
+            channel = self.bot.get_channel(self.channel)
+            await channel.send("X 的 gt 或 cookies 可能過期，請重新啟動機器人以更新。")
+            return None
         datas = response.json()
         data = datas['data']['user']['result']['timeline']['timeline']['instructions'][2]['entries'][0]['content']['itemContent']['tweet_results']['result']['legacy']
         session.close()
