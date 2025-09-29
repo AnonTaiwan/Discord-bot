@@ -9,7 +9,7 @@ retouch_picture_remind_time = [
 ]
 
 GSAT_remind_time = [
-    time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)
+    time(hour=8, minute=0, second=0, tzinfo=utils.TIME_ZONE)
 ]
 
 GSAT_day = datetime(year=2026, month=1, day=17, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
