@@ -27,8 +27,11 @@ class RoutineMessage(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        if not self.daily_message.is_running():
-            self.daily_message.start()
+        if not self.retouch_picture_remind.is_running():
+            self.retouch_picture_remind.start()
+
+        if not self.retouch_picture_remind.is_running():
+            self.GSAT_remind.start()
 
     @tasks.loop(time=retouch_picture_remind_time)
     async def retouch_picture_remind(self):
