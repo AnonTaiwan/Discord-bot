@@ -62,7 +62,7 @@ class RoutineMessage(commands.Cog):
     async def GSAT_remind(self):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 
-        now = datetime.now()
+        now = datetime.now(utils.TIME_ZONE)
         today = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
         days = (GSAT_day - today).days
