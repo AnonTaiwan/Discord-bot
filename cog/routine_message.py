@@ -30,7 +30,7 @@ class RoutineMessage(commands.Cog):
         if not self.retouch_picture_remind.is_running():
             self.retouch_picture_remind.start()
 
-        if not self.retouch_picture_remind.is_running():
+        if not self.GSAT_remind.is_running():
             self.GSAT_remind.start()
 
     @tasks.loop(time=retouch_picture_remind_time)
