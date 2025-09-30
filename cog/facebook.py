@@ -257,7 +257,7 @@ class NewFB(commands.Cog):
                     self.comment_unchecked_posts.push(create_time, post)
                 self.latest = [i['id'] for i in datas]
         except Exception as e:
-            self.bot.get_channel(utils.TEST_CHANNEL_ID).send(f"@<&{utils.DEVELOPER_ROLE_ID}>\n`Error checking for updates: {e}`")
+            await self.bot.get_channel(utils.TEST_CHANNEL_ID).send(f"@<&{utils.DEVELOPER_ROLE_ID}>\n`Error checking for updates: {e}`")
             self.check_post_updates.cancel()
             self.logger.error(f"Error checking for updates: {e}")
 
