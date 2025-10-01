@@ -100,12 +100,14 @@ def get_logger(name):
     
     return logging.getLogger(name)
 
-def is_developer(user: discord.User) -> bool:
+def is_developer(user: discord.Member | discord.User) -> bool:
     """檢查使用者是否為開發者"""
     return user.id in DEVELOPER
 
-def is_operator(user: discord.User) -> bool:
+def is_operator(user: discord.Member | discord.User) -> bool:
     """檢查使用者是否為開發者或管理員"""
+    if not isinstance(user, discord.Member):
+        return False
     if user.id in DEVELOPER:
         return True
     if any(role.id == DEVELOPER_ROLE_ID for role in user.roles):

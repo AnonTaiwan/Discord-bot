@@ -105,7 +105,7 @@ class Omikuji(commands.Cog):
 
     @omikuji_admin_command_group.command(name="reset", description="重置指定使用者抽籤")
     async def reset_omikuji(self, ctx: discord.ApplicationContext,
-                            user: discord.Member = None):
+                            user: discord.Member):
         try:
             if not utils.is_developer(ctx.author):
                 await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)

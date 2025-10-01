@@ -49,7 +49,7 @@ class Health(commands.Cog):
         message = await ctx.respond("正在確認服務運作狀態...")
         await self.__health_check(message)
 
-    async def __health_check(self, message: discord.Message):
+    async def __health_check(self, message: discord.Message | discord.Interaction):
         try:
             content = '### Health Check:'
 

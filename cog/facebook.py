@@ -55,7 +55,7 @@ class CommentLink(discord.ui.Modal):
         
     def create_embed(self):
         embed = discord.Embed(title=f"補上來源 - {self.type}", url=self.post_url, color=discord.Color.blue())
-        embed.add_field(name="來源連結", value=self.link, inline=False)
+        embed.add_field(name="來源連結", value=self.link or "無連結", inline=False)
         return embed
 
     async def callback(self, interaction: discord.Interaction):
@@ -388,6 +388,8 @@ class NewFB(commands.Cog):
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
             if posts_count == 100 or reels_count == 100:
+                if embed.description is None:
+                    embed.description = ""
                 embed.description += "\n\n注意：因為 Facebook API 的限制，查詢結果至多為 100。"
 
             await ctx.respond(embed=embed, file=file)

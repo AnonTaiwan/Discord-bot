@@ -190,11 +190,14 @@ class KickMenu(discord.ui.View):
         self.add_item(select_menu)
 
     async def kick_member(self, interaction: discord.Interaction):
+        if interaction.user is None:
+            return
+
         if not utils.is_developer(interaction.user):
             await interaction.response.send_message("❌ 你沒有權限使用此功能。", ephemeral=True)
             return
-
-        selected_days = int(interaction.data['values'][0])
+        
+        selected_days = int(interaction.data['values'][0]) # type: ignore
         
         threshold_time = datetime.now(timezone.utc) - timedelta(days=selected_days)
         members_to_kick = [member for member in self.members if member.joined_at < threshold_time]
@@ -286,8 +289,9 @@ class Member(commands.Cog):
             for member in non_mygo_members:
                 if NO_MYGO_ROLE not in member.roles:
                     try:
-                        await member.add_roles(NO_MYGO_ROLE, reason="自動偵測未領取「迷失之人」身分組")
-                        self.logger.info(f"Added No MyGO role to {member.name}#{member.discriminator} ({member.id})")
+                        if NO_MYGO_ROLE is not None:
+                            await member.add_roles(NO_MYGO_ROLE, reason="自動偵測未領取「迷失之人」身分組")
+                            self.logger.info(f"Added No MyGO role to {member.name}#{member.discriminator} ({member.id})")
                     except Exception as e:
                         self.logger.error(f"為成員 {member.name} 添加通知用戶身分組時發生錯誤：{e}")
 
@@ -295,8 +299,9 @@ class Member(commands.Cog):
             for member in mygo_members:
                 if NO_MYGO_ROLE in member.roles:
                     try:
-                        await member.remove_roles(NO_MYGO_ROLE, reason="自動偵測已領取「迷失之人」身分組")
-                        self.logger.info(f"Removed No MyGO role from {member.name}#{member.discriminator} ({member.id})")
+                        if NO_MYGO_ROLE is not None:
+                            await member.remove_roles(NO_MYGO_ROLE, reason="自動偵測已領取「迷失之人」身分組")
+                            self.logger.info(f"Removed No MyGO role from {member.name}#{member.discriminator} ({member.id})")
                     except Exception as e:
                         self.logger.error(f"為成員 {member.name} 移除通知用戶身分組時發生錯誤：{e}")
         except Exception as e:
@@ -387,8 +392,9 @@ class Member(commands.Cog):
             removed = []
             for member in members_with_notify:
                 try:
-                    await member.remove_roles(NOTIFY_ROLE, reason="移除所有成員的「通知用戶」身分組")
-                    removed.append(member)
+                    if NOTIFY_ROLE is not None:
+                        await member.remove_roles(NOTIFY_ROLE, reason="移除所有成員的「通知用戶」身分組")
+                        removed.append(member)
                 except Exception as e:
                     self.logger.error(f"移除成員 {member.name} 的「通知用戶」身分組時發生錯誤：{e}")
 
@@ -419,8 +425,9 @@ class Member(commands.Cog):
             removed = []
             for member in members_with_notify:
                 try:
-                    await member.remove_roles(NO_MYGO_ROLE, reason="移除所有成員的「未領取必要身份組」身分組")
-                    removed.append(member)
+                    if NO_MYGO_ROLE is not None:
+                        await member.remove_roles(NO_MYGO_ROLE, reason="移除所有成員的「未領取必要身份組」身分組")
+                        removed.append(member)
                 except Exception as e:
                     self.logger.error(f"移除成員 {member.name} 的「未領取必要身份組」身分組時發生錯誤：{e}")
 
