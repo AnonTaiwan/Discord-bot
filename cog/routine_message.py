@@ -36,6 +36,9 @@ class RoutineMessage(commands.Cog):
         if not self.retouch_picture_remind.is_running():
             self.retouch_picture_remind.start()
 
+        if not self.rena_commend.is_running():
+            self.rena_commend.start()
+
         if not self.GSAT_remind.is_running():
             self.GSAT_remind.start()
 
