@@ -50,7 +50,7 @@ class Gacha(commands.Cog):
         return utils.is_developer(ctx.author) or utils.is_in_bot_playground(ctx.channel)
     
     async def __send_no_permission_message(self, ctx: discord.ApplicationContext):
-        await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
+        await ctx.respond("❌ 你沒有權限使用此指令", ephemeral=True)
         self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
 
     @gacha_command_group.command(name="normal", description="抽一抽普通池")
@@ -64,7 +64,7 @@ class Gacha(commands.Cog):
         try:
             await ctx.respond(result)
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤：{e}")
+            await ctx.respond(f"❌ 發生錯誤，請稍後再試")
             self.logger.error(f"Error in gacha command: {e}")
 
     @gacha_command_group.command(name="normal10", description="抽十抽普通池")
@@ -84,7 +84,7 @@ class Gacha(commands.Cog):
         try:
             await ctx.respond(results)
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤：{e}")
+            await ctx.respond(f"❌ 發生錯誤，請稍後再試")
             self.logger.error(f"Error in gacha10 command: {e}")
 
     @gacha_command_group.command(name="fes", description="抽一抽 FES 池")
@@ -98,7 +98,7 @@ class Gacha(commands.Cog):
         try:
             await ctx.respond(result)
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤：{e}")
+            await ctx.respond(f"❌ 發生錯誤，請稍後再試")
             self.logger.error(f"Error in fes_gacha command: {e}")
 
     @gacha_command_group.command(name="fes10", description="抽十抽 FES 池")
@@ -118,7 +118,7 @@ class Gacha(commands.Cog):
         try:
             await ctx.respond(results)
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤：{e}")
+            await ctx.respond(f"❌ 發生錯誤，請稍後再試")
             self.logger.error(f"Error in fes_gacha10 command: {e}")
 
 def setup(bot: commands.Bot):
