@@ -61,7 +61,7 @@ class Facebook(commands.Cog):
                 return
             self.logger.info(f"最新貼文 URL: {self.latest}")
         except Exception as e:
-            self.logger.error(f"初始化過程中發生錯誤: {e}")
+            self.logger.error(f"初始化過程中發生錯誤：{e}")
         finally:
             # 無論如何只啟動一次
             asyncio.create_task(self.check_data())
@@ -109,7 +109,7 @@ class Facebook(commands.Cog):
                         self.logger.warning("無法獲取 Facebook 數據，用最近的紀錄代替")
                         self.load_latest_post()
                     if url != self.latest and content != self.content and uri != self.image:
-                        self.logger.info(f"檢測到新貼文: {url}")
+                        self.logger.info(f"檢測到新貼文：{url}")
                         with open('1.jpg', 'wb') as img_file:
                             img_response = requests.get(url = uri, headers=self.headers, allow_redirects=True,impersonate='chrome110')
                             img_file.write(img_response.content)
@@ -170,13 +170,13 @@ class Facebook(commands.Cog):
                         text += '}'
                     return json.loads(text)
                 except json.JSONDecodeError as e:
-                    self.logger.error(f"JSON 解析錯誤: {e}")
+                    self.logger.error(f"JSON 解析錯誤：{e}")
                     return None
             else:
                 self.logger.warning("在 Facebook 回應中找不到 attachments 模式")
                 return None
         except Exception as e:
-            self.logger.error(f"get_data 中發生錯誤: {e}")
+            self.logger.error(f"get_data 中發生錯誤：{e}")
             return None
     
     def filte_data(self,data):
@@ -236,7 +236,7 @@ class Facebook(commands.Cog):
                             title = "無法解析的圖片貼文"
                         response.url = f'https://www.facebook.com/61566516636930/posts/{data["styles"]["attachment"]["media"]["id"]}'
                 except Exception as e:
-                    self.logger.error(f"filte_data 中發生錯誤: {e}")
+                    self.logger.error(f"filte_data 中發生錯誤：{e}")
                     return None, None, None
         else:
             url = data['styles']['attachment']['url'].replace('\\','')
@@ -264,7 +264,7 @@ class Facebook(commands.Cog):
                     elapsed = datetime.now() - last_time
                     remaining = timedelta(hours=48) - elapsed
                     if remaining.total_seconds() > 0:
-                        self.logger.info(f"等待剩餘時間: {remaining}")
+                        self.logger.info(f"等待剩餘時間：{remaining}")
                         await asyncio.sleep(remaining.total_seconds())
 
                 # 一直跑
@@ -285,11 +285,11 @@ class Facebook(commands.Cog):
             self.cookies = response.cookies.get_dict()
             self.cookies['dpr'] = '2'
             self.cookies['wd'] = '798x847'
-            self.logger.info(f"Cookies 已更新: {self.cookies}")
+            self.logger.info(f"Cookies 已更新：{self.cookies}")
             with open('JSON/Cookies.json', 'w', encoding='utf-8') as f:
                 json.dump(self.cookies, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            self.logger.error(f"更新 Cookies 時發生錯誤: {e}")
+            self.logger.error(f"更新 Cookies 時發生錯誤：{e}")
 
     def save_latest_post(self):
         with open('JSON/latest_post.json', 'w', encoding='utf-8') as f:
