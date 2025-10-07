@@ -28,9 +28,13 @@ class AdminRemind(commands.Cog):
     
     async def create_webhook(self,channel: discord.TextChannel, user: discord.Member):
         await self.__clean_webhook(channel)
-        avatar_bytes = await user.display_avatar.read()
         name = user.name
-        return await channel.create_webhook(name=name, avatar=avatar_bytes, reason="用於管理員提醒")
+        try:
+            avatar_bytes = await user.display_avatar.read()
+            return await channel.create_webhook(name=name, avatar=avatar_bytes, reason="用於管理員提醒")
+        except Exception as e:
+            self.logger.warning(f"無法下載頭像，使用預設頭像：{e}")
+            return await channel.create_webhook(name=name, reason="用於管理員提醒")
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
