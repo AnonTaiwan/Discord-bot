@@ -101,7 +101,7 @@ class AdminRemind(commands.Cog):
             await ctx.respond("你已啟用管理員提醒。", ephemeral=True)
             self.logger.info(f"{ctx.author.name} 啟用管理員提醒")
         with open('JSON/admin_remind.json', 'w', encoding='utf-8') as f:
-    json.dump(data, f, ensure_ascii=False, indent=4)
+            json.dump(data, f, ensure_ascii=False, indent=4)
 
 def setup(bot):
     bot.add_cog(AdminRemind(bot))
