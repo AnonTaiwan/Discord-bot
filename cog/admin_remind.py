@@ -68,7 +68,6 @@ class AdminRemind(commands.Cog):
         
         if should_send:
             self.last_message = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            data["last_message"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             webhook = await self.create_webhook(message.channel, message.author)
             content = message.content + "\n\n"
             for user_id in data.get("user_id", []):
@@ -79,12 +78,13 @@ class AdminRemind(commands.Cog):
                 await message.channel.purge(limit=1)
             except Exception as e:
                 self.logger.error(f"發送 webhook 失敗：{e}")
-            try:
-                with open('JSON/admin_remind.json', 'w', encoding='utf-8') as f:
-                    json.dump(data, f, ensure_ascii=False, indent=4)
-            except Exception as e:
+                
+        data["last_message"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            with open('JSON/admin_remind.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+        except Exception as e:
                 self.logger.error(f"寫入 admin_remind.json 失敗：{e}")
-    
     @discord.slash_command(description="啟用/停用管理員提醒")
     async def toggle_admin_remind(self, ctx: discord.ApplicationContext):
         if not utils.is_operator(ctx.author):
