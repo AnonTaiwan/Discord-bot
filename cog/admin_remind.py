@@ -11,7 +11,7 @@ class AdminRemind(commands.Cog):
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/admin_remind.py: 日誌系統初始化完成")
         self.last_message = None
-        
+
     async def __clean_webhook(self,channel):
         webhooks = await channel.webhooks()
         if not webhooks:
@@ -26,7 +26,7 @@ class AdminRemind(commands.Cog):
                 await webhook.delete(reason="超過 Discord 限制，自動清除")
             except Exception as e:   
                 continue
-    
+
     async def create_webhook(self,channel: discord.TextChannel, user: discord.Member):
         await self.__clean_webhook(channel)
         name = user.display_name
@@ -36,36 +36,36 @@ class AdminRemind(commands.Cog):
         except Exception as e:
             self.logger.warning(f"無法下載頭像，使用預設頭像：{e}")
             return await channel.create_webhook(name=name, reason="用於管理員提醒")
-    
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.channel.id != utils.ADMIN_CHANNEL_ID:
             return
-        
+
         try:
             with open('JSON/admin_remind.json', 'r', encoding='utf-8') as f:
                 data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             data = {"last_message": None, "user_id": []}
-        
+
         if not data.get("user_id", []):
             return
-            
+
         last_message = data.get("last_message")
         should_send = True
-        
+
         if self.last_message:
             last_time = datetime.strptime(self.last_message, "%Y-%m-%d %H:%M:%S")
             elapsed = datetime.now() - last_time
             if elapsed < timedelta(minutes=5):
                 should_send = False
-        
+
         if last_message:
             last_time = datetime.strptime(last_message, "%Y-%m-%d %H:%M:%S")
             elapsed = datetime.now() - last_time
             if elapsed < timedelta(minutes=5):
                 should_send = False
-        
+
         if should_send:
             self.last_message = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             webhook = await self.create_webhook(message.channel, message.author)
@@ -78,7 +78,7 @@ class AdminRemind(commands.Cog):
                 await message.channel.purge(limit=1)
             except Exception as e:
                 self.logger.error(f"發送 webhook 失敗：{e}")
-                
+
         data["last_message"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
             with open('JSON/admin_remind.json', 'w', encoding='utf-8') as f:
@@ -100,6 +100,8 @@ class AdminRemind(commands.Cog):
             data["user_id"].append(ctx.author.id)
             await ctx.respond("你已啟用管理員提醒。", ephemeral=True)
             self.logger.info(f"{ctx.author.name} 啟用管理員提醒")
-            
+        with open('JSON/admin_remind.json', 'w', encoding='utf-8') as f:
+    json.dump(data, f, ensure_ascii=False, indent=4)
+
 def setup(bot):
     bot.add_cog(AdminRemind(bot))
