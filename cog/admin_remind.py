@@ -10,6 +10,7 @@ class AdminRemind(commands.Cog):
         self.bot = bot
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/admin_remind.py: 日誌系統初始化完成")
+        self.last_message = None
         
     async def __clean_webhook(self,channel):
         webhooks = await channel.webhooks()
@@ -53,6 +54,12 @@ class AdminRemind(commands.Cog):
         last_message = data.get("last_message")
         should_send = True
         
+        if self.last_message:
+            last_time = datetime.strptime(self.last_message, "%Y-%m-%d %H:%M:%S")
+            elapsed = datetime.now() - last_time
+            if elapsed < timedelta(minutes=5):
+                should_send = False
+        
         if last_message:
             last_time = datetime.strptime(last_message, "%Y-%m-%d %H:%M:%S")
             elapsed = datetime.now() - last_time
@@ -60,6 +67,7 @@ class AdminRemind(commands.Cog):
                 should_send = False
         
         if should_send:
+            self.last_message = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             data["last_message"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             webhook = await self.create_webhook(message.channel, message.author)
             content = message.content + "\n\n"
@@ -68,7 +76,7 @@ class AdminRemind(commands.Cog):
             try:
                 await webhook.send(content)
                 await webhook.delete(reason="提醒發送完畢，清理 webhook")
-                await message.channel.purge(1)
+                await message.channel.purge(limit=1)
             except Exception as e:
                 self.logger.error(f"發送 webhook 失敗：{e}")
             try:
