@@ -39,9 +39,6 @@ class AdminRemind(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.author.bot:
-            return
-            
         if message.channel.id != utils.ADMIN_CHANNEL_ID:
             return
 
@@ -54,10 +51,17 @@ class AdminRemind(commands.Cog):
         if not data.get("user_id", []):
             return
 
+        last_message = data.get("last_message")
         should_send = True
 
         if self.last_message:
             last_time = datetime.strptime(self.last_message, "%Y-%m-%d %H:%M:%S")
+            elapsed = datetime.now() - last_time
+            if elapsed < timedelta(minutes=5):
+                should_send = False
+
+        if last_message:
+            last_time = datetime.strptime(last_message, "%Y-%m-%d %H:%M:%S")
             elapsed = datetime.now() - last_time
             if elapsed < timedelta(minutes=5):
                 should_send = False
@@ -75,23 +79,19 @@ class AdminRemind(commands.Cog):
             except Exception as e:
                 self.logger.error(f"發送 webhook 失敗：{e}")
 
-            data["last_message"] = self.last_message
-            try:
-                with open('JSON/admin_remind.json', 'w', encoding='utf-8') as f:
-                    json.dump(data, f, ensure_ascii=False, indent=4)
-            except Exception as e:
+        data["last_message"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            with open('JSON/admin_remind.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+        except Exception as e:
                 self.logger.error(f"寫入 admin_remind.json 失敗：{e}")
     @discord.slash_command(description="啟用/停用管理員提醒")
     async def toggle_admin_remind(self, ctx: discord.ApplicationContext):
         if not utils.is_operator(ctx.author):
             await ctx.respond("你沒有權限使用此指令。", ephemeral=True)
             return
-        try:
-            with open('JSON/admin_remind.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            data = {"last_message": None, "user_id": []}
-            
+        with open('JSON/admin_remind.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
         if ctx.author.id in data.get("user_id", []):
             data["user_id"].remove(ctx.author.id)
             await ctx.respond("你已停用管理員提醒。", ephemeral=True)
@@ -100,7 +100,6 @@ class AdminRemind(commands.Cog):
             data["user_id"].append(ctx.author.id)
             await ctx.respond("你已啟用管理員提醒。", ephemeral=True)
             self.logger.info(f"{ctx.author.name} 啟用管理員提醒")
-            
         with open('JSON/admin_remind.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
