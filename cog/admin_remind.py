@@ -29,7 +29,7 @@ class AdminRemind(commands.Cog):
     
     async def create_webhook(self,channel: discord.TextChannel, user: discord.Member):
         await self.__clean_webhook(channel)
-        name = user.name
+        name = user.display_name
         try:
             avatar_bytes = await user.display_avatar.read()
             return await channel.create_webhook(name=name, avatar=avatar_bytes, reason="用於管理員提醒")
