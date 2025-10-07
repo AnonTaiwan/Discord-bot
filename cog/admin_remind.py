@@ -66,10 +66,9 @@ class AdminRemind(commands.Cog):
             for user_id in data.get("user_id", []):
                 content += f"<@{user_id}> "
             try:
-                message = await webhook.send(content)
+                await webhook.send(content)
                 await webhook.delete(reason="提醒發送完畢，清理 webhook")
-                await asyncio.sleep(1)  # 等待 1 秒
-                await message.delete()
+                await message.channel.purge(1)
             except Exception as e:
                 self.logger.error(f"發送 webhook 失敗：{e}")
             try:
