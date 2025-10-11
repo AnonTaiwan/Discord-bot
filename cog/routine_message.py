@@ -67,6 +67,23 @@ class RoutineMessage(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error sending retouch picture remind message: {e}")
 
+        guild: discord.Guild = self.bot.get_guild(utils.CRYCHIC_GUILD_ID)
+        user: discord.Member = None # type: ignore
+        for member in guild.members:
+            if 'konata_toki' in member.name:
+                print(member.id, member.name, member.display_name)
+                user = member
+        if user is not None:
+            if now.hour == 14:
+                message = f"每日監督 @{user.display_name} cosplay (1/2)"
+            elif now.hour == 20:
+                message = f"每日監督 @{user.display_name} cosplay (2/2)"
+
+            try:
+                await channel.send(message)
+            except Exception as e:
+                self.logger.error(f"Error sending retouch picture remind message: {e}")
+
     @tasks.loop(time=rena_commend_time)
     async def rena_commend(self):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
