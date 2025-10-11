@@ -73,9 +73,12 @@ class AdminRemind(commands.Cog):
             for user_id in data.get("user_id", []):
                 content += f"<@{user_id}> "
             try:
-                await webhook.send(content)
+                mes = await webhook.send(content)
+                if mes:
+                    await message.delete()
+                else:
+                    await message.channel.purge(limit=1)
                 await webhook.delete(reason="提醒發送完畢，清理 webhook")
-                await message.channel.purge(limit=1)
             except Exception as e:
                 self.logger.error(f"發送 webhook 失敗：{e}")
 
@@ -87,9 +90,6 @@ class AdminRemind(commands.Cog):
                 self.logger.error(f"寫入 admin_remind.json 失敗：{e}")
     @discord.slash_command(description="啟用/停用管理員提醒")
     async def toggle_admin_remind(self, ctx: discord.ApplicationContext):
-        if not utils.is_operator(ctx.author):
-            await ctx.respond("你沒有權限使用此指令。", ephemeral=True)
-            return
         with open('JSON/admin_remind.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
         if ctx.author.id in data.get("user_id", []):
