@@ -5,6 +5,7 @@ import utils
 
 JERRY_ID = 654273506921414656
 FABAO_ID = 271297517432340480
+KONATA_TOKI_ID = 1106473991939559504
 
 RECORD_FILE = utils.JSON_DIR / 'activity.json'
 
@@ -54,6 +55,18 @@ class Activity(commands.Cog):
                 content = f'📢 <@{FABAO_ID}> 的暱稱變更為 {after.display_name}'
                 self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
                 await self.channel.send(content = content)
+            return
+        
+        if before.id == KONATA_TOKI_ID:
+            if before.display_name != after.display_name:
+                self.logger.info(f"Bot changed nickname from {before.display_name} to {after.display_name}")
+
+                guild = self.bot.get_guild(utils.CRYCHIC_GUILD_ID)
+                if not guild:
+                    self.logger.error(f"Guild with ID {utils.CRYCHIC_GUILD_ID} not found")
+                    return
+                
+                await guild.me.edit(nick = after.display_name)
             return
         
         fabao_keywords = ["法堡", "Fabao", "fabao", "FABAO"]
