@@ -17,7 +17,7 @@ class MyBot(commands.Bot):
                 self.initial_extensions.append(f"cog.{p.stem}")
 
     async def on_ready(self):
-        game = discord.Game("Blue Archive")
+        game = discord.Game("椎名立希")
         print(f"✅ Logged in as {self.user}")
         await self.change_presence(status=discord.Status.online, activity=game)
         self.remove_command("help")
