@@ -17,6 +17,7 @@ class Love(commands.Cog):
             return
         if "夢以我愛" in message.content or "夢以我喜歡" in message.content:
             if utils.is_operator(message.author):
-                await message.channel.send(random.choice(self.operator))
+                print("Operator Detected")
+                await message.reply(random.choice(self.operator))
             else:
-                await message.channel.send(random.choice(self.non_operator))
+                await message.reply(random.choice(self.non_operator))
