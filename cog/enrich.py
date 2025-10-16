@@ -22,21 +22,15 @@ class EnrichCog(commands.Cog):
         if message.author.bot:
             return
 
-        # if random.random() > 1 or message.channel.id != utils.OFFTOPIC_CHANNEL_ID:
-        #     return
-        
-        if not (message.content == "!enrich" and message.author.id == 705432231304495205):
+        if random.random() > 1 or message.channel.id != utils.OFFTOPIC_CHANNEL_ID:
             return
         
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
             enrich_data = json.load(f)
-        
-        # user_id = str(message.author.id)
-        user_id = str(271297517432340480) # for test
+            
+        user_id = str(message.author.id)
         
         if user_id in enrich_data:
-            
-            print("found enrich user") # for test
             
             with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -53,15 +47,12 @@ class EnrichCog(commands.Cog):
                             return
                         except:
                             pass
-                        
-            print("create new webhook") # for test
             
             webhook = await self.create_webhook(message.channel, user_id)
             await webhook.send(content=mes)
             return
 
     async def create_webhook(self, channel: discord.TextChannel, userid):
-        print("create_webhook")
         userid = str(userid)
         await self.clean_webhook(channel)
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
@@ -80,11 +71,9 @@ class EnrichCog(commands.Cog):
         webhook_token = webhook.token
         with open("JSON/webhook.json", "r", encoding="utf-8") as f:
             data = json.load(f)
-        print(f"webhook created")
         data[str(userid)] = {"id": webhook_id, "token": webhook_token}
         with open("JSON/webhook.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-        print(f"webhook saved")
         return webhook
 
     async def clean_webhook(self,channel):
@@ -108,6 +97,8 @@ class EnrichCog(commands.Cog):
                 
             if not after.id == 705432231304495205: # 測試用
                 return
+            
+            print("member back detected") # for test
             
             # user_id = str(after.id)
             user_id = str(271297517432340480) # for test
