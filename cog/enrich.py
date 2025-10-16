@@ -21,9 +21,18 @@ class EnrichCog(commands.Cog):
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
-
-        if random.random() > 0.25 or message.channel.id != utils.OFFTOPIC_CHANNEL_ID:
-            return
+        
+        # 允許管理員用 .force_enrich 強制觸發
+        is_force = message.content == ".force_enrich" and utils.is_operator(message.author)
+        
+        # 如果不是強制觸發，則檢查條件
+        if not is_force:
+            # 不在指定頻道則跳過
+            if message.channel.id != utils.OFFTOPIC_CHANNEL_ID:
+                return
+            # 25% 機率才觸發
+            if random.random() > 0.25:
+                return
         
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
             enrich_data = json.load(f)
