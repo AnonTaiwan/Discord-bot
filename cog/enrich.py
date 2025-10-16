@@ -22,7 +22,7 @@ class EnrichCog(commands.Cog):
         if message.author.bot:
             return
         
-        if random.random() > 0.25 or message.channel.id != utils.OFFTOPIC_CHANNEL_ID: 
+        if random.random() > 0 or message.channel.id != utils.OFFTOPIC_CHANNEL_ID: 
             return
         
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
@@ -82,8 +82,32 @@ class EnrichCog(commands.Cog):
             except Exception as e:   
                 continue
 
-
-
+    @commands.Cog.listener()
+    async def on_member_update(self, before: discord.Member, after: discord.Member):
+        if before.status == discord.Status.offline and after.status != discord.Status.offline:
+            with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
+                enrich_data = json.load(f)
+            if str(after.id) in enrich_data.keys():
+                
+                with open('JSON/enrich.json', 'w', encoding='utf-8') as f:
+                    json.dump(enrich_data, f, ensure_ascii=False, indent=4)
+            with open("JSON/webhook.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+            mes = f"哇！是<@{after.id}>老公回來了"
+            if str(after.id) in data.keys():
+                webhook_id = data[str(after.id)]["id"]
+                webhook_token = data[str(after.id)]["token"]
+                async with aiohttp.ClientSession() as session:
+                        webhook = Webhook.partial(webhook_id, webhook_token, session=session)
+                        try:
+                            await webhook.fetch()
+                            await webhook.send(content=mes)
+                            return
+                        except:
+                            pass
+            channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+            webhook = await self.create_webhook(channel, after.id)
+            await webhook.send(content=mes)
 
 def setup(bot: commands.Bot):
     bot.add_cog(EnrichCog(bot))
