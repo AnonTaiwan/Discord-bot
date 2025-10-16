@@ -27,7 +27,7 @@ class EnrichCog(commands.Cog):
         
         if not (message.content == "!enrich" and message.author.id == 705432231304495205):
             return
-
+        print("enrich command detected") # for test
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
             enrich_data = json.load(f)
             
@@ -38,6 +38,7 @@ class EnrichCog(commands.Cog):
                 data = json.load(f)
             mes = f"我覺得老公說的對"
             if str(message.author.id) in data.keys():
+                print("found webhook")
                 webhook_id = data[str(message.author.id)]["id"]
                 webhook_token = data[str(message.author.id)]["token"]
                 async with aiohttp.ClientSession() as session:
@@ -48,6 +49,9 @@ class EnrichCog(commands.Cog):
                             return
                         except:
                             pass
+                        
+            print("create new webhook") # for test
+            
             webhook = await self.create_webhook(message.channel, message.author.id)
             await webhook.send(content=mes)
             return
@@ -102,6 +106,9 @@ class EnrichCog(commands.Cog):
             after.id = 271297517432340480 # 測試用
             
             if str(after.id) in enrich_data.keys():
+                
+                print("member back online") # for test
+                
                 with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                     data = json.load(f)
                 mes = f"哇！是<@{after.id}>老公回來了"
