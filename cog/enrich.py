@@ -43,7 +43,7 @@ class EnrichCog(commands.Cog):
             
             with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
-            mes = f"我覺得老公說的對"
+            mes = random.choice(["我覺得老公說的對", "我非常支持老公的觀點", "老公說得真好", "我完全同意老公的看法"])
             if user_id in data:
                 webhook_id = data[user_id]["id"]
                 webhook_token = data[user_id]["token"]
@@ -52,12 +52,14 @@ class EnrichCog(commands.Cog):
                         try:
                             await webhook.fetch()
                             await webhook.send(content=mes)
+                            await message.delete() if is_force else None
                             return
                         except:
                             pass
             
             webhook = await self.create_webhook(message.channel, user_id)
             await webhook.send(content=mes)
+            await message.delete() if is_force else None
             return
 
     async def create_webhook(self, channel: discord.TextChannel, userid):
