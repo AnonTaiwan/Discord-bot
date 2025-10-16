@@ -60,13 +60,14 @@ class EnrichCog(commands.Cog):
             await webhook.send(content=mes)
             return
 
-    async def create_webhook(self, channel: discord.TextChannel, userid: int):
+    async def create_webhook(self, channel: discord.TextChannel, userid):
         print("create_webhook")
+        userid = str(userid)
         await self.clean_webhook(channel)
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
             enrich_data = json.load(f)
-        name = enrich_data.get(str(userid), "name")
-        avatar_base64 = enrich_data.get(str(userid), None)
+        name = enrich_data.get(userid, {}).get("name", "Default Name")
+        avatar_base64 = enrich_data.get(userid, {}).get("avatar", None)
         avatar_bytes = None
         if avatar_base64:
             try:
