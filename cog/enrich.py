@@ -94,22 +94,14 @@ class EnrichCog(commands.Cog):
         if before.status == discord.Status.offline and after.status != discord.Status.offline:
             with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
                 enrich_data = json.load(f)
-                
-            if not after.id == 705432231304495205: # 測試用
-                return
-            
-            print("member back detected") # for test
-            
-            # user_id = str(after.id)
-            user_id = str(271297517432340480) # for test
+
+            user_id = str(after.id)
             
             if user_id in enrich_data:
-
-                print("member back online") # for test
                 
                 with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                     data = json.load(f)
-                mes = f"哇！是<@{after.id}>老公回來了"
+                mes = f"哇！是<@{user_id}>老公回來了"
                 if user_id in data:
                     webhook_id = data[user_id]["id"]
                     webhook_token = data[user_id]["token"]
