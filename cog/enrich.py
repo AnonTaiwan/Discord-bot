@@ -36,7 +36,6 @@ class EnrichCog(commands.Cog):
                 data = json.load(f)
             mes = f"我覺得老公說的對"
             if user_id in data:
-                print("found webhook")
                 webhook_id = data[user_id]["id"]
                 webhook_token = data[user_id]["token"]
                 async with aiohttp.ClientSession() as session:
