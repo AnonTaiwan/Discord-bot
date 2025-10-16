@@ -27,13 +27,12 @@ class EnrichCog(commands.Cog):
         
         if not (message.content == "!enrich" and message.author.id == 705432231304495205):
             return
-        print("enrich command detected") # for test
+        
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
             enrich_data = json.load(f)
-        print("load enrich_data") # for test
         
         # user_id = str(message.author.id)
-        user_id = str(705432231304495205) # for test
+        user_id = str(271297517432340480) # for test
         
         if user_id in enrich_data:
             
@@ -108,7 +107,10 @@ class EnrichCog(commands.Cog):
                 
             if not after.id == 705432231304495205: # 測試用
                 return
-            user_id = str(after.id)
+            
+            # user_id = str(after.id)
+            user_id = str(271297517432340480) # for test
+            
             if user_id in enrich_data:
 
                 print("member back online") # for test
