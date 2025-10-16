@@ -31,16 +31,18 @@ class EnrichCog(commands.Cog):
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
             enrich_data = json.load(f)
             
-        message.author.id = 271297517432340480 # 測試用
         
-        if str(message.author.id) in enrich_data.keys():
+        # user_id = str(message.author.id)
+        user_id = str(705432231304495205) # for test
+        
+        if user_id in enrich_data.keys():
             with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
             mes = f"我覺得老公說的對"
-            if str(message.author.id) in data.keys():
+            if user_id in data.keys():
                 print("found webhook")
-                webhook_id = data[str(message.author.id)]["id"]
-                webhook_token = data[str(message.author.id)]["token"]
+                webhook_id = data[user_id]["id"]
+                webhook_token = data[user_id]["token"]
                 async with aiohttp.ClientSession() as session:
                         webhook = Webhook.partial(webhook_id, webhook_token, session=session)
                         try:
@@ -52,7 +54,7 @@ class EnrichCog(commands.Cog):
                         
             print("create new webhook") # for test
             
-            webhook = await self.create_webhook(message.channel, message.author.id)
+            webhook = await self.create_webhook(message.channel, user_id)
             await webhook.send(content=mes)
             return
 
@@ -103,18 +105,17 @@ class EnrichCog(commands.Cog):
                 
             if not after.id == 705432231304495205: # 測試用
                 return
-            after.id = 271297517432340480 # 測試用
-            
-            if str(after.id) in enrich_data.keys():
-                
+            user_id = str(after.id)
+            if user_id in enrich_data.keys():
+
                 print("member back online") # for test
                 
                 with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                     data = json.load(f)
                 mes = f"哇！是<@{after.id}>老公回來了"
-                if str(after.id) in data.keys():
-                    webhook_id = data[str(after.id)]["id"]
-                    webhook_token = data[str(after.id)]["token"]
+                if user_id in data.keys():
+                    webhook_id = data[user_id]["id"]
+                    webhook_token = data[user_id]["token"]
                     async with aiohttp.ClientSession() as session:
                             webhook = Webhook.partial(webhook_id, webhook_token, session=session)
                             try:
@@ -124,7 +125,7 @@ class EnrichCog(commands.Cog):
                             except:
                                 pass
                 channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
-                webhook = await self.create_webhook(channel, after.id)
+                webhook = await self.create_webhook(channel, user_id)
                 await webhook.send(content=mes)
 
 def setup(bot: commands.Bot):
