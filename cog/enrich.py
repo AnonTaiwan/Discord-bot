@@ -21,12 +21,18 @@ class EnrichCog(commands.Cog):
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
+
+        # if random.random() > 1 or message.channel.id != utils.OFFTOPIC_CHANNEL_ID:
+        #     return
         
-        if random.random() > 0 or message.channel.id != utils.OFFTOPIC_CHANNEL_ID: 
+        if not (message.content == "!enrich" and message.author.id == 705432231304495205):
             return
-        
+
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
             enrich_data = json.load(f)
+            
+        message.author.id = 271297517432340480 # 測試用
+        
         if str(message.author.id) in enrich_data.keys():
             with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -47,6 +53,7 @@ class EnrichCog(commands.Cog):
             return
 
     async def create_webhook(self, channel: discord.TextChannel, userid: int):
+        print("create_webhook")
         await self.clean_webhook(channel)
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
             enrich_data = json.load(f)
@@ -64,9 +71,11 @@ class EnrichCog(commands.Cog):
         webhook_token = webhook.token
         with open("JSON/webhook.json", "r", encoding="utf-8") as f:
             data = json.load(f)
+        print(f"webhook created")
         data[str(userid)] = {"id": webhook_id, "token": webhook_token}
         with open("JSON/webhook.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
+        print(f"webhook saved")
         return webhook
 
     async def clean_webhook(self,channel):
@@ -87,6 +96,11 @@ class EnrichCog(commands.Cog):
         if before.status == discord.Status.offline and after.status != discord.Status.offline:
             with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
                 enrich_data = json.load(f)
+                
+            if not after.id == 705432231304495205: # 測試用
+                return
+            after.id = 271297517432340480 # 測試用
+            
             if str(after.id) in enrich_data.keys():
                 with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                     data = json.load(f)
