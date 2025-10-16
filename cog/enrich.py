@@ -22,7 +22,7 @@ class EnrichCog(commands.Cog):
         if message.author.bot:
             return
 
-        if random.random() > 1 or message.channel.id != utils.OFFTOPIC_CHANNEL_ID:
+        if random.random() > 0.25 or message.channel.id != utils.OFFTOPIC_CHANNEL_ID:
             return
         
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
