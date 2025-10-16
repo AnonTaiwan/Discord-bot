@@ -90,8 +90,7 @@ class EnrichCog(commands.Cog):
                 continue
 
     @commands.Cog.listener()
-    async def on_member_update(self, before: discord.Member, after: discord.Member):
-        print("on_member_update triggered") # for test
+    async def on_presence_update(self, before: discord.Member, after: discord.Member):
         if before.status == discord.Status.offline and after.status != discord.Status.offline:
             with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
                 enrich_data = json.load(f)
