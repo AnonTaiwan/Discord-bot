@@ -8,12 +8,6 @@ retouch_picture_remind_time = [
     time(hour=20, minute=0, second=0, tzinfo=utils.TIME_ZONE),
 ]
 
-rena_commend_time = [
-    time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)
-]
-
-RENA_ID = 123057558628990977
-
 GSAT_remind_time = [
     time(hour=8, minute=0, second=0, tzinfo=utils.TIME_ZONE)
 ]
@@ -83,21 +77,6 @@ class RoutineMessage(commands.Cog):
                 await channel.send(message)
             except Exception as e:
                 self.logger.error(f"Error sending retouch picture remind message: {e}")
-
-    @tasks.loop(time=rena_commend_time)
-    async def rena_commend(self):
-        channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
-        user = self.bot.get_user(RENA_ID)
-
-        try:
-            embed = discord.Embed(title="已表揚成員", color=discord.Color.green())
-
-            embed.add_field(name="被表揚成員", value=f"{user.mention}", inline=False)
-            embed.add_field(name="表揚理由", value="謝蕾總每日關心", inline=False)
-
-            await channel.send(embed=embed)
-        except Exception as e:
-            self.logger.error(f"Error sending Rena commend message: {e}")
 
     @tasks.loop(time=GSAT_remind_time)
     async def GSAT_remind(self):
