@@ -99,7 +99,7 @@ class NewFB(commands.Cog):
         self.bot = bot
         self.latest = []
         self.comment_unchecked_posts = utils.PriorityQueue(self.__save_facebook_record)
-
+        self.gbc_latest = []
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/facebook.py: 日誌系統初始化完成")
 
@@ -116,8 +116,8 @@ class NewFB(commands.Cog):
             "comment_unchecked_posts": self.comment_unchecked_posts.get_raw_elements()
         })
     
-    def get_datas(self, limit=3):
-        response = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={utils.FACEBOOK_TOKEN}&limit={limit}')
+    def get_datas(self, page_id, limit=3):
+        response = requests.get(f'https://graph.facebook.com/v23.0/{page_id}/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={utils.FACEBOOK_TOKEN}&limit={limit}')
         datas = json.loads(response.text)
         return datas['data']
             
@@ -148,12 +148,13 @@ class NewFB(commands.Cog):
         self.logger.info(f"已發送新貼文通知：{data_id}")
         os.remove(f"tmp/{data_id}.jpg")
 
-    async def __send_post_update_message(self, data):
+    async def __send_post_update_message(self, data, page_id):
         await self.get_photo(data)
+        name = "Anon Taiwan" if page_id == utils.FB_PAGE_ID else "女團哭迷因"
         message = data.get('message', 'No message provided')
         message = bytes(message, 'utf-8').decode(encoding="utf-8", errors="ignore")
         url = data.get('permalink_url', 'No URL provided').replace('\\', '')
-        embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url=url, color=0x00ff00)
+        embed = discord.Embed(title=f'{name} 更新了新貼文！', url=url, color=0x00ff00)
         embed.add_field(name='貼文連結', value=url, inline=False)
         embed.add_field(name='貼文內容', value=message or "（無內容）", inline=False)
         file_path = f"tmp/{data['id']}.jpg"
@@ -202,12 +203,38 @@ class NewFB(commands.Cog):
         await test_channel.send(embed=embed, view=view)
         self.logger.info(f"已發送留言提醒通知：{post_id}")
     
+    async def __if_post_updates(self, datas, latest):
+        new_post = [i for i in datas if i['id'] not in latest]
+        return new_post
+    
+    async def __handle_new_post(self, datas, latest, page_id):
+        new_posts = await self.__if_post_updates(datas, latest)
+        if new_posts:
+            for post in new_posts:
+                threads = self.bot.get_cog('Threads')
+                if threads:
+                    await threads.new_post_detected(post, page_id)
+                await self.__send_post_update_message(post, page_id)
+                if page_id == utils.FB_PAGE_ID:
+                    create_time_str = post.get('created_time', None)
+                    if create_time_str is None:
+                        create_time = datetime.now(utils.TIME_ZONE)
+                    else:
+                        create_time = datetime.strptime(create_time_str, "%Y-%m-%dT%H:%M:%S%z").replace(tzinfo=utils.TIME_ZONE)
+
+                    self.comment_unchecked_posts.push(create_time, post)
+                    self.logger.info(f"已將貼文 {post['id']} 加入待檢查留言列表。")
+                    
+            self.latest = [i['id'] for i in datas]
+
     @commands.Cog.listener()
     async def on_ready(self):
         if not os.path.exists("tmp"):
             os.makedirs("tmp")
-        datas = self.get_datas()
+        datas = self.get_datas(page_id=utils.FB_PAGE_ID)
         self.latest = [i['id'] for i in datas]
+        datas = self.get_datas(page_id=utils.GBC_FB_PAGE_ID)
+        self.gbc_latest = [i['id'] for i in datas]
         self.reel = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url&access_token={utils.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
         
         if not self.check_comments_routine.is_running():
@@ -241,21 +268,10 @@ class NewFB(commands.Cog):
     @tasks.loop(minutes=1)
     async def check_post_updates(self):
         try:
-            datas = self.get_datas()
-            new_post = [i for i in datas if i['id'] not in self.latest]
-            if new_post:
-                self.logger.info(f"發現 {len(new_post)} 條新貼文")
-                for post in new_post:
-                    await self.__send_post_update_message(post)
-
-                    create_time_str = post.get('created_time', None)
-                    if create_time_str is None:
-                        create_time = datetime.now(utils.TIME_ZONE)
-                    else:
-                        create_time = datetime.strptime(create_time_str, "%Y-%m-%dT%H:%M:%S%z").replace(tzinfo=utils.TIME_ZONE)
-
-                    self.comment_unchecked_posts.push(create_time, post)
-                self.latest = [i['id'] for i in datas]
+            datas = self.get_datas(page_id=utils.FB_PAGE_ID)
+            await self.__handle_new_post(datas, self.latest, utils.FB_PAGE_ID)
+            gbc_datas = self.get_datas(page_id=utils.GBC_FB_PAGE_ID)
+            await self.__handle_new_post(gbc_datas, self.gbc_latest, utils.GBC_FB_PAGE_ID)
         except Exception as e:
             await self.bot.get_channel(utils.TEST_CHANNEL_ID).send(f"@<&{utils.DEVELOPER_ROLE_ID}>\n`Error checking for updates: {e}`")
             self.check_post_updates.cancel()
