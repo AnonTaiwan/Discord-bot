@@ -3,10 +3,8 @@ import discord
 from discord.ext import commands, tasks
 import json
 import utils
-from datetime import datetime
 import asyncio
-
-update_threads_time = datetime(day=17, hour=6, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
+from datetime import datetime, timedelta
 
 class Threads(commands.Cog):
     def __init__(self, bot):
@@ -338,22 +336,27 @@ https://lit.link/bangdream114514
         with open('JSON/threads.json', 'w', encoding='utf-8') as f:
             json.dump(threads_data, f, ensure_ascii=False, indent=4)
 
-    @tasks.loop(time=update_threads_time)
+    @tasks.loop(hours=1)  # 每小時檢查一次
     async def update_threads(self):
+        # 只在每月 1 號的 06:00 執行
+        now = datetime.now(utils.TIME_ZONE)
+        if now.day != 1 or now.hour != 6:
+            return
+            
         url = f"https://graph.threads.net/refresh_access_token?grant_type=th_refresh_token&access_token={utils.THREADS_TOKEN}"
         response = requests.get(url)
-        if response.status == 200:
-            data = await response.json()
+        if response.status_code == 200:
+            data = response.json()
             access_token = data.get('access_token')
             with open(utils.BOT_CONFIG_FILE, 'r', encoding='utf-8') as f:
                 config = json.load(f)
             config['THREADS_TOKEN'] = access_token
             with open(utils.BOT_CONFIG_FILE, 'w', encoding='utf-8') as f:
                 json.dump(config, f, ensure_ascii=False, indent=4)
-            utils.update_bot_config()
+            utils.update_bot_config('THREADS_TOKEN', access_token)
             self.logger.info(f"成功更新 Threads 存取權杖：{data}")
         else:
-            self.logger.error(f"更新 Threads 存取權杖失敗，狀態碼：{response.status}")
+            self.logger.error(f"更新 Threads 存取權杖失敗，狀態碼：{response.status_code}")
             channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
             await channel.send(f"<@&1361994254536409088>更新 Threads 存取權杖失敗，請檢查日誌以獲取更多資訊")
 
