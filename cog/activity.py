@@ -57,18 +57,6 @@ class Activity(commands.Cog):
                 await self.channel.send(content = content)
             return
         
-        if before.id == KONATA_TOKI_ID:
-            if before.display_name != after.display_name:
-                self.logger.info(f"Bot changed nickname from {before.display_name} to {after.display_name}")
-
-                guild = self.bot.get_guild(utils.CRYCHIC_GUILD_ID)
-                if not guild:
-                    self.logger.error(f"Guild with ID {utils.CRYCHIC_GUILD_ID} not found")
-                    return
-                
-                await guild.me.edit(nick = after.display_name)
-            return
-        
         fabao_keywords = ["法堡", "Fabao", "fabao", "FABAO"]
         keyword_in_before = False
         keyword_in_after = False
