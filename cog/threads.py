@@ -270,9 +270,9 @@ class Threads(commands.Cog):
             await interaction.response.send_modal(modal)
             await interaction.delete_original_message()
             
-    class EditPost(discord.ui.Modal, title="編輯貼文文字"):
+    class EditPost(discord.ui.Modal):
         def __init__(self, post_info, mes_id):
-            super().__init__()
+            super().__init__(title="編輯貼文文字")
             self.post_info = post_info
             self.mes_id = mes_id
             self.add_item(discord.ui.InputText(label="新的貼文文字", style=discord.InputTextStyle.long, default=post_info['text']))
