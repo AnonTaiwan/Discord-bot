@@ -5,6 +5,7 @@ import json
 import utils
 import asyncio
 from datetime import datetime, timedelta
+from io import BytesIO
 
 class Threads(commands.Cog):
     def __init__(self, bot):
@@ -15,16 +16,21 @@ class Threads(commands.Cog):
 
     async def __media_to_Disccord(self, media_url, media_type):
         channel = self.bot.get_channel(utils.THREADS_MEDIA_CHANNEL_ID)
-        response = requests.get(media_url)
+        # 將阻塞的 HTTP 下載放到執行緒，避免阻塞事件迴圈
+        response = await asyncio.to_thread(requests.get, media_url, timeout=30)
         if response.status_code == 200:
             if media_type == "IMAGE":
                 fb = response.content
-                discord_file = discord.File(fp=bytes(fb), filename='image.jpg')
+                buffer = BytesIO(fb)
+                buffer.seek(0)
+                discord_file = discord.File(fp=buffer, filename='image.jpg')
                 message = await channel.send(file=discord_file)
                 return message.attachments[0].url
             elif media_type == "VIDEO":
                 fb = response.content
-                discord_file = discord.File(fp=bytes(fb), filename='video.mp4')
+                buffer = BytesIO(fb)
+                buffer.seek(0)
+                discord_file = discord.File(fp=buffer, filename='video.mp4')
                 message = await channel.send(file=discord_file)
                 return message.attachments[0].url
         else:
@@ -58,7 +64,7 @@ class Threads(commands.Cog):
                         dc_url = await self.__media_to_Disccord(url, "IMAGE")
                         if dc_url is not None:
                             media_urls.append(dc_url)
-                    success = self.__multi_post(post_id, message_id, media_urls)
+                    success = await self.__multi_post(post_id, message_id, media_urls)
                 else:
                     media_url = data[0]["media"]["image"]["src"]
                     dc_url = await self.__media_to_Disccord(media_url, "IMAGE")
@@ -77,7 +83,6 @@ class Threads(commands.Cog):
     async def __text_post(self, post_id, message_id):
         ID = utils.THREADS_ID
         API = utils.THREADS_TOKEN
-        data = self.get_post_details(post_id)
         with open('JSON/threads.json', 'r', encoding='utf-8') as f:
             threads_data = json.load(f)
         post_info = threads_data[str(message_id)]
@@ -103,7 +108,6 @@ class Threads(commands.Cog):
     async def __single_post(self, post_id, message_id, media_url):
         ID = utils.THREADS_ID
         API = utils.THREADS_TOKEN
-        data = self.get_post_details(post_id)
         with open('JSON/threads.json', 'r', encoding='utf-8') as f:
             threads_data = json.load(f)
         post_info = threads_data[str(message_id)]
@@ -131,7 +135,6 @@ class Threads(commands.Cog):
     async def __video_post(self, post_id, message_id, media_url):
         ID = utils.THREADS_ID
         API = utils.THREADS_TOKEN
-        data = self.get_post_details(post_id)
         with open('JSON/threads.json', 'r', encoding='utf-8') as f:
             threads_data = json.load(f)
         post_info = threads_data[str(message_id)]
@@ -159,7 +162,6 @@ class Threads(commands.Cog):
     async def __multi_post(self, post_id, message_id, media_urls):
         ID = utils.THREADS_ID
         API = utils.THREADS_TOKEN
-        data = self.get_post_details(post_id)
         with open('JSON/threads.json', 'r', encoding='utf-8') as f:
             threads_data = json.load(f)
         post_info = threads_data[str(message_id)]
@@ -281,7 +283,7 @@ class Threads(commands.Cog):
             self.mes_id = mes_id
             self.add_item(discord.ui.InputText(label="新的貼文文字", style=discord.InputTextStyle.long, value=post_info['text']))
             
-        async def on_submit(self, interaction: discord.Interaction):
+        async def callback(self, interaction: discord.Interaction):
             self.post_info['text'] = self.children[0].value
             with open('JSON/threads.json', 'r', encoding='utf-8') as f:
                 threads_data = json.load(f)
@@ -326,7 +328,7 @@ https://www.anontaiwan.meme/
         embed.add_field(name="貼文連結", value=post.get('permalink_url', '無連結'), inline=False)
         with open('JSON/threads.json', 'r', encoding='utf-8') as f:
             threads_data = json.load(f)
-        view = self.PostButton()
+        view = self.PostButton(self)
         message = await channel.send(embed=embed, view=view)
         if data.get('data') is None:
             post_type = "TEXT"
