@@ -79,6 +79,9 @@ class Threads(commands.Cog):
                 del threads_data[str(message_id)]
                 with open('JSON/threads.json', 'w', encoding='utf-8') as f:
                     json.dump(threads_data, f, ensure_ascii=False, indent=4)
+                channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
+                message = await channel.fetch_message(message_id)
+                await message.delete()
 
     async def __text_post(self, post_id, message_id):
         ID = utils.THREADS_ID
@@ -204,6 +207,7 @@ class Threads(commands.Cog):
         
     async def __check_post_status(self, data, post_id):
         data_id = data.get("id")
+        self.channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
         print("Posted thread with media ID:", data_id)
         if data_id is None:
             embed = discord.Embed(title="貼文發布失敗", description=f"貼文 ID: {post_id} 發布到 Threads 失敗。", color=0xff0000)
@@ -290,8 +294,8 @@ class Threads(commands.Cog):
             threads_data[str(self.mes_id)] = self.post_info
             with open('JSON/threads.json', 'w', encoding='utf-8') as f:
                 json.dump(threads_data, f, ensure_ascii=False, indent=4)
-            await self.cog._handle_posting(int(self.mes_id))
             await interaction.response.send_message("已更新貼文文字並發布", ephemeral=True)
+            await self.cog._handle_posting(int(self.mes_id))
 
     async def post_new_thread(self, post_info):
         channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
