@@ -270,14 +270,14 @@ class Threads(commands.Cog):
         @discord.ui.button(label="確認貼文", style=discord.ButtonStyle.success)
         async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
             await interaction.response.send_message("貼文已確認，正在發布...", ephemeral=True)
-            await self.cog._handle_posting(int(self.mes_id))
             await interaction.delete_original_message()
+            await self.cog._handle_posting(int(self.mes_id))
             
         @discord.ui.button(label="修改文字", style=discord.ButtonStyle.danger)
         async def edit_text(self, button: discord.ui.Button, interaction: discord.Interaction):
             modal = Threads.EditPost(self.cog, self.post_info, self.mes_id)
-            await interaction.response.send_modal(modal)
             await interaction.delete_original_message()
+            await interaction.response.send_modal(modal)
             
     class EditPost(discord.ui.Modal):
         def __init__(self, cog, post_info, mes_id):
@@ -370,5 +370,4 @@ https://www.anontaiwan.meme/
             channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
             await channel.send(f"<@&1361994254536409088>更新 Threads 存取權杖失敗，請檢查日誌以獲取更多資訊")
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Threads(bot))
+def
