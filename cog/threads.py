@@ -285,7 +285,7 @@ class Threads(commands.Cog):
             self.post_info['text'] = self.children[0].value
             with open('JSON/threads.json', 'r', encoding='utf-8') as f:
                 threads_data = json.load(f)
-            threads_data[self.mes_id] = self.post_info
+            threads_data[str(self.mes_id)] = self.post_info
             with open('JSON/threads.json', 'w', encoding='utf-8') as f:
                 json.dump(threads_data, f, ensure_ascii=False, indent=4)
             await self.cog._handle_posting(int(self.mes_id))
