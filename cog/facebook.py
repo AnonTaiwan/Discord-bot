@@ -211,9 +211,6 @@ class NewFB(commands.Cog):
         new_posts = await self.__if_post_updates(datas, latest)
         if new_posts:
             for post in new_posts:
-                threads = self.bot.get_cog('Threads')
-                if threads:
-                    await threads.new_post_detected(post, page_id)
                 await self.__send_post_update_message(post, page_id)
                 if page_id == utils.FB_PAGE_ID:
                     create_time_str = post.get('created_time', None)
@@ -224,6 +221,12 @@ class NewFB(commands.Cog):
 
                     self.comment_unchecked_posts.push(create_time, post)
                     self.logger.info(f"已將貼文 {post['id']} 加入待檢查留言列表。")
+                try:
+                    threads = self.bot.get_cog('Threads')
+                    if threads:
+                        await threads.new_post_detected(post, page_id)
+                except Exception as e:
+                    self.logger.error(f"Error notifying Threads cog: {e}")
                     
             self.latest = [i['id'] for i in datas]
 
