@@ -279,7 +279,7 @@ class Threads(commands.Cog):
             self.cog: "Threads" = cog
             self.post_info = post_info
             self.mes_id = mes_id
-            self.add_item(discord.ui.InputText(label="新的貼文文字", style=discord.InputTextStyle.long, default=post_info['text']))
+            self.add_item(discord.ui.InputText(label="新的貼文文字", style=discord.InputTextStyle.long, value=post_info['text']))
             
         async def on_submit(self, interaction: discord.Interaction):
             self.post_info['text'] = self.children[0].value
