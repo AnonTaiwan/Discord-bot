@@ -182,7 +182,6 @@ class Threads(commands.Cog):
             }
             response = requests.post(create_media_url, data=payload)
             data = response.json()
-            print("Posted thread ID:", data.get("id"))
             media_ids.append(data.get("id"))
             await asyncio.sleep(2)  # 避免過快請求導致失敗
         carousel_url = f"https://graph.threads.net/v1.0/{ID}/threads"
@@ -370,4 +369,5 @@ https://www.anontaiwan.meme/
             channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
             await channel.send(f"<@&1361994254536409088>更新 Threads 存取權杖失敗，請檢查日誌以獲取更多資訊")
 
-def
+def setup(bot: commands.Bot):
+    bot.add_cog(Threads(bot))
