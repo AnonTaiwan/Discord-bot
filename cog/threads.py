@@ -303,7 +303,7 @@ class Threads(commands.Cog):
             return
 
     async def get_post_details(self, post_id) -> dict:
-        access_token = utils.FACEBOOK_TOKEN
+        access_token = utils.FACEBOOK_TOKEN if '465375250002911' in post_id else utils.GBC_TOKEN
         url = f"https://graph.facebook.com/{post_id}/attachments?access_token={access_token}"
         response = requests.get(url)
         if response.status_code == 200:

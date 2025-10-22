@@ -28,6 +28,7 @@ try:
     DEVELOPER = config.get("DEVELOPER", [])
     BOT_TOKEN = config.get("DISCORD_BOT_TOKEN", "")
     FACEBOOK_TOKEN = config.get("FACEBOOK_TOKEN", "")
+    GBC_TOKEN = config.get("GBC_TOKEN", "")
     THREADS_TOKEN = config.get("THREADS_TOKEN", "")
 except Exception as e:
     print(f"Error reading {BOT_CONFIG_FILE}: {e}")
