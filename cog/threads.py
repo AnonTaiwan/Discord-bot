@@ -31,7 +31,7 @@ class Threads(commands.Cog):
             self.logger.error(f"無法下載媒體，狀態碼：{response.status_code}")
             return None
 
-    async def __handle_posting(self, message_id):
+    async def _handle_posting(self, message_id):
         with open('JSON/threads.json', 'r', encoding='utf-8') as f:
             threads_data = json.load(f)
         post_info = threads_data[str(message_id)]
@@ -214,13 +214,15 @@ class Threads(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.add_view(self.PostButton())
+        # 註冊持久化按鈕 View，並傳入本 Cog 實例供回呼使用
+        self.bot.add_view(self.PostButton(self))
         if not self.update_threads.is_running():
             self.update_threads.start()
 
     class PostButton(discord.ui.View):
-        def __init__(self):
+        def __init__(self, cog):
             super().__init__(timeout=None)
+            self.cog: "Threads" = cog
 
         @discord.ui.button(label="發布貼文", style=discord.ButtonStyle.primary, custom_id="post_button")
         async def post(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -231,7 +233,7 @@ class Threads(commands.Cog):
                 await interaction.response.send_message("找不到對應的貼文資料。", ephemeral=True)
                 return
             post_info = threads_data[str(message_id)]
-            view = Threads.ConfirmButton(str(message_id))
+            view = Threads.ConfirmButton(self.cog, str(message_id))
             embed = discord.Embed(title="確認發布貼文", description="請確認以下貼文內容是否正確，然後選擇操作。", color=0x0000ff)
             embed.add_field(name="貼文 ID", value=post_info['post_id'], inline=False)
             embed.add_field(name="貼文內容", value=post_info['text'], inline=False)
@@ -250,8 +252,9 @@ class Threads(commands.Cog):
             await interaction.delete_original_message()
             
     class ConfirmButton(discord.ui.View):
-        def __init__(self, mes_id):
+        def __init__(self, cog, mes_id):
             super().__init__(timeout=None)
+            self.cog: "Threads" = cog
             with open('JSON/threads.json', 'r', encoding='utf-8') as f:
                 threads_data = json.load(f)
             post_info = threads_data[mes_id]
@@ -261,18 +264,19 @@ class Threads(commands.Cog):
         @discord.ui.button(label="確認貼文", style=discord.ButtonStyle.success)
         async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
             await interaction.response.send_message("貼文已確認，正在發布...", ephemeral=True)
-            await Threads.__handle_posting(self, int(self.mes_id))
+            await self.cog._handle_posting(int(self.mes_id))
             await interaction.delete_original_message()
             
         @discord.ui.button(label="修改文字", style=discord.ButtonStyle.danger)
         async def edit_text(self, button: discord.ui.Button, interaction: discord.Interaction):
-            modal = Threads.EditPost(self.post_info, self.mes_id)
+            modal = Threads.EditPost(self.cog, self.post_info, self.mes_id)
             await interaction.response.send_modal(modal)
             await interaction.delete_original_message()
             
     class EditPost(discord.ui.Modal):
-        def __init__(self, post_info, mes_id):
+        def __init__(self, cog, post_info, mes_id):
             super().__init__(title="編輯貼文文字")
+            self.cog: "Threads" = cog
             self.post_info = post_info
             self.mes_id = mes_id
             self.add_item(discord.ui.InputText(label="新的貼文文字", style=discord.InputTextStyle.long, default=post_info['text']))
@@ -284,7 +288,7 @@ class Threads(commands.Cog):
             threads_data[self.mes_id] = self.post_info
             with open('JSON/threads.json', 'w', encoding='utf-8') as f:
                 json.dump(threads_data, f, ensure_ascii=False, indent=4)
-            await Threads.__handle_posting(self, int(self.mes_id))
+            await self.cog._handle_posting(int(self.mes_id))
             await interaction.response.send_message("已更新貼文文字並發布", ephemeral=True)
 
     async def post_new_thread(self, post_info):
@@ -314,7 +318,7 @@ class Threads(commands.Cog):
 --
 Anon Taiwan x 女團哭迷因（GIRLS BAND CRY Memes）
 各平台帳號與同好聊天社群
-https://lit.link/bangdream114514
+https://www.anontaiwan.meme/
 '''
         embed = discord.Embed(title="新貼文偵測", description=f"在頁面 ID {page_id} 偵測到新貼文", url=post.get('permalink_url', '無連結'), color=0x00ff00)
         embed.add_field(name="貼文 ID", value=post['id'], inline=False)
