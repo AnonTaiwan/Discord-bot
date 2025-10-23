@@ -336,7 +336,7 @@ https://www.anontaiwan.meme/
         if data.get('data') is None:
             post_type = "TEXT"
         else:
-            post_type = "IMAGE" if data['data'][0]['type'] == 'album' else "VIDEO"
+            post_type = "IMAGE" if data['data'][0]['type'] == 'album' or data['data'][0]['type'] == 'photo' else "VIDEO"
         threads_data[str(message.id)] = {
             "post_id": post['id'],
             "text": text,

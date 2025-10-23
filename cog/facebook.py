@@ -228,7 +228,10 @@ class NewFB(commands.Cog):
                 except Exception as e:
                     self.logger.error(f"Error notifying Threads cog: {e}")
                     
-            self.latest = [i['id'] for i in datas]
+            if page_id == utils.FB_PAGE_ID:
+                self.latest = [i['id'] for i in datas]
+            else:
+                self.gbc_latest = [i['id'] for i in datas]
 
     @commands.Cog.listener()
     async def on_ready(self):
