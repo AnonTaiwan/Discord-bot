@@ -152,7 +152,7 @@ class Threads(commands.Cog):
         response = requests.post(create_media_url, data=payload)
         data = response.json()
         Media_ID = data.get('id')
-        await asyncio.sleep(5)  # 避免過快請求導致失敗
+        await asyncio.sleep(10)  # 避免過快請求導致失敗
         post_media_url = f"https://graph.threads.net/v1.0/{ID}/threads_publish"
         payload = {
             "access_token": API,
@@ -254,7 +254,7 @@ class Threads(commands.Cog):
                 with open('JSON/threads.json', 'w', encoding='utf-8') as f:
                     json.dump(threads_data, f, ensure_ascii=False, indent=4)
             await interaction.response.send_message("已取消發布貼文。", ephemeral=True)
-            await interaction.delete_original_message()
+            await interaction.message.delete()
             
     class ConfirmButton(discord.ui.View):
         def __init__(self, cog, mes_id):
