@@ -152,7 +152,7 @@ class Threads(commands.Cog):
         response = requests.post(create_media_url, data=payload)
         data = response.json()
         Media_ID = data.get('id')
-        await asyncio.sleep(30)  # 避免過快請求導致失敗
+        await asyncio.sleep(60)  # 避免過快請求導致失敗
         post_media_url = f"https://graph.threads.net/v1.0/{ID}/threads_publish"
         payload = {
             "access_token": API,
