@@ -112,7 +112,8 @@ class EnrichCog(commands.Cog):
             user_id = str(after.id)
             
             if user_id in enrich_data:
-                
+                if not enrich_data[user_id].get("online_remind", False):
+                    return
                 with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                     data = json.load(f)
                 mes = f"哇！是<@{user_id}>老公回來了"
