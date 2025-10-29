@@ -43,7 +43,11 @@ class EnrichCog(commands.Cog):
             
             with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
-            mes = random.choice(["我覺得老公說的對", "我非常支持老公的觀點", "老公說得真好", "我完全同意老公的看法"])
+            choice = ["我覺得老公說的對", "我非常支持老公的觀點", "老公說得真好", "我完全同意老公的看法"]
+            if enrich_data[user_id].get("custom_messages"):
+                for msg in enrich_data[user_id]["custom_messages"]:
+                    choice.append(msg)
+            mes = random.choice(choice)
             if user_id in data:
                 webhook_id = data[user_id]["id"]
                 webhook_token = data[user_id]["token"]
