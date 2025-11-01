@@ -34,12 +34,19 @@ class Activity(commands.Cog):
             return format(self.length, '.1f')
 
     async def send_message(self):
-        content = f'偵測到 <@{JERRY_ID}> 偷打 LoL，紅地毯長度增加為 {self.__format_length()} 公尺'
-        await self.channel.send(content = content)
+        content = f'老公 <@{JERRY_ID}> 又偷打 LoL，我要繼續將你的紅地毯長度增加為 {self.__format_length()} 公尺'
+        await self.enrich_cog.invoke_jerry_webhook(content, str(JERRY_ID))
+
+        # content = f'偵測到 <@{JERRY_ID}> 偷打 LoL，紅地毯長度增加為 {self.__format_length()} 公尺'
+        # await self.channel.send(content = content)
         
     @commands.Cog.listener()
     async def on_ready(self):
         self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+        
+        self.enrich_cog = self.bot.get_cog('EnrichCog')
+        if not self.enrich_cog:
+            print('EnrichCog not found!')
 
     def __is_playing_league_of_legends(self, member):
         for activity in member.activities:
@@ -95,9 +102,13 @@ class Activity(commands.Cog):
         if after.status == discord.Status.offline and before.status != discord.Status.offline:
             self.offline_time = datetime.now()
             self.logger.info(f"Member {after.name} is offline")
-            content = f'偵測到 <@{JERRY_ID}> 下線，紅地毯長度每秒增加 0.5 公尺'
-            self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
-            await self.channel.send(content = content)
+
+            content = f'啊...老公離開了...我會想你的... <@{JERRY_ID}>，這段時間我來繼續為你織紅地毯吧！'
+            self.enrich_cog.invoke_jerry_webhook(content, str(JERRY_ID))
+            
+            # content = f'偵測到 <@{JERRY_ID}> 下線，紅地毯長度每秒增加 0.5 公尺'
+            # self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+            # await self.channel.send(content = content)
             return
 
         if after.status == discord.Status.online and before.status == discord.Status.offline:
@@ -106,9 +117,13 @@ class Activity(commands.Cog):
                 self.length += offline_duration.total_seconds() * 0.5
                 self.logger.info(f"Member {after.name} was offline for {offline_duration}, length updated to {self.length}")
                 self.__write_config()
-                content = f'<@{JERRY_ID}> 已上線，共下線 {offline_duration.total_seconds()} 秒，紅地毯長度增加至 {self.__format_length()} 公尺'
-                self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
-                await self.channel.send(content = content)
+
+                content = f'歡迎老公 <@{JERRY_ID}> 回來，我等你回來等了 {offline_duration.total_seconds()} 秒呢！\n這段期間我把紅地毯長度延長至 {self.__format_length()} 公尺了喔！'
+                await self.enrich_cog.invoke_jerry_webhook(content, str(JERRY_ID))
+
+                # content = f'<@{JERRY_ID}> 已上線，共下線 {offline_duration.total_seconds()} 秒，紅地毯長度增加至 {self.__format_length()} 公尺'
+                # self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+                # await self.channel.send(content = content)
 
         if not self.__is_playing_league_of_legends(before) and self.__is_playing_league_of_legends(after):
             if after.name not in self.cooldown_list or datetime.now() - self.cooldown_list[after.name] > timedelta(minutes=5):

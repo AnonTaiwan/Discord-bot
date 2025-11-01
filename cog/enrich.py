@@ -132,5 +132,30 @@ class EnrichCog(commands.Cog):
                 webhook = await self.create_webhook(channel, user_id)
                 await webhook.send(content=mes)
 
+    async def invoke_jerry_webhook(self, content: str, user_id: str):
+        with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
+            enrich_data = json.load(f)
+        
+        if user_id in enrich_data:
+            if not enrich_data[user_id].get("online_remind", False):
+                return
+            with open("JSON/webhook.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+            mes = content
+            if user_id in data:
+                webhook_id = data[user_id]["id"]
+                webhook_token = data[user_id]["token"]
+                async with aiohttp.ClientSession() as session:
+                        webhook = Webhook.partial(webhook_id, webhook_token, session=session)
+                        try:
+                            await webhook.fetch()
+                            await webhook.send(content=mes)
+                            return
+                        except:
+                            pass
+            channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+            webhook = await self.create_webhook(channel, user_id)
+            await webhook.send(content=mes)
+
 def setup(bot: commands.Bot):
     bot.add_cog(EnrichCog(bot))
