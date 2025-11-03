@@ -137,8 +137,6 @@ class EnrichCog(commands.Cog):
             enrich_data = json.load(f)
         
         if user_id in enrich_data:
-            if not enrich_data[user_id].get("online_remind", False):
-                return
             with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
             mes = content
