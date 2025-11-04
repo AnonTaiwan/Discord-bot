@@ -73,7 +73,7 @@ class MCTicket(commands.Cog):
             embed.add_field(name="尺寸", value=self.children[1].value, inline=False)
             await channel.send(content = interaction.user.mention, embed=embed)
 
-            await interaction.followup.send("您的申請已提交，請稍候審核。")
+            await interaction.followup.send("您的申請已提交，請稍候審核。", ephemeral=True)
     
     class TerritoryExpandModal(discord.ui.Modal):
         def __init__(self):
@@ -97,7 +97,7 @@ class MCTicket(commands.Cog):
             embed.add_field(name="申請理由", value=self.children[0].value, inline=False)
             await channel.send(content = interaction.user.mention, embed=embed)
             
-            await interaction.followup.send("您的領地增建/擴張申請已提交，請稍候審核。")
+            await interaction.followup.send("您的領地增建/擴張申請已提交，請稍候審核。", ephemeral=True)
     
     class ReportPlayerModal(discord.ui.Modal):
         def __init__(self):
@@ -122,9 +122,9 @@ class MCTicket(commands.Cog):
             embed.add_field(name="被檢舉玩家名稱", value=self.children[0].value, inline=False)
             embed.add_field(name="檢舉理由", value=self.children[1].value, inline=False)
             await channel.send(content = interaction.user.mention, embed=embed)
-            
-            await interaction.followup.send("您的檢舉已提交，請稍候審核。")
-    
+
+            await interaction.followup.send("您的檢舉已提交，請稍候審核。", ephemeral=True)
+
     class TicketButton(discord.ui.View):
         def __init__(self):
             super().__init__(timeout=None)
@@ -171,7 +171,7 @@ class MCTicket(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        pass
+        self.bot.add_view(self.TicketButton())
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
