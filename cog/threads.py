@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 import os
 import re
+import subprocess
 
 class Threads(commands.Cog):
     def __init__(self, bot):
@@ -43,7 +44,6 @@ class Threads(commands.Cog):
         for item in file['representations']:
             if item.get("mime_type") == "audio/mp4":
                 url = item.get("base_url").replace("\\/", "/")
-                print("Audio URL:", url)
 
         response = requests.get(url, headers=headers)
         route = utils.get_tmp_file(f"{post_id}.m4a")
@@ -66,7 +66,21 @@ class Threads(commands.Cog):
                 route = utils.get_tmp_file(f"{post_id}.mp4")
                 with open(route, 'wb') as f:
                     f.write(response.content)
-                os.system(f"ffmpeg -i {route} -i {utils.get_tmp_file(f'{post_id}.m4a')} -c:v copy -c:a aac {utils.get_tmp_file(f'{post_id}_output.mp4')}")
+                video_file = route
+                audio_file = utils.get_tmp_file(f"{post_id}.m4a")
+                output_file = utils.get_tmp_file(f"{post_id}_output.mp4")
+
+                cmd = [
+                    "ffmpeg",
+                    "-y",  # 覆蓋舊檔案
+                    "-i", video_file,
+                    "-i", audio_file,
+                    "-c:v", "copy",
+                    "-c:a", "aac",
+                    output_file
+                ]
+
+                subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 await asyncio.sleep(2)  # 確保文件寫入完成
                 discord_file = discord.File(fp=utils.get_tmp_file(f'{post_id}_output.mp4'), filename='video.mp4')
                 message = await channel.send(file=discord_file)
