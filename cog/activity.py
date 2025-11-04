@@ -104,7 +104,7 @@ class Activity(commands.Cog):
             self.logger.info(f"Member {after.name} is offline")
 
             content = f'啊...老公離開了...我會想你的... <@{JERRY_ID}>，這段時間我來繼續為你織紅地毯吧！'
-            self.enrich_cog.invoke_jerry_webhook(content, str(JERRY_ID))
+            await self.enrich_cog.invoke_jerry_webhook(content, str(JERRY_ID))
             
             # content = f'偵測到 <@{JERRY_ID}> 下線，紅地毯長度每秒增加 0.5 公尺'
             # self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
