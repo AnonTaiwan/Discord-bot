@@ -16,7 +16,7 @@ class Threads(commands.Cog):
         self.logger.info("cog/threads.py: 日誌系統初始化完成")
         self.channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
 
-    async def __get_video_audio(self, post_id):
+    async def __get_video_audio(self, post_id, link):
         headers = {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'accept-language': 'zh-TW,zh;q=0.9',
@@ -35,7 +35,7 @@ class Threads(commands.Cog):
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
         }
 
-        response = requests.get(f'https://www.facebook.com/reel/{post_id.split('_')[1]}', headers=headers)
+        response = requests.get(url = link, headers=headers)
         pattern = r"all_video_dash_prefetch_representations\":\[(.*?)\"nextgendash\":true}"
         matches = re.findall(pattern, response.text, re.DOTALL)
         file = json.loads(matches[0]+ '"nextgendash": true}')
@@ -81,6 +81,7 @@ class Threads(commands.Cog):
         post_info = threads_data[str(message_id)]
         post_type = post_info['type']
         post_id = post_info['post_id']
+        post_link = post_info.get('link', '無連結')
         if post_type == "TEXT":
             success = await self.__text_post(post_id, message_id)
             if success:
@@ -109,7 +110,7 @@ class Threads(commands.Cog):
                     success = await self.__single_post(post_id, message_id, dc_url)
             elif post_type == "VIDEO":
                 media_url = data[0]["media"]["source"]
-                await self.__get_video_audio(post_id)
+                await self.__get_video_audio(post_id, post_link)
                 dc_url = await self.__media_to_Discord(media_url, "VIDEO", post_id)
                 success = await self.__video_post(post_id, message_id, dc_url)
             if success:
@@ -387,7 +388,8 @@ https://www.anontaiwan.meme/
         threads_data[str(message.id)] = {
             "post_id": post['id'],
             "text": text,
-            "type": post_type
+            "type": post_type,
+            "link": post.get('permalink_url', '無連結')
         }
         with open('JSON/threads.json', 'w', encoding='utf-8') as f:
             json.dump(threads_data, f, ensure_ascii=False, indent=4)
