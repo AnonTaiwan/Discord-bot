@@ -67,6 +67,7 @@ class Threads(commands.Cog):
                 with open(route, 'wb') as f:
                     f.write(response.content)
                 os.system(f"ffmpeg -i {route} -i {utils.get_tmp_file(f'{post_id}.m4a')} -c:v copy -c:a aac {utils.get_tmp_file(f'{post_id}_output.mp4')}")
+                await asyncio.sleep(2)  # 確保文件寫入完成
                 discord_file = discord.File(fp=utils.get_tmp_file(f'{post_id}_output.mp4'), filename='video.mp4')
                 message = await channel.send(file=discord_file)
                 return message.attachments[0].url
@@ -108,6 +109,7 @@ class Threads(commands.Cog):
                     success = await self.__single_post(post_id, message_id, dc_url)
             elif post_type == "VIDEO":
                 media_url = data[0]["media"]["source"]
+                await self.__get_video_audio(post_id)
                 dc_url = await self.__media_to_Discord(media_url, "VIDEO", post_id)
                 success = await self.__video_post(post_id, message_id, dc_url)
             if success:
