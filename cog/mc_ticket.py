@@ -186,6 +186,7 @@ class MCTicket(commands.Cog):
             if message.channel.category and message.channel.category.id == utils.MC_TICKET_ID:
                 view = MCTicket.CloseConfirmation()
                 embed = discord.Embed(title="關閉工單確認", description="您確定要關閉此工單嗎？關閉後將無法恢復。", color=0xff0000)
+                await message.delete()
                 await message.channel.send(embed=embed, view=view)
             else:
                 await message.channel.send("❌ 此指令只能在 Minecraft 伺服器工單頻道中使用。", delete_after=10)
