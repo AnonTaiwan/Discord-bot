@@ -151,7 +151,7 @@ class MCTicket(commands.Cog):
 
         @discord.ui.button(label="確認關閉", style=discord.ButtonStyle.danger)
         async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
-            log_channel = interaction.client.get_channel(utils.MC_TICKET_HISTORY_CHANNEL_ID)
+            log_channel = interaction.guild.get_channel(utils.MC_TICKET_HISTORY_CHANNEL_ID)
             transcript = await chat_exporter.export(interaction.channel, limit=None, tz_info="Asia/Taipei")
             if log_channel is not None and transcript is not None:
                 file = discord.File(io.BytesIO(transcript.encode()), filename=f"{interaction.channel.name}.html")
