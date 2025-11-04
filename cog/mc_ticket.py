@@ -153,9 +153,7 @@ class MCTicket(commands.Cog):
         async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
             log_channel = interaction.client.get_channel(utils.MC_TICKET_HISTORY_CHANNEL_ID)
             transcript = await chat_exporter.export(interaction.channel, limit=None, tz_info="Asia/Taipei")
-            print(transcript.type)
-            print(log_channel.id if log_channel else "No log channel found")
-            if log_channel and transcript:
+            if log_channel is not None and transcript is not None:
                 file = discord.File(io.BytesIO(transcript.encode()), filename=f"{interaction.channel.name}.html")
                 await log_channel.send(file=file)
                 
