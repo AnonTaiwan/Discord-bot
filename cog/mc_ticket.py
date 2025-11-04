@@ -71,7 +71,7 @@ class MCTicket(commands.Cog):
             embed = discord.Embed(title="機器申請", color=0x00ff00)
             embed.add_field(name="機器名稱", value=self.children[0].value, inline=False)
             embed.add_field(name="尺寸", value=self.children[1].value, inline=False)
-            await channel.send(content = interaction.user.mention, embed=embed)
+            await channel.send(content = f"{interaction.user.mention} <@&{utils.MC_MANAGER_ROLE_ID}>", embed=embed)
 
             await interaction.followup.send("您的申請已提交，請稍候審核。", ephemeral=True)
     
@@ -95,7 +95,7 @@ class MCTicket(commands.Cog):
             
             embed = discord.Embed(title="領地增建/擴張申請", color=0x0000ff)
             embed.add_field(name="申請理由", value=self.children[0].value, inline=False)
-            await channel.send(content = interaction.user.mention, embed=embed)
+            await channel.send(content = f"{interaction.user.mention} <@&{utils.MC_MANAGER_ROLE_ID}>", embed=embed)
             
             await interaction.followup.send("您的領地增建/擴張申請已提交，請稍候審核。", ephemeral=True)
     
@@ -121,7 +121,7 @@ class MCTicket(commands.Cog):
             embed = discord.Embed(title="玩家檢舉", color=0xff0000)
             embed.add_field(name="被檢舉玩家名稱", value=self.children[0].value, inline=False)
             embed.add_field(name="檢舉理由", value=self.children[1].value, inline=False)
-            await channel.send(content = interaction.user.mention, embed=embed)
+            await channel.send(content = f"{interaction.user.mention} <@&{utils.MC_MANAGER_ROLE_ID}>", embed=embed)
 
             await interaction.followup.send("您的檢舉已提交，請稍候審核。", ephemeral=True)
 
