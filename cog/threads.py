@@ -6,6 +6,8 @@ import utils
 import asyncio
 from datetime import datetime, timedelta
 from io import BytesIO
+import os
+import re
 
 class Threads(commands.Cog):
     def __init__(self, bot):
@@ -14,7 +16,41 @@ class Threads(commands.Cog):
         self.logger.info("cog/threads.py: 日誌系統初始化完成")
         self.channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
 
-    async def __media_to_Disccord(self, media_url, media_type):
+    async def __get_video_audio(self, post_id):
+        headers = {
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept-language': 'zh-TW,zh;q=0.9',
+            'cache-control': 'no-cache',
+            'pragma': 'no-cache',
+            'priority': 'u=0, i',
+            'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'document',
+            'sec-fetch-mode': 'navigate',
+            'sec-fetch-site': 'none',
+            'sec-fetch-user': '?1',
+            'referrer': 'https://www.facebook.com/',
+            'upgrade-insecure-requests': '1',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+        }
+
+        response = requests.get(f'https://www.facebook.com/reel/{post_id}', headers=headers)
+        pattern = r"all_video_dash_prefetch_representations\":\[(.*?)\"nextgendash\":true}"
+        matches = re.findall(pattern, response.text, re.DOTALL)
+        file = json.loads(matches[0]+ '"nextgendash": true}')
+
+        for item in file['representations']:
+            if item.get("mime_type") == "audio/mp4":
+                url = item.get("base_url").replace("\\/", "/")
+                print("Audio URL:", url)
+
+        response = requests.get(url, headers=headers)
+        route = utils.get_tmp_file(f"{post_id}.m4a")
+        with open(route, 'wb') as f:
+            f.write(response.content)
+
+    async def __media_to_Discord(self, media_url, media_type, post_id=None):
         channel = self.bot.get_channel(utils.THREADS_MEDIA_CHANNEL_ID)
         # 將阻塞的 HTTP 下載放到執行緒，避免阻塞事件迴圈
         response = await asyncio.to_thread(requests.get, media_url, timeout=30)
@@ -26,11 +62,12 @@ class Threads(commands.Cog):
                 discord_file = discord.File(fp=buffer, filename='image.jpg')
                 message = await channel.send(file=discord_file)
                 return message.attachments[0].url
-            elif media_type == "VIDEO":
-                fb = response.content
-                buffer = BytesIO(fb)
-                buffer.seek(0)
-                discord_file = discord.File(fp=buffer, filename='video.mp4')
+            elif media_type == "VIDEO" and post_id is not None:
+                route = utils.get_tmp_file(f"{post_id}.mp4")
+                with open(route, 'wb') as f:
+                    f.write(response.content)
+                os.system(f"ffmpeg -i {route} -i {utils.get_tmp_file(f'{post_id}.m4a')} -c:v copy -c:a aac {utils.get_tmp_file(f'{post_id}_output.mp4')}")
+                discord_file = discord.File(fp=utils.get_tmp_file(f'{post_id}_output.mp4'), filename='video.mp4')
                 message = await channel.send(file=discord_file)
                 return message.attachments[0].url
         else:
@@ -61,17 +98,17 @@ class Threads(commands.Cog):
                     media_urls = []
                     for item in subattachments['data']:
                         url = item["media"]["image"]["src"]
-                        dc_url = await self.__media_to_Disccord(url, "IMAGE")
+                        dc_url = await self.__media_to_Discord(url, "IMAGE")
                         if dc_url is not None:
                             media_urls.append(dc_url)
                     success = await self.__multi_post(post_id, message_id, media_urls)
                 else:
                     media_url = data[0]["media"]["image"]["src"]
-                    dc_url = await self.__media_to_Disccord(media_url, "IMAGE")
+                    dc_url = await self.__media_to_Discord(media_url, "IMAGE")
                     success = await self.__single_post(post_id, message_id, dc_url)
             elif post_type == "VIDEO":
                 media_url = data[0]["media"]["source"]
-                dc_url = await self.__media_to_Disccord(media_url, "VIDEO")
+                dc_url = await self.__media_to_Discord(media_url, "VIDEO", post_id)
                 success = await self.__video_post(post_id, message_id, dc_url)
             if success:
                 with open('JSON/threads.json', 'r', encoding='utf-8') as f:
@@ -138,8 +175,10 @@ class Threads(commands.Cog):
     async def __video_post(self, post_id, message_id, media_url):
         ID = utils.THREADS_ID
         API = utils.THREADS_TOKEN
+        
         with open('JSON/threads.json', 'r', encoding='utf-8') as f:
             threads_data = json.load(f)
+            
         post_info = threads_data[str(message_id)]
         text = post_info['text']
         create_media_url = f"https://graph.threads.net/v1.0/{ID}/threads"
@@ -150,9 +189,15 @@ class Threads(commands.Cog):
             "text": text
         }
         response = requests.post(create_media_url, data=payload)
+        
         data = response.json()
         Media_ID = data.get('id')
         await asyncio.sleep(60)  # 避免過快請求導致失敗
+        try:
+            os.remove(utils.get_tmp_file(f"{post_id}.mp4"))
+            os.remove(utils.get_tmp_file(f"{post_id}.m4a"))
+        except Exception as e:
+            print("Error removing temporary files:", e)
         post_media_url = f"https://graph.threads.net/v1.0/{ID}/threads_publish"
         payload = {
             "access_token": API,
