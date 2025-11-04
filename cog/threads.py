@@ -35,7 +35,7 @@ class Threads(commands.Cog):
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
         }
 
-        response = requests.get(f'https://www.facebook.com/reel/{post_id}', headers=headers)
+        response = requests.get(f'https://www.facebook.com/reel/{post_id.split('_')[1]}', headers=headers)
         pattern = r"all_video_dash_prefetch_representations\":\[(.*?)\"nextgendash\":true}"
         matches = re.findall(pattern, response.text, re.DOTALL)
         file = json.loads(matches[0]+ '"nextgendash": true}')
