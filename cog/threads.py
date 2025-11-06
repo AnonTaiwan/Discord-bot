@@ -430,7 +430,7 @@ https://www.anontaiwan.meme/
         else:
             self.logger.error(f"更新 Threads 存取權杖失敗，狀態碼：{response.status_code}")
             channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
-            await channel.send(f"<@&1361994254536409088>更新 Threads 存取權杖失敗，請檢查日誌以獲取更多資訊")
+            await channel.send(f"<@&{utils.DEVELOPER_ROLE_ID}>更新 Threads 存取權杖失敗，請檢查日誌以獲取更多資訊")
 
 def setup(bot: commands.Bot):
     bot.add_cog(Threads(bot))
