@@ -28,10 +28,13 @@ def get_category(bot):
     category = discord.utils.get(guild.categories, id=utils.MC_TICKET_ID)
     return category
 
-def overwrite_permissions(user: discord.User):
+def overwrite_permissions(user: discord.User, guild: discord.Guild):
+
     return {
         user: discord.PermissionOverwrite(read_messages=True, send_messages=True, view_channel=True),
-    }
+        guild.default_role: discord.PermissionOverwrite(view_channel=False),
+        guild.get_role(utils.MC_MANAGER_ROLE_ID): discord.PermissionOverwrite(read_messages=True, send_messages=True, view_channel=True)
+}
 
 async def create_ticket_channel(bot, name: str, overwrites: dict):
     category = get_category(bot)
@@ -58,7 +61,7 @@ class MCTicket(commands.Cog):
         async def callback(self, interaction: discord.Interaction):
             await interaction.response.defer(ephemeral=True)
 
-            overwrites = overwrite_permissions(interaction.user)
+            overwrites = overwrite_permissions(interaction.user, interaction.guild)
 
             tickets = open_mc_ticket_config()
             if "machine_tickets" not in tickets:
@@ -83,7 +86,7 @@ class MCTicket(commands.Cog):
         async def callback(self, interaction: discord.Interaction):
             await interaction.response.defer(ephemeral=True)
             
-            overwrites = overwrite_permissions(interaction.user)
+            overwrites = overwrite_permissions(interaction.user, interaction.guild)
             
             tickets = open_mc_ticket_config()
             if "territory_tickets" not in tickets:
@@ -108,7 +111,7 @@ class MCTicket(commands.Cog):
         async def callback(self, interaction: discord.Interaction):
             await interaction.response.defer(ephemeral=True)
             
-            overwrites = overwrite_permissions(interaction.user)
+            overwrites = overwrite_permissions(interaction.user, interaction.guild)
             
             tickets = open_mc_ticket_config()
             if "report_tickets" not in tickets:
@@ -125,6 +128,34 @@ class MCTicket(commands.Cog):
 
             await interaction.followup.send("您的檢舉已提交，請稍候審核。", ephemeral=True)
 
+    class DummySetupModal(discord.ui.Modal):
+        def __init__(self):
+            super().__init__(title="假人設置申請")
+            self.add_item(discord.ui.InputText(label="假人設置指令", placeholder="請輸入假人設置的指令", style=discord.InputTextStyle.short))
+            self.add_item(discord.ui.InputText(label="設置座標", placeholder="請輸入假人座標", style=discord.InputTextStyle.short))
+            self.add_item(discord.ui.InputText(label="設置理由", style=discord.InputTextStyle.paragraph, placeholder="請描述您設置假人的理由"))
+    
+        async def callback(self, interaction: discord.Interaction):
+            await interaction.response.defer(ephemeral=True)
+            
+            overwrites = overwrite_permissions(interaction.user, interaction.guild)
+            
+            tickets = open_mc_ticket_config()
+            if "dummy_tickets" not in tickets:
+                tickets["dummy_tickets"] = 0
+            channel_name = f"假人設置-{(tickets['dummy_tickets'] + 1):04d}"
+            channel = await create_ticket_channel(interaction.client, channel_name, overwrites)
+            tickets["dummy_tickets"] += 1
+            save_mc_ticket_config(tickets)
+            
+            embed = discord.Embed(title="假人設置申請", color=0x00ffff)
+            embed.add_field(name="假人設置指令", value=self.children[0].value, inline=False)
+            embed.add_field(name="設置座標", value=self.children[1].value, inline=False)
+            embed.add_field(name="設置理由", value=self.children[2].value, inline=False)
+            await channel.send(content = f"{interaction.user.mention} <@&{utils.MC_MANAGER_ROLE_ID}>", embed=embed)
+
+            await interaction.followup.send("您的假人設置申請已提交，請稍候審核。", ephemeral=True)
+
     class TicketButton(discord.ui.View):
         def __init__(self):
             super().__init__(timeout=None)
@@ -138,7 +169,12 @@ class MCTicket(commands.Cog):
         async def territory_expand(self, button: discord.ui.Button, interaction: discord.Interaction):
             modal = MCTicket.TerritoryExpandModal()
             await interaction.response.send_modal(modal)
-        
+
+        @discord.ui.button(label="假人設置", style=discord.ButtonStyle.green, custom_id="mc_ticket:dummy_setup")
+        async def dummy_setup(self, button: discord.ui.Button, interaction: discord.Interaction):
+            modal = MCTicket.DummySetupModal()
+            await interaction.response.send_modal(modal)
+
         @discord.ui.button(label="檢舉玩家", style=discord.ButtonStyle.danger, custom_id="mc_ticket:report_player")
         async def report_player(self, button: discord.ui.Button, interaction: discord.Interaction):
             modal = MCTicket.ReportPlayerModal()

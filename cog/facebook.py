@@ -241,7 +241,7 @@ class NewFB(commands.Cog):
         self.latest = [i['id'] for i in datas]
         datas = self.get_datas(page_id=utils.GBC_FB_PAGE_ID)
         self.gbc_latest = [i['id'] for i in datas]
-        self.reel = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url&access_token={utils.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
+        # self.reel = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url&access_token={utils.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
         
         if not self.check_comments_routine.is_running():
             self.check_comments_routine.start()
@@ -249,8 +249,8 @@ class NewFB(commands.Cog):
         if not self.check_post_updates.is_running():
             self.check_post_updates.start()
 
-        if not self.check_reel_updates.is_running():
-            self.check_reel_updates.start()
+        # if not self.check_reel_updates.is_running():
+        #     self.check_reel_updates.start()
 
         self.channel = self.bot.get_channel(utils.FB_NOTIFICATION_CHANNEL_ID)
 
