@@ -67,17 +67,25 @@ class X(commands.Cog):
                 return
             if data['id_str'] != self.new_post.get(post):
                 text = data['full_text']
-                translated_text = self.__translate_text(text)
+                try:
+                    # 翻譯為非同步、帶重試的呼叫，避免 503 導致任務崩潰
+                    translated_text = await self.__translate_text(text)
+                except Exception as e:
+                    self.logger.error("Translation failed, using original text: %s", e)
+                    translated_text = text
+
                 images = data['entities'].get('media')
+                files = None
                 if images is not None:
-                    self.__get_image(images)
+                    # 下載圖片為阻塞程式，放到執行緒中執行
+                    await asyncio.to_thread(self.__get_image, images)
                     files = [discord.File(f'tmp/image_{i}.jpg') for i in range(len(images))]
                 name = self.X_ID_TO_NAME.get(post, "Unknown")
                 embed = discord.Embed(title=name, color=0x1DA1F2)
                 embed.add_field(name="原文", value=text, inline=False)
                 embed.add_field(name="翻譯", value=translated_text, inline=False)
                 embed.set_footer(text=f"來自 X 的最新貼文，發布時間：{data['created_at']}")
-                await channel.send(embed=embed, files=files if images is not None else None)
+                await channel.send(embed=embed, files=files)
                 self.new_post[post] = data['id_str']
                 for i in range(len(images)) if images is not None else []:
                     os.remove(f'tmp/image_{i}.jpg')
@@ -257,12 +265,47 @@ class X(commands.Cog):
             with open(f'tmp/image_{image}.jpg', 'wb') as handler:
                 handler.write(img_data)
 
-    def __translate_text(self, content):
-        client = genai.Client(api_key=self.GEMINI_TOKEN)
-        response = client.models.generate_content(
-        model="gemini-2.5-flash", contents="請不省略的幫我翻譯以下日文內容 (不用解釋)，並用繁體中文回答：\n" + content
-        )
-        return response.text
+    async def __translate_text(self, content: str) -> str:
+        """
+        Non-blocking wrapper for Gemini translation with retries and backoff.
+        On persistent failure returns the original content as fallback.
+        """
+        max_retries = 3
+        backoff = 1
+        # 建立 client 在主執行緒，每次呼叫時都建立可以避免共用 state
+        for attempt in range(1, max_retries + 1):
+            try:
+                client = genai.Client(api_key=self.GEMINI_TOKEN)
+                prompt = "請不省略的幫我翻譯以下日文內容 (不用解釋)，並用繁體中文回答：\n" + content
+                # generate_content 是同步函數，放到執行緒中執行以免阻塞事件迴圈
+                response = await asyncio.to_thread(
+                    client.models.generate_content,
+                    model="gemini-2.5-flash",
+                    contents=prompt,
+                )
+                # response 物件可能有 text 屬性
+                result_text = getattr(response, 'text', None)
+                if result_text is None:
+                    # 有時候 response.text 可能不存在，嘗試取 json 或其他欄位
+                    try:
+                        result_text = response.json().get('text', '')
+                    except Exception:
+                        result_text = str(response)
+                return result_text
+            except Exception as e:
+                # 伺服器過載，記錄並重試
+                self.logger.warning("Translate server busy (attempt %s/%s): %s", attempt, max_retries, e)
+                if attempt == max_retries:
+                    break
+                await asyncio.sleep(backoff)
+                backoff *= 2
+            except Exception as e:
+                # 其他錯誤直接記錄並中斷重試
+                self.logger.error("Error during translation: %s", e)
+                break
+
+        # 若到這裡仍失敗，回傳原文作為 fallback
+        return f"（翻譯服務暫時不可用）\n{content}"
 
 def setup(bot):
     bot.add_cog(X(bot))
