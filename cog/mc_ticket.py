@@ -57,6 +57,7 @@ class MCTicket(commands.Cog):
             super().__init__(title="申請 Minecraft 伺服器機器")
             self.add_item(discord.ui.InputText(label="機器名稱", placeholder="請輸入機器名稱"))
             self.add_item(discord.ui.InputText(label="尺寸", style=discord.InputTextStyle.short, placeholder="請描述機器尺寸 ex: 16*32*16"))
+            self.add_item(discord.ui.InputText(label="地點", style=discord.InputTextStyle.short, placeholder="請描述您申請此機器的地點"))
 
         async def callback(self, interaction: discord.Interaction):
             await interaction.response.defer(ephemeral=True)
@@ -73,7 +74,8 @@ class MCTicket(commands.Cog):
 
             embed = discord.Embed(title="機器申請", color=0x00ff00)
             embed.add_field(name="機器名稱", value=self.children[0].value, inline=False)
-            embed.add_field(name="尺寸", value=self.children[1].value, inline=False)
+            embed.add_field(name="尺寸", value=f"```{self.children[1].value}```", inline=False)
+            embed.add_field(name="地點", value=f"```{self.children[2].value}```", inline=False)
             await channel.send(content = f"{interaction.user.mention} <@&{utils.MC_MANAGER_ROLE_ID}>", embed=embed)
 
             await interaction.followup.send("您的申請已提交，請稍候審核。", ephemeral=True)
@@ -194,6 +196,7 @@ class MCTicket(commands.Cog):
                 await log_channel.send(file=file)
                 
                 await interaction.response.send_message("工單將在 5 秒後關閉。", ephemeral=True)
+                await interaction.message.delete()
                 await asyncio.sleep(5)
                 await interaction.channel.delete()
                 

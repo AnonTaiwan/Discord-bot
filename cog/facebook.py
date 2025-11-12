@@ -279,7 +279,7 @@ class NewFB(commands.Cog):
             gbc_datas = self.get_datas(page_id=utils.GBC_FB_PAGE_ID)
             await self.__handle_new_post(gbc_datas, self.gbc_latest, utils.GBC_FB_PAGE_ID)
         except Exception as e:
-            await self.bot.get_channel(utils.TEST_CHANNEL_ID).send(f"@<&{utils.DEVELOPER_ROLE_ID}>\n`Error checking for updates: {e}`")
+            await self.bot.get_channel(utils.TEST_CHANNEL_ID).send(f"<@&{utils.DEVELOPER_ROLE_ID}>\n facebook.py 報錯:\n`Error checking for updates: {e}`")
             self.check_post_updates.cancel()
             self.logger.error(f"Error checking for updates: {e}")
 

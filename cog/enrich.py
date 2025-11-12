@@ -39,8 +39,7 @@ class EnrichCog(commands.Cog):
             
         user_id = str(message.author.id)
         
-        if user_id in enrich_data:
-            
+        if user_id in enrich_data and message.content is not None:
             with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
             choice = ["我覺得老公說的對", "我非常支持老公的觀點", "老公說得真好", "我完全同意老公的看法"]
@@ -113,6 +112,8 @@ class EnrichCog(commands.Cog):
             
             if user_id in enrich_data:
                 if not enrich_data[user_id].get("online_remind", False):
+                    return
+                if random.random() > 0.25:
                     return
                 with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                     data = json.load(f)
