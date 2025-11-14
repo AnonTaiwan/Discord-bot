@@ -116,10 +116,21 @@ class NewFB(commands.Cog):
             "comment_unchecked_posts": self.comment_unchecked_posts.get_raw_elements()
         })
     
-    def get_datas(self, page_id, limit=3):
-        response = requests.get(f'https://graph.facebook.com/v23.0/{page_id}/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={utils.FACEBOOK_TOKEN}&limit={limit}')
-        datas = json.loads(response.text)
-        return datas['data']
+    async def get_datas(self, page_id, limit=3):
+        """Fetch Facebook posts with timeout and retry."""
+        url = f'https://graph.facebook.com/v23.0/{page_id}/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={utils.FACEBOOK_TOKEN}&limit={limit}'
+        max_retries = 2
+        for attempt in range(1, max_retries + 1):
+            try:
+                response = await asyncio.to_thread(requests.get, url, timeout=30)
+                datas = json.loads(response.text)
+                return datas.get('data', [])
+            except Exception as e:
+                self.logger.warning(f"get_datas attempt {attempt}/{max_retries} failed: {e}")
+                if attempt == max_retries:
+                    raise
+                await asyncio.sleep(2)
+        return []
             
     async def get_photo(self,data):
         headers = {
@@ -136,11 +147,15 @@ class NewFB(commands.Cog):
             'upgrade-insecure-requests': '1',
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
         }
-        url = data.get('full_picture', None).replace('\\','')
+        url = data.get('full_picture', None)
         if url:
-            response = requests.get(url, headers=headers)
-            with open(f'tmp/{data["id"]}.jpg','wb') as f:
-                f.write(response.content)
+            url = url.replace('\\','')
+            try:
+                response = await asyncio.to_thread(requests.get, url, headers=headers, timeout=30)
+                with open(f'tmp/{data["id"]}.jpg','wb') as f:
+                    f.write(response.content)
+            except Exception as e:
+                self.logger.error(f"Failed to download image for {data['id']}: {e}")
 
     async def __send_update_message(self, data_id, embed, file):
         msg = await self.channel.send(content=f'<@&{utils.ANON_TAIWAN_SUBSCRIBER_ROLE_ID}>', embed=embed, file=file if file else None)
@@ -172,8 +187,13 @@ class NewFB(commands.Cog):
         message = bytes(message,'utf-8').decode(encoding="utf-8", errors="ignore")
         picture_url = reel.get('picture', {})
         file_path = f"tmp/{reel_data_id}.jpg"
-        with open(file_path, 'wb') as f:
-            f.write(requests.get(picture_url).content)
+        try:
+            response = await asyncio.to_thread(requests.get, picture_url, timeout=30)
+            with open(file_path, 'wb') as f:
+                f.write(response.content)
+        except Exception as e:
+            self.logger.error(f"Failed to download reel picture {reel_data_id}: {e}")
+            return
         embed = discord.Embed(title='Anon Taiwan 更新了新 Reel！', url=url, color=discord.Color.blue())
         file = discord.File(file_path, filename=f"{reel_data_id}.jpg")
         embed.set_image(url=f"attachment://{reel_data_id}.jpg")
@@ -187,13 +207,18 @@ class NewFB(commands.Cog):
         COMMENT_KEYWORDS = ["創作分享", "圖文分享", "平台分享", "傳送門", "影片"]
         if any(keyword in message for keyword in POST_KEYWORDS) and post_id and post_url:
             url = f"https://graph.facebook.com/v23.0/{post_id}?fields=message,created_time,permalink_url,full_picture,comments&access_token={utils.FACEBOOK_TOKEN}"
-            response = requests.get(url)
-            response.encoding = "utf-8"
-            data = response.json()
-            for i in data["comments"]["data"]:
-                if not any(word in i["message"] and i["from"]["id"] == utils.FB_PAGE_ID for word in COMMENT_KEYWORDS):
-                    await self.__send_comments_remind_message(post_id, post_url)
-                    self.logger.info(f"貼文 {post_id} 不包含留言來源，發送提醒。")
+            try:
+                response = await asyncio.to_thread(requests.get, url, timeout=30)
+                response.encoding = "utf-8"
+                data = response.json()
+                comments_data = data.get("comments", {}).get("data", [])
+                for i in comments_data:
+                    if not any(word in i.get("message", "") and i.get("from", {}).get("id") == utils.FB_PAGE_ID for word in COMMENT_KEYWORDS):
+                        await self.__send_comments_remind_message(post_id, post_url)
+                        self.logger.info(f"貼文 {post_id} 不包含留言來源，發送提醒。")
+                        break
+            except Exception as e:
+                self.logger.error(f"Failed to check comments for {post_id}: {e}")
 
     async def __send_comments_remind_message(self, post_id, post_url):
         test_channel = self.bot.get_channel(utils.TEST_CHANNEL_ID)
@@ -237,9 +262,9 @@ class NewFB(commands.Cog):
     async def on_ready(self):
         if not os.path.exists("tmp"):
             os.makedirs("tmp")
-        datas = self.get_datas(page_id=utils.FB_PAGE_ID)
+        datas = await self.get_datas(page_id=utils.FB_PAGE_ID)
         self.latest = [i['id'] for i in datas]
-        datas = self.get_datas(page_id=utils.GBC_FB_PAGE_ID)
+        datas = await self.get_datas(page_id=utils.GBC_FB_PAGE_ID)
         self.gbc_latest = [i['id'] for i in datas]
         # self.reel = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url&access_token={utils.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
         
@@ -274,21 +299,21 @@ class NewFB(commands.Cog):
     @tasks.loop(minutes=1)
     async def check_post_updates(self):
         try:
-            datas = self.get_datas(page_id=utils.FB_PAGE_ID)
+            datas = await self.get_datas(page_id=utils.FB_PAGE_ID)
             await self.__handle_new_post(datas, self.latest, utils.FB_PAGE_ID)
-            gbc_datas = self.get_datas(page_id=utils.GBC_FB_PAGE_ID)
+            gbc_datas = await self.get_datas(page_id=utils.GBC_FB_PAGE_ID)
             await self.__handle_new_post(gbc_datas, self.gbc_latest, utils.GBC_FB_PAGE_ID)
         except Exception as e:
             await self.bot.get_channel(utils.TEST_CHANNEL_ID).send(f"<@&{utils.DEVELOPER_ROLE_ID}>\n facebook.py 報錯:\n`Error checking for updates: {e}`")
-            self.check_post_updates.cancel()
             self.logger.error(f"Error checking for updates: {e}")
 
     @tasks.loop(minutes=5)
     async def check_reel_updates(self):
         try:
-            response = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url,picture&access_token={utils.FACEBOOK_TOKEN}&limit=3')
+            url = f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url,picture&access_token={utils.FACEBOOK_TOKEN}&limit=3'
+            response = await asyncio.to_thread(requests.get, url, timeout=30)
             reels_data = response.json()
-            if self.reel != reels_data['data'][0]['id']:
+            if reels_data.get('data') and self.reel != reels_data['data'][0]['id']:
                 self.reel = reels_data['data'][0]['id']
                 await self.__send_reel_update_message(reels_data['data'][0])
         except Exception as e:
@@ -302,13 +327,15 @@ class NewFB(commands.Cog):
             self.logger.error(f"時間格式錯誤：{e}")
             return None
         
-    def __get_posts_and_reels_count(self, start_timestamp, end_timestamp):
+    async def __get_posts_and_reels_count(self, start_timestamp, end_timestamp):
         try:
-            response = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/posts?fields=&access_token={utils.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
+            posts_url = f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/posts?fields=&access_token={utils.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100'
+            response = await asyncio.to_thread(requests.get, posts_url, timeout=30)
             posts_data = json.loads(response.text)
             posts_count = len(posts_data.get('data', []))
 
-            response = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=&access_token={utils.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100')
+            reels_url = f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=&access_token={utils.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100'
+            response = await asyncio.to_thread(requests.get, reels_url, timeout=30)
             reels_data = json.loads(response.text)
             reels_count = len(reels_data.get('data', []))
 
@@ -345,7 +372,7 @@ class NewFB(commands.Cog):
             today_timestamp = int(today.timestamp())
             yesterday_timestamp = int(yesterday.timestamp())
 
-            posts_count, reels_count = self.__get_posts_and_reels_count(yesterday_timestamp, today_timestamp)
+            posts_count, reels_count = await self.__get_posts_and_reels_count(yesterday_timestamp, today_timestamp)
 
             embed = discord.Embed(title=f'{yesterday.strftime('%Y-%m-%d')} 統整', color=discord.Color.blue())
             self.__generate_daily_post_picture(posts_count, reels_count)
@@ -368,7 +395,7 @@ class NewFB(commands.Cog):
             now_timestamp = int(now.timestamp())
             midnight_timestamp = int(midnight.timestamp())
 
-            posts_count, reels_count = self.__get_posts_and_reels_count(midnight_timestamp, now_timestamp)
+            posts_count, reels_count = await self.__get_posts_and_reels_count(midnight_timestamp, now_timestamp)
 
             embed = discord.Embed(title='今日統整', color=discord.Color.blue())
             self.__generate_daily_post_picture(posts_count, reels_count)
@@ -401,7 +428,7 @@ class NewFB(commands.Cog):
             else:
                 end_timestamp = self.__formatted_time_to_unix_timestamp(end_date)
 
-            posts_count, reels_count = self.__get_posts_and_reels_count(start_timestamp, end_timestamp)
+            posts_count, reels_count = await self.__get_posts_and_reels_count(start_timestamp, end_timestamp)
 
             start_date_str = datetime.fromtimestamp(start_timestamp).strftime("%Y-%m-%d %H:%M:%S") if start_timestamp else "<unknown>"
             end_date_str = datetime.fromtimestamp(end_timestamp).strftime("%Y-%m-%d %H:%M:%S") if end_timestamp else "<unknown>"
