@@ -15,7 +15,8 @@ GSAT_remind_time = [
 GSAT_day = datetime(year=2026, month=1, day=17, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
 
 GSAT_candidates = [
-    741308613993300058
+    741308613993300058,
+    838291392047743016
 ]
 
 class RoutineMessage(commands.Cog):
