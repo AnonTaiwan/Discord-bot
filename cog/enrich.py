@@ -38,15 +38,21 @@ class EnrichCog(commands.Cog):
             enrich_data = json.load(f)
             
         user_id = str(message.author.id)
-        
         if user_id in enrich_data and message.content is not None:
             with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
-            choice = ["我覺得老公說的對", "我非常支持老公的觀點", "老公說得真好", "我完全同意老公的看法"]
+                
+            gender = enrich_data[user_id].get("gender", "Male")
+            if gender == "Female":
+                choice = ["我覺得老婆說的對", "我非常支持老婆的觀點", "老婆說得真好", "我完全同意老婆的看法"]
+            else:
+                choice = ["我覺得老公說的對", "我非常支持老公的觀點", "老公說得真好", "我完全同意老公的看法"]
+            
             if enrich_data[user_id].get("custom_messages"):
                 for msg in enrich_data[user_id]["custom_messages"]:
                     choice.append(msg)
             mes = random.choice(choice)
+            
             if user_id in data:
                 webhook_id = data[user_id]["id"]
                 webhook_token = data[user_id]["token"]
@@ -115,9 +121,16 @@ class EnrichCog(commands.Cog):
                     return
                 if random.random() > 0.25:
                     return
+                
                 with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                     data = json.load(f)
-                mes = f"哇！是<@{user_id}>老公回來了"
+                    
+                gender = enrich_data[user_id].get("gender", "Male")
+                if gender == "Female":
+                    mes = f"哇！是<@{user_id}>老婆回來了"
+                else:
+                    mes = f"哇！是<@{user_id}>老公回來了"
+                    
                 if user_id in data:
                     webhook_id = data[user_id]["id"]
                     webhook_token = data[user_id]["token"]
