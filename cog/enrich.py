@@ -6,6 +6,7 @@ import random
 import json
 import base64
 import aiohttp
+import re
 from discord import Webhook
 
 class EnrichCog(commands.Cog):
@@ -23,7 +24,7 @@ class EnrichCog(commands.Cog):
             return
         
         # 允許管理員用 .force_enrich 強制觸發
-        is_force = message.content == ".enrich" and utils.is_operator(message.author)
+        is_force =  ".enrich" in message.content and utils.is_operator(message.author)
         
         # 如果不是強制觸發，則檢查條件
         if not is_force:
@@ -36,8 +37,13 @@ class EnrichCog(commands.Cog):
         
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
             enrich_data = json.load(f)
-            
-        user_id = str(message.author.id)
+        
+        if is_force:
+            if len(message.content.split()) != 1:
+                user_id = message.content.split()[1].strip()
+            else:
+                user_id = str(message.author.id)
+
         if user_id in enrich_data and message.content is not None:
             with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -51,7 +57,13 @@ class EnrichCog(commands.Cog):
             if enrich_data[user_id].get("custom_messages"):
                 for msg in enrich_data[user_id]["custom_messages"]:
                     choice.append(msg)
-            mes = random.choice(choice)
+            
+            pattern = r"^\.enrich\s+(\d+)\s+(.*)"
+            match = re.match(pattern, message.content)
+            if match:
+                mes = match.group(2).strip()
+            else:
+                mes = random.choice(choice)
             
             if user_id in data:
                 webhook_id = data[user_id]["id"]
