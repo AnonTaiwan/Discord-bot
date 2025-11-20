@@ -38,11 +38,12 @@ class EnrichCog(commands.Cog):
         with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
             enrich_data = json.load(f)
         
+        # 預設使用訊息作者的 ID
+        user_id = str(message.author.id)
+        
         if is_force:
             if len(message.content.split()) != 1:
                 user_id = message.content.split()[1].strip()
-            else:
-                user_id = str(message.author.id)
 
         if user_id in enrich_data and message.content is not None:
             with open("JSON/webhook.json", "r", encoding="utf-8") as f:
