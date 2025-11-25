@@ -64,7 +64,7 @@ class SayItOnce(commands.Cog):
                 times = 1
                 
             target_msgs = await self.__get_target_message(message, times)
-            if not match:
+            if match:
                 await message.delete()
             
             reply_msg = "你再一句！" if times == 1 else f"你們再一句！"
