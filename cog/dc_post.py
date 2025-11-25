@@ -54,7 +54,7 @@ class DcPostCog(commands.Cog):
         
     @tasks.loop(minutes=1)
     async def scheduled_post(self):
-        datas = self.read_json(utils.JSON_DIR/'dc_post.json')
+        datas = self.read_json(f"{utils.JSON_DIR}/dc_post.json")
         now = datetime.now()
         for message_id, data in list(datas.items()):
             scheduled_time_str = data.get("scheduled_time")
@@ -84,7 +84,7 @@ class DcPostCog(commands.Cog):
                 self.logger.info(f"已成功轉發訊息 {message_id_int} 到頻道 {target_channel_id}。")
 
                 datas.pop(message_id, None)
-                utils.write_json(self.logger, utils.JSON_DIR/'dc_post.json', datas)
+                utils.write_json(self.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
     class SelectView(discord.ui.Modal):
         def __init__(self, bot, message_id):
             super().__init__(title="選擇轉發方式")
@@ -95,13 +95,13 @@ class DcPostCog(commands.Cog):
         async def callback(self, interaction: discord.Interaction):
             time_str = self.children[0].value
             try:
-                datas = DcPostCog.read_json(utils.JSON_DIR/'dc_post.json')
+                datas = self.read_json(f"{utils.JSON_DIR}/dc_post.json")
                 data = datas.get(str(self.message_id))
                 if data is None:
                     await interaction.response.send_message("找不到對應的轉發資料。", ephemeral=True)
                     return
                 data["scheduled_time"] = time_str
-                utils.write_json(self.bot.logger, utils.JSON_DIR/'dc_post.json', datas)
+                utils.write_json(self.bot.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
                 await interaction.response.send_message(f"已設定轉發時間為 {time_str}。", ephemeral=True)
             except Exception as e:
                 await interaction.response.send_message(f"設定轉發時間時發生錯誤：{e}", ephemeral=True)
@@ -115,7 +115,7 @@ class DcPostCog(commands.Cog):
         @discord.ui.button(label="是否要直接發布", style=discord.ButtonStyle.green)
         async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
             await interaction.response.send_message("已確認轉發。", ephemeral=True)
-            datas = DcPostCog.read_json(utils.JSON_DIR/'dc_post.json')
+            datas = self.read_json(f"{utils.JSON_DIR}/dc_post.json")
             data = datas.get(str(self.message_id))
             
             if data is None:
@@ -136,13 +136,13 @@ class DcPostCog(commands.Cog):
             await interaction.followup.send("訊息已成功轉發！", ephemeral=True)
             
             datas.pop(str(self.message_id), None)
-            utils.write_json(self.bot.logger, utils.JSON_DIR/'dc_post.json', datas)
+            utils.write_json(self.bot.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
             
         @discord.ui.button(label="取消", style=discord.ButtonStyle.red)
         async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
-            datas = DcPostCog.read_json(utils.JSON_DIR/'dc_post.json')
+            datas = self.read_json(f"{utils.JSON_DIR}/dc_post.json")
             datas.pop(str(self.message_id), None)
-            utils.write_json(self.bot.logger, utils.JSON_DIR/'dc_post.json', datas)
+            utils.write_json(self.bot.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
             
             await interaction.response.send_message("已取消轉發。", ephemeral=True)
         
@@ -171,9 +171,9 @@ class DcPostCog(commands.Cog):
 
         @discord.ui.button(label="取消", style=discord.ButtonStyle.red, emoji="❌",custom_id="dc_post_cancel")
         async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
-            datas = DcPostCog.read_json(utils.JSON_DIR/'dc_post.json')
+            datas = self.read_json(f"{utils.JSON_DIR}/dc_post.json")
             datas.pop(str(interaction.message.id), None)
-            utils.write_json(DcPostCog.logger, utils.JSON_DIR/'dc_post.json', datas)
+            utils.write_json(self.bot.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
             await interaction.message.delete()
             await interaction.response.send_message("已取消轉發。", ephemeral=True)
 
@@ -209,7 +209,7 @@ class DcPostCog(commands.Cog):
             view = self.DcPostView(self.bot)
             msg = await message.reply(embed=embed, view=view)
             
-            data = DcPostCog.read_json(utils.JSON_DIR/'dc_post.json')
+            data = self.read_json(f"{utils.JSON_DIR}/dc_post.json")
             data[str(msg.id)] = {
                 "target_channel_id": channel.id,
                 "message_id": message.id}
