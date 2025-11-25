@@ -23,9 +23,38 @@ class DcPostCog(commands.Cog):
         if not self.scheduled_post.is_running():
             self.scheduled_post.start()
         
+            
+    async def __get_message_channel(self, channel_id: int):
+        channel = self.bot.get_channel(channel_id)
+        if channel is None:
+            try:
+                channel = await self.bot.fetch_channel(channel_id)
+            except Exception as e:
+                self.logger.error(f"無法取得頻道 {channel_id}:{e}")
+                return None
+        return channel
+    
+    async def __get_message_by_id(self, channel: discord.TextChannel, message_id: int):
+        try:
+            message = await channel.fetch_message(message_id)
+            return message
+        except Exception as e:
+            self.logger.error(f"無法取得訊息 {message_id}:{e}")
+            return None
+        
+    def read_json(self, file_path: str) -> dict:
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return data
+        except Exception as e:
+            self.logger.error(f"讀取 JSON 檔案 {file_path} 時發生錯誤：{e}")
+            return {}
+        
+        
     @tasks.loop(minutes=1)
     async def scheduled_post(self):
-        datas = utils.read_json(self.logger, utils.JSON_DIR/'dc_post.json')
+        datas = self.read_json(self.logger, utils.JSON_DIR/'dc_post.json')
         now = datetime.now()
         for message_id, data in list(datas.items()):
             scheduled_time_str = data.get("scheduled_time")
@@ -56,25 +85,6 @@ class DcPostCog(commands.Cog):
 
                 datas.pop(message_id, None)
                 utils.write_json(self.logger, utils.JSON_DIR/'dc_post.json', datas)
-        
-    async def __get_message_channel(self, channel_id: int):
-        channel = self.bot.get_channel(channel_id)
-        if channel is None:
-            try:
-                channel = await self.bot.fetch_channel(channel_id)
-            except Exception as e:
-                self.logger.error(f"無法取得頻道 {channel_id}:{e}")
-                return None
-        return channel
-    
-    async def __get_message_by_id(self, channel: discord.TextChannel, message_id: int):
-        try:
-            message = await channel.fetch_message(message_id)
-            return message
-        except Exception as e:
-            self.logger.error(f"無法取得訊息 {message_id}:{e}")
-            return None
-        
     class SelectView(discord.ui.Modal):
         def __init__(self, bot, message_id):
             super().__init__(title="選擇轉發方式")
@@ -85,13 +95,13 @@ class DcPostCog(commands.Cog):
         async def callback(self, interaction: discord.Interaction):
             time_str = self.children[0].value
             try:
-                datas = utils.read_json(DcPostCog.logger, utils.JSON_DIR/'dc_post.json')
+                datas = DcPostCog.read_json(utils.JSON_DIR/'dc_post.json')
                 data = datas.get(str(self.message_id))
                 if data is None:
                     await interaction.response.send_message("找不到對應的轉發資料。", ephemeral=True)
                     return
                 data["scheduled_time"] = time_str
-                utils.write_json(DcPostCog.logger, utils.JSON_DIR/'dc_post.json', datas)
+                utils.write_json(self.bot.logger, utils.JSON_DIR/'dc_post.json', datas)
                 await interaction.response.send_message(f"已設定轉發時間為 {time_str}。", ephemeral=True)
             except Exception as e:
                 await interaction.response.send_message(f"設定轉發時間時發生錯誤：{e}", ephemeral=True)
@@ -105,7 +115,7 @@ class DcPostCog(commands.Cog):
         @discord.ui.button(label="是否要直接發布", style=discord.ButtonStyle.green)
         async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
             await interaction.response.send_message("已確認轉發。", ephemeral=True)
-            datas = utils.read_json(self.bot.logger, utils.JSON_DIR/'dc_post.json')
+            datas = DcPostCog.read_json(utils.JSON_DIR/'dc_post.json')
             data = datas.get(str(self.message_id))
             
             if data is None:
@@ -130,7 +140,7 @@ class DcPostCog(commands.Cog):
             
         @discord.ui.button(label="取消", style=discord.ButtonStyle.red)
         async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
-            datas = utils.read_json(self.bot.logger, utils.JSON_DIR/'dc_post.json')
+            datas = DcPostCog.read_json(utils.JSON_DIR/'dc_post.json')
             datas.pop(str(self.message_id), None)
             utils.write_json(self.bot.logger, utils.JSON_DIR/'dc_post.json', datas)
             
@@ -161,7 +171,7 @@ class DcPostCog(commands.Cog):
 
         @discord.ui.button(label="取消", style=discord.ButtonStyle.red, emoji="❌",custom_id="dc_post_cancel")
         async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
-            datas = utils.read_json(DcPostCog.logger, utils.JSON_DIR/'dc_post.json')
+            datas = DcPostCog.read_json(utils.JSON_DIR/'dc_post.json')
             datas.pop(str(interaction.message.id), None)
             utils.write_json(DcPostCog.logger, utils.JSON_DIR/'dc_post.json', datas)
             await interaction.message.delete()
@@ -199,7 +209,7 @@ class DcPostCog(commands.Cog):
             view = self.DcPostView(self.bot)
             msg = await message.reply(embed=embed, view=view)
             
-            data = utils.read_json(self.logger, utils.JSON_DIR/'dc_post.json')
+            data = DcPostCog.read_json(utils.JSON_DIR/'dc_post.json')
             data[str(msg.id)] = {
                 "target_channel_id": channel.id,
                 "message_id": message.id}
