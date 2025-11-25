@@ -209,7 +209,7 @@ class DcPostCog(commands.Cog):
         try:
             embed = discord.Embed(title="確認轉發頻道和訊息", description=f"目標頻道：{channel.mention}", color=discord.Color.blue())
             
-            view = self.DcPostView(self.bot)
+            view = self.DcPostView(self.bot, self)
             msg = await message.reply(embed=embed, view=view)
             
             data = self.read_json(f"{utils.JSON_DIR}/dc_post.json")
