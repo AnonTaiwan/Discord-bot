@@ -166,6 +166,7 @@ class DcPostCog(commands.Cog):
 
         @discord.ui.button(label="排程轉發", style=discord.ButtonStyle.blurple,emoji="⏰",custom_id="dc_post_scheduled")
         async def scheduled(self, button: discord.ui.Button, interaction: discord.Interaction):
+            await interaction.response.defer(ephemeral=True)
             try:
                 await interaction.message.delete()
                 await interaction.followup.send(content="請選擇轉發方式", view=DcPostCog.SelectView(self.bot, interaction.message.id, self.cog))
@@ -174,11 +175,11 @@ class DcPostCog(commands.Cog):
 
         @discord.ui.button(label="取消", style=discord.ButtonStyle.red, emoji="❌",custom_id="dc_post_cancel")
         async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
+            await interaction.response.send_message("已取消轉發。", ephemeral=True)
             datas = DcPostCog.read_json(self.cog, f"{utils.JSON_DIR}/dc_post.json")
             datas.pop(str(interaction.message.id), None)
             utils.write_json(self.cog.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
             await interaction.message.delete()
-            await interaction.response.send_message("已取消轉發。", ephemeral=True)
 
         
     @discord.slash_command(name="dc_post", description="將指定訊息轉發到指定頻道")
