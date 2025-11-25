@@ -86,8 +86,9 @@ class DcPostCog(commands.Cog):
                 datas.pop(message_id, None)
                 utils.write_json(self.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
     class SelectView(discord.ui.Modal):
-        def __init__(self, bot, message_id):
+        def __init__(self, bot, message_id, cog):
             super().__init__(title="選擇轉發方式")
+            self.cog: "DcPostCog" = cog
             self.bot = bot
             self.message_id = message_id
             self.add_item(discord.ui.InputText(label="轉發時間", placeholder="輸入格式：YYYY-MM-DD HH:MM 範例：2024-06-01 15:30", required=True))
@@ -95,27 +96,28 @@ class DcPostCog(commands.Cog):
         async def callback(self, interaction: discord.Interaction):
             time_str = self.children[0].value
             try:
-                datas = DcPostCog.read_json(f"{utils.JSON_DIR}/dc_post.json")
+                datas = DcPostCog.read_json(self.cog, f"{utils.JSON_DIR}/dc_post.json")
                 data = datas.get(str(self.message_id))
                 if data is None:
                     await interaction.response.send_message("找不到對應的轉發資料。", ephemeral=True)
                     return
                 data["scheduled_time"] = time_str
-                utils.write_json(self.bot.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
+                utils.write_json(self.cog.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
                 await interaction.response.send_message(f"已設定轉發時間為 {time_str}。", ephemeral=True)
             except Exception as e:
                 await interaction.response.send_message(f"設定轉發時間時發生錯誤：{e}", ephemeral=True)
         
     class ConfirmView(discord.ui.View):
-        def __init__(self, bot, message_id):
+        def __init__(self, bot, message_id, cog):
             super().__init__(timeout=None)
             self.bot = bot
             self.message_id = message_id
+            self.cog: "DcPostCog" = cog
 
         @discord.ui.button(label="是否要直接發布", style=discord.ButtonStyle.green)
         async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
             await interaction.response.send_message("已確認轉發。", ephemeral=True)
-            datas = DcPostCog.read_json(f"{utils.JSON_DIR}/dc_post.json")
+            datas = DcPostCog.read_json(self.cog, f"{utils.JSON_DIR}/dc_post.json")
             data = datas.get(str(self.message_id))
             
             if data is None:
@@ -136,20 +138,21 @@ class DcPostCog(commands.Cog):
             await interaction.followup.send("訊息已成功轉發！", ephemeral=True)
             
             datas.pop(str(self.message_id), None)
-            utils.write_json(self.bot.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
+            utils.write_json(self.cog.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
             
         @discord.ui.button(label="取消", style=discord.ButtonStyle.red)
         async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
-            datas = DcPostCog.read_json(f"{utils.JSON_DIR}/dc_post.json")
+            datas = DcPostCog.read_json(self.cog, f"{utils.JSON_DIR}/dc_post.json")
             datas.pop(str(self.message_id), None)
-            utils.write_json(self.bot.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
+            utils.write_json(self.cog.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
             
             await interaction.response.send_message("已取消轉發。", ephemeral=True)
         
     class DcPostView(discord.ui.View):
-        def __init__(self, bot):
+        def __init__(self, bot, cog):
             super().__init__(timeout=None)
             self.bot = bot
+            self.cog: "DcPostCog" = cog
             self.value = None
 
         @discord.ui.button(label="直接轉發", style=discord.ButtonStyle.green,emoji="✅",custom_id="dc_post_direct")
@@ -157,7 +160,7 @@ class DcPostCog(commands.Cog):
             await interaction.response.defer(ephemeral=True)
             try:
                 await interaction.message.delete()
-                await interaction.followup.send(content="請確認是否要直接發布", view=DcPostCog.ConfirmView(self.bot, interaction.message.id), ephemeral=True)
+                await interaction.followup.send(content="請確認是否要直接發布", view=DcPostCog.ConfirmView(self.bot, interaction.message.id, self.cog), ephemeral=True)
             except Exception as e:
                 await interaction.followup.send(f"轉發訊息時發生錯誤：{e}", ephemeral=True)
 
@@ -165,15 +168,15 @@ class DcPostCog(commands.Cog):
         async def scheduled(self, button: discord.ui.Button, interaction: discord.Interaction):
             try:
                 await interaction.message.delete()
-                await interaction.followup.send(content="請選擇轉發方式", view=DcPostCog.SelectView(self.bot, interaction.message.id))
+                await interaction.followup.send(content="請選擇轉發方式", view=DcPostCog.SelectView(self.bot, interaction.message.id, self.cog))
             except Exception as e:
                 await interaction.followup.send(f"轉發訊息時發生錯誤：{e}", ephemeral=True)
 
         @discord.ui.button(label="取消", style=discord.ButtonStyle.red, emoji="❌",custom_id="dc_post_cancel")
         async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
-            datas = DcPostCog.read_json(f"{utils.JSON_DIR}/dc_post.json")
+            datas = DcPostCog.read_json(self.cog, f"{utils.JSON_DIR}/dc_post.json")
             datas.pop(str(interaction.message.id), None)
-            utils.write_json(self.bot.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
+            utils.write_json(self.cog.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
             await interaction.message.delete()
             await interaction.response.send_message("已取消轉發。", ephemeral=True)
 
