@@ -206,3 +206,6 @@ class DcPostCog(commands.Cog):
             
         except Exception as e:
             await ctx.respond(f"發生錯誤：{e}", ephemeral=True)
+            
+def setup(bot):
+    bot.add_cog(DcPostCog(bot))
