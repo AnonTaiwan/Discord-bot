@@ -170,6 +170,10 @@ class DcPostCog(commands.Cog):
         
     @discord.slash_command(name="dc_post", description="將指定訊息轉發到指定頻道")
     async def dc_post(self, ctx: discord.ApplicationContext, channel: discord.channel.TextChannel, message_link: str):
+        if not utils.is_operator(ctx.author):
+            await ctx.respond("你沒有權限使用此指令。", ephemeral=True)
+            return
+        
         pattern = r"https://discord.com/channels/\d+/(\d+)/(\d+)"
         match = re.match(pattern, message_link)
         if not match:
