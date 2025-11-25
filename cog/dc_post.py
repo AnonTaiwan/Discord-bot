@@ -54,7 +54,7 @@ class DcPostCog(commands.Cog):
         
     @tasks.loop(minutes=1)
     async def scheduled_post(self):
-        datas = self.read_json(self.logger, utils.JSON_DIR/'dc_post.json')
+        datas = self.read_json(utils.JSON_DIR/'dc_post.json')
         now = datetime.now()
         for message_id, data in list(datas.items()):
             scheduled_time_str = data.get("scheduled_time")
