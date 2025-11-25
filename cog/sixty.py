@@ -62,7 +62,6 @@ class Sixty(commands.Cog):
                 
                 if target_member:
                     for member in target_member:
-                        print(f"Attempting to timeout member: {member}")
                         await self.__timeout_user(member, timedelta(minutes=1), "使用「我討厭你」指令被自動禁言")
             
 def setup(bot):
