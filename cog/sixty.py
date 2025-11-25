@@ -38,12 +38,9 @@ class Sixty(commands.Cog):
             await user.timeout_for(duration, reason=reason)
         except discord.Forbidden:
             self.logger.warning(f"❌ Cannot timeout {user.mention}")
-            return False
         except Exception as e:
             self.logger.error(f"禁言成員 {user} 時發生錯誤：{e}")
             await self.logger.warning(f"❌ 發生錯誤，無法禁言 {user.mention}")
-            return False
-        return True
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -65,8 +62,8 @@ class Sixty(commands.Cog):
                 
                 if target_member:
                     for member in target_member:
-                        if not await self.__timeout_user(member, timedelta(minutes=1), "使用「我討厭你」指令被自動禁言"):
-                            self.logger.warning(f"❌ 無法禁言 {member.mention}")
+                        print(f"Attempting to timeout member: {member}")
+                        await self.__timeout_user(member, timedelta(minutes=1), "使用「我討厭你」指令被自動禁言")
             
 def setup(bot):
     bot.add_cog(Sixty(bot))

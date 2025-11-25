@@ -158,7 +158,7 @@ class NewFB(commands.Cog):
                 self.logger.error(f"Failed to download image for {data['id']}: {e}")
 
     async def __send_update_message(self, data_id, embed, file):
-        msg = await self.channel.send(content=f'<@&{utils.ANON_TAIWAN_SUBSCRIBER_ROLE_ID}>', embed=embed, file=file if file else None)
+        # msg = await self.channel.send(content=f'<@&{utils.ANON_TAIWAN_SUBSCRIBER_ROLE_ID}>', embed=embed, file=file if file else None)
         msg = await self.channel.send(embed=embed, file=file if file else None) #test
         await msg.publish()
         self.logger.info(f"已發送新貼文通知：{data_id}")
