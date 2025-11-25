@@ -8,6 +8,11 @@ retouch_picture_remind_time = [
     time(hour=20, minute=0, second=0, tzinfo=utils.TIME_ZONE),
 ]
 
+fall_remind_time = [
+    time(hour=12, minute=40, second=0, tzinfo=utils.TIME_ZONE),
+    time(hour=20, minute=0, second=0, tzinfo=utils.TIME_ZONE),
+]
+
 GSAT_remind_time = [
     time(hour=8, minute=0, second=0, tzinfo=utils.TIME_ZONE)
 ]
@@ -58,6 +63,21 @@ class RoutineMessage(commands.Cog):
             await channel.send(message)
         except Exception as e:
             self.logger.error(f"Error sending retouch picture remind message: {e}")
+
+    @tasks.loop(time=fall_remind_time)
+    async def fall_remind(self):
+        channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+
+        now = datetime.now(utils.TIME_ZONE)
+        if now.hour == 12:
+            message = "每日提醒琪涵雅女裝 (1/2)"
+        elif now.hour == 20:
+            message = "每日提醒琪涵雅女裝 (2/2)"
+        
+        try:
+            await channel.send(message)
+        except Exception as e:
+            self.logger.error(f"Error sending fall remind message: {e}")
 
     @tasks.loop(time=GSAT_remind_time)
     async def GSAT_remind(self):
