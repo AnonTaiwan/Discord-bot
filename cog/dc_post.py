@@ -69,7 +69,7 @@ class DcPostCog(commands.Cog):
             if now >= scheduled_time:
                 target_channel_id = data.get("target_channel_id")
                 message_id_int = data.get("message_id")
-                target_channel = await self.bot.get_channel(target_channel_id)
+                target_channel = self.bot.get_channel(target_channel_id)
                 
                 if target_channel is None:
                     self.logger.error(f"無法取得目標頻道 {target_channel_id}，跳過此訊息。")
@@ -125,7 +125,7 @@ class DcPostCog(commands.Cog):
                 return
             target_channel_id = data.get("target_channel_id")
             message_id = data.get("message_id")
-            target_channel = await self.bot.get_channel(target_channel_id)
+            target_channel = self.bot.get_channel(target_channel_id)
             
             if target_channel is None:
                 await interaction.followup.send("無法取得目標頻道。", ephemeral=True)
