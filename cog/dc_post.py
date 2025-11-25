@@ -166,12 +166,15 @@ class DcPostCog(commands.Cog):
 
         @discord.ui.button(label="排程轉發", style=discord.ButtonStyle.blurple,emoji="⏰",custom_id="dc_post_scheduled")
         async def scheduled(self, button: discord.ui.Button, interaction: discord.Interaction):
-            await interaction.response.defer(ephemeral=True)
             try:
+                modal = DcPostCog.SelectView(self.bot, interaction.message.id, self.cog)
+                await interaction.response.send_modal(modal)
                 await interaction.message.delete()
-                await interaction.followup.send(content="請選擇轉發方式", view=DcPostCog.SelectView(self.bot, interaction.message.id, self.cog))
             except Exception as e:
-                await interaction.followup.send(f"轉發訊息時發生錯誤：{e}", ephemeral=True)
+                if not interaction.response.is_done():
+                    await interaction.response.send_message(f"轉發訊息時發生錯誤：{e}", ephemeral=True)
+                else:
+                    await interaction.followup.send(f"轉發訊息時發生錯誤：{e}", ephemeral=True)
 
         @discord.ui.button(label="取消", style=discord.ButtonStyle.red, emoji="❌",custom_id="dc_post_cancel")
         async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
