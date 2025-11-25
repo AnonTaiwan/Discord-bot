@@ -9,7 +9,7 @@ retouch_picture_remind_time = [
 ]
 
 fall_remind_time = [
-    time(hour=12, minute=40, second=0, tzinfo=utils.TIME_ZONE),
+    time(hour=13, minute=0, second=0, tzinfo=utils.TIME_ZONE),
     time(hour=20, minute=0, second=0, tzinfo=utils.TIME_ZONE),
 ]
 
@@ -38,6 +38,9 @@ class RoutineMessage(commands.Cog):
 
         if not self.GSAT_remind.is_running():
             self.GSAT_remind.start()
+        
+        if not self.fall_remind.is_running():
+            self.fall_remind.start()
 
     @tasks.loop(time=retouch_picture_remind_time)
     async def retouch_picture_remind(self):
@@ -69,7 +72,7 @@ class RoutineMessage(commands.Cog):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 
         now = datetime.now(utils.TIME_ZONE)
-        if now.hour == 12:
+        if now.hour == 13:
             message = "每日提醒琪涵雅女裝 (1/2)"
         elif now.hour == 20:
             message = "每日提醒琪涵雅女裝 (2/2)"

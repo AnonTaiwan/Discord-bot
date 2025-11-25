@@ -50,7 +50,7 @@ class SayItOnce(commands.Cog):
                 await target_msg.reply("你再一句！")
                 if utils.is_operator(message.author):
                     self.target_messages.append(target_msg)
-                    await asyncio.sleep(15)  
+                    await asyncio.sleep(60)  
                     self.target_messages.remove(target_msg)
         for target in self.target_messages:
             if message.author == target.author and message.channel == target.channel:
