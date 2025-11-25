@@ -73,7 +73,7 @@ class SayItOnce(commands.Cog):
                 await target_msgs[0].reply(reply_msg)
                 for target_msg in target_msgs:
                     if utils.is_operator(message.author):
-                        await self.add_message_to_watchlist(target_msg[0])
+                        await self.add_message_to_watchlist(target_msg)
 
         for target in self.target_messages:
             if message.author == target.author and message.channel == target.channel:

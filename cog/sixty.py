@@ -9,7 +9,7 @@ class Sixty(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.logger = utils.get_logger(__name__)
-        self.logger.info("cog/sayitonce.py: 日誌系統初始化完成")
+        self.logger.info("cog/sixty.py: 日誌系統初始化完成")
         self.target_messages = []
 
     async def __get_target_message(self, message: discord.Message, times: int):
@@ -44,11 +44,6 @@ class Sixty(commands.Cog):
             await self.logger.warning(f"❌ 發生錯誤，無法禁言 {user.mention}")
             return False
         return True
-
-    async def add_message_to_watchlist(self, message: discord.Message):
-        self.target_messages.append(message)
-        await asyncio.sleep(60)  
-        self.target_messages.remove(message)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
