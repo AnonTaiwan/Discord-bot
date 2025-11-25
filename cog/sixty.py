@@ -12,12 +12,12 @@ class Sixty(commands.Cog):
         self.logger.info("cog/sixty.py: 日誌系統初始化完成")
         self.target_messages = []
 
-    async def __get_target_message(self, message: discord.Message, times: int):
+    async def __get_target_member(self, message: discord.Message, times: int):
         messages = []
         if message.reference is not None:
             try:
                 ref_msg = await message.channel.fetch_message(message.reference.message_id)
-                messages.append(ref_msg)
+                messages.append(ref_msg.author)
             except Exception as e:
                 self.logger.error(f"無法取得引用訊息：{e}")
                 return None
@@ -26,7 +26,7 @@ class Sixty(commands.Cog):
         next_message = False
         async for msg in message.channel.history(limit=times + 10):
             if next_message:
-                messages.append(msg)
+                messages.append(msg.author)
                 if len(messages) == times:
                     return messages
             if msg.id == message.id:
@@ -47,25 +47,25 @@ class Sixty(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        pattern = r"^我討厭你\s+(\d+)$"
-        match = re.match(pattern, message.content)
-        if "我討厭你" == message.content or match:
-            if message.author.id == self.bot.user.id:
-                return
+        if utils.is_operator(message.author):
+            pattern = r"^我討厭你\s+(\d+)$"
+            match = re.match(pattern, message.content)
+            if "我討厭你" == message.content or match:
+                if message.author.id == self.bot.user.id:
+                    return
 
-            if match:
-                times = int(match.group(1))
-            else:
-                times = 1
+                if match:
+                    times = int(match.group(1))
+                else:
+                    times = 1
+                    
+                target_member = await self.__get_target_member(message, times)
+                if match:
+                    await message.delete()
                 
-            target_msgs = await self.__get_target_message(message, times)
-            if match:
-                await message.delete()
-            
-            if target_msgs:
-                for target_msg in target_msgs:
-                    if utils.is_operator(message.author):
-                        await self.__timeout_user(target_msg.author, timedelta(minutes=1), "使用「我討厭你」指令被自動禁言")
+                if target_member:
+                    for member in target_member:
+                        await self.__timeout_user(member, timedelta(minutes=1), "使用「我討厭你」指令被自動禁言")
             
 def setup(bot):
     bot.add_cog(Sixty(bot))
