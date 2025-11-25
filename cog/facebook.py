@@ -242,6 +242,7 @@ class NewFB(commands.Cog):
         self.logger.info(f"已發送留言提醒通知：{post_id}")
     
     async def __if_post_updates(self, datas, latest):
+        print(latest) # debug line
         new_post = [i for i in datas if i['id'] not in latest]
         return new_post
     
