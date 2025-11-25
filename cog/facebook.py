@@ -160,7 +160,14 @@ class NewFB(commands.Cog):
     async def __send_update_message(self, data_id, embed, file):
         # msg = await self.channel.send(content=f'<@&{utils.ANON_TAIWAN_SUBSCRIBER_ROLE_ID}>', embed=embed, file=file if file else None)
         msg = await self.channel.send(embed=embed, file=file if file else None) #test
-        await msg.publish()
+        try:
+            await msg.publish()
+        except discord.NotFound:
+            self.logger.warning(f"無法發布訊息 {data_id}：訊息不存在或已被刪除")
+        except discord.Forbidden:
+            self.logger.warning(f"無法發布訊息 {data_id}：權限不足或非公告頻道")
+        except Exception as e:
+            self.logger.error(f"發布訊息 {data_id} 時發生錯誤：{e}")
         self.logger.info(f"已發送新貼文通知：{data_id}")
         file_path = f"tmp/{data_id}.jpg"
         if os.path.exists(file_path):
@@ -261,6 +268,7 @@ class NewFB(commands.Cog):
                     
             if page_id == utils.FB_PAGE_ID:
                 self.latest = [i['id'] for i in datas]
+                print(self.latest) # debug line
             else:
                 self.gbc_latest = [i['id'] for i in datas]
 
@@ -270,6 +278,7 @@ class NewFB(commands.Cog):
             os.makedirs("tmp")
         datas = await self.get_datas(page_id=utils.FB_PAGE_ID)
         self.latest = [i['id'] for i in datas]
+        print(self.latest) # debug line
         datas = await self.get_datas(page_id=utils.GBC_FB_PAGE_ID)
         self.gbc_latest = [i['id'] for i in datas]
         # self.reel = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url&access_token={utils.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
