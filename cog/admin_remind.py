@@ -88,6 +88,7 @@ class AdminRemind(commands.Cog):
                 json.dump(data, f, ensure_ascii=False, indent=4)
         except Exception as e:
                 self.logger.error(f"寫入 admin_remind.json 失敗：{e}")
+                
     @discord.slash_command(description="啟用/停用管理員提醒")
     async def toggle_admin_remind(self, ctx: discord.ApplicationContext):
         with open('JSON/admin_remind.json', 'r', encoding='utf-8') as f:

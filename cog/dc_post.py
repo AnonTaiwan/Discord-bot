@@ -143,7 +143,7 @@ class DcPostCog(commands.Cog):
             self.value = None
 
         @discord.ui.button(label="直接轉發", style=discord.ButtonStyle.green,emoji="✅",custom_id="dc_post_direct")
-        async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
+        async def direct(self, button: discord.ui.Button, interaction: discord.Interaction):
             await interaction.response.defer(ephemeral=True)
             try:
                 await interaction.message.delete()
@@ -152,7 +152,7 @@ class DcPostCog(commands.Cog):
                 await interaction.followup.send(f"轉發訊息時發生錯誤：{e}", ephemeral=True)
 
         @discord.ui.button(label="排程轉發", style=discord.ButtonStyle.blurple,emoji="⏰",custom_id="dc_post_scheduled")
-        async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
+        async def scheduled(self, button: discord.ui.Button, interaction: discord.Interaction):
             try:
                 await interaction.message.delete()
                 await interaction.followup.send(content="請選擇轉發方式", view=DcPostCog.SelectView(self.bot, interaction.message.id))
