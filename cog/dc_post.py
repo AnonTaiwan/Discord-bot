@@ -95,7 +95,7 @@ class DcPostCog(commands.Cog):
         async def callback(self, interaction: discord.Interaction):
             time_str = self.children[0].value
             try:
-                datas = self.read_json(f"{utils.JSON_DIR}/dc_post.json")
+                datas = DcPostCog.read_json(f"{utils.JSON_DIR}/dc_post.json")
                 data = datas.get(str(self.message_id))
                 if data is None:
                     await interaction.response.send_message("找不到對應的轉發資料。", ephemeral=True)
@@ -115,7 +115,7 @@ class DcPostCog(commands.Cog):
         @discord.ui.button(label="是否要直接發布", style=discord.ButtonStyle.green)
         async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
             await interaction.response.send_message("已確認轉發。", ephemeral=True)
-            datas = self.read_json(f"{utils.JSON_DIR}/dc_post.json")
+            datas = DcPostCog.read_json(f"{utils.JSON_DIR}/dc_post.json")
             data = datas.get(str(self.message_id))
             
             if data is None:
@@ -140,7 +140,7 @@ class DcPostCog(commands.Cog):
             
         @discord.ui.button(label="取消", style=discord.ButtonStyle.red)
         async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
-            datas = self.read_json(f"{utils.JSON_DIR}/dc_post.json")
+            datas = DcPostCog.read_json(f"{utils.JSON_DIR}/dc_post.json")
             datas.pop(str(self.message_id), None)
             utils.write_json(self.bot.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
             
@@ -171,7 +171,7 @@ class DcPostCog(commands.Cog):
 
         @discord.ui.button(label="取消", style=discord.ButtonStyle.red, emoji="❌",custom_id="dc_post_cancel")
         async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
-            datas = self.read_json(f"{utils.JSON_DIR}/dc_post.json")
+            datas = DcPostCog.read_json(f"{utils.JSON_DIR}/dc_post.json")
             datas.pop(str(interaction.message.id), None)
             utils.write_json(self.bot.logger, f"{utils.JSON_DIR}/dc_post.json", datas)
             await interaction.message.delete()
