@@ -214,6 +214,8 @@ class DcPostCog(commands.Cog):
                 "target_channel_id": channel.id,
                 "message_id": message.id}
             
+            utils.write_json(self.logger, f"{utils.JSON_DIR}/dc_post.json", data)
+            
         except Exception as e:
             await ctx.respond(f"發生錯誤：{e}", ephemeral=True)
             
