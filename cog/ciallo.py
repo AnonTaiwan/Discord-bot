@@ -15,7 +15,7 @@ class Ciallo(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.author.id == self.bot.user.id:
+        if message.author.id == self.bot.user.id or message.channel.id == utils.TTS_CHANNEL_ID:
             return
 
         if "掐" in message.content:
