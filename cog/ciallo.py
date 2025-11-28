@@ -15,6 +15,9 @@ class Ciallo(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+        if message.author.id == self.bot.user.id:
+            return
+
         if "掐" in message.content:
             await message.reply("掐囉～(∠·ω< )⌒★")
 
