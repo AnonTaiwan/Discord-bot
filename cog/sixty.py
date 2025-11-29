@@ -62,7 +62,8 @@ class Sixty(commands.Cog):
                 
                 if target_member:
                     for member in target_member:
-                        await self.__timeout_user(member, timedelta(minutes=1), "使用「我討厭你」指令被自動禁言")
+                        # await self.__timeout_user(member, timedelta(minutes=1), "使用「我討厭你」指令被自動禁言")
+                        pass
             
 def setup(bot):
     bot.add_cog(Sixty(bot))
