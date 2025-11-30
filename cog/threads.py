@@ -90,21 +90,21 @@ class Threads(commands.Cog):
             return None
 
     async def _handle_posting(self, message_id):
-        with open('JSON/threads.json', 'r', encoding='utf-8') as f:
-            threads_data = json.load(f)
+        threads_data = self.read_json_file('JSON/threads.json')
         post_info = threads_data[str(message_id)]
         post_type = post_info['type']
         post_id = post_info['post_id']
         post_link = post_info.get('link', '無連結')
+        post_tag = post_info.get('tag', '無標籤')
+        
         if post_type == "TEXT":
             success = await self.__text_post(post_id, message_id)
             if success:
-                with open('JSON/threads.json', 'r', encoding='utf-8') as f:
-                    threads_data = json.load(f)
+                threads_data = self.read_json_file('JSON/threads.json')
                 del threads_data[str(message_id)]
-                with open('JSON/threads.json', 'w', encoding='utf-8') as f:
-                    json.dump(threads_data, f, ensure_ascii=False, indent=4)
+                self.write_json_file('JSON/threads.json', threads_data)
             return
+        
         data = await self.get_post_details(post_id)
         data = data.get('data', [])
         if data:
@@ -140,16 +140,20 @@ class Threads(commands.Cog):
     async def __text_post(self, post_id, message_id):
         ID = utils.THREADS_ID
         API = utils.THREADS_TOKEN
-        with open('JSON/threads.json', 'r', encoding='utf-8') as f:
-            threads_data = json.load(f)
+        threads_data = self.read_json_file('JSON/threads.json')
         post_info = threads_data[str(message_id)]
         text = post_info['text']
+        post_tag = post_info.get('tag', '無標籤')
+
         post_url = f"https://graph.threads.net/v1.0/{ID}/threads"
         payload = {
             "access_token": API,
             "media_type": "TEXT",
             "text": text
         }
+        if post_tag != "無標籤":
+            payload["topic_tag"] = f"{post_tag}"
+
         response = requests.post(post_url, data=payload)
         data = response.json()
         await asyncio.sleep(5)  # 避免過快請求導致失敗
@@ -165,10 +169,11 @@ class Threads(commands.Cog):
     async def __single_post(self, post_id, message_id, media_url):
         ID = utils.THREADS_ID
         API = utils.THREADS_TOKEN
-        with open('JSON/threads.json', 'r', encoding='utf-8') as f:
-            threads_data = json.load(f)
+        threads_data = self.read_json_file('JSON/threads.json')
         post_info = threads_data[str(message_id)]
         text = post_info['text']
+        post_tag = post_info.get('tag', '無標籤')
+        
         create_media_url = f"https://graph.threads.net/v1.0/{ID}/threads"
         payload = {
             "access_token": API,
@@ -176,6 +181,9 @@ class Threads(commands.Cog):
             "image_url": media_url,
             "text": text
         }
+        if post_tag != "無標籤":
+            payload["topic_tag"] = f"{post_tag}"
+        
         response = requests.post(create_media_url, data=payload)
         data = response.json()
         Media_ID = data.get('id')
@@ -193,11 +201,11 @@ class Threads(commands.Cog):
         ID = utils.THREADS_ID
         API = utils.THREADS_TOKEN
         
-        with open('JSON/threads.json', 'r', encoding='utf-8') as f:
-            threads_data = json.load(f)
-            
+        threads_data = self.read_json_file('JSON/threads.json')
         post_info = threads_data[str(message_id)]
         text = post_info['text']
+        post_tag = post_info.get('tag', '無標籤')
+        
         create_media_url = f"https://graph.threads.net/v1.0/{ID}/threads"
         payload = {
             "access_token": API,
@@ -205,6 +213,9 @@ class Threads(commands.Cog):
             "video_url": media_url,
             "text": text
         }
+        if post_tag != "無標籤":
+            payload["topic_tag"] = f"{post_tag}"
+        
         response = requests.post(create_media_url, data=payload)
         
         data = response.json()
@@ -227,10 +238,10 @@ class Threads(commands.Cog):
     async def __multi_post(self, post_id, message_id, media_urls):
         ID = utils.THREADS_ID
         API = utils.THREADS_TOKEN
-        with open('JSON/threads.json', 'r', encoding='utf-8') as f:
-            threads_data = json.load(f)
+        threads_data = self.read_json_file('JSON/threads.json')
         post_info = threads_data[str(message_id)]
         text = post_info['text']
+        post_tag = post_info.get('tag', '無標籤')
         media_ids = []
 
         for i in media_urls:
@@ -253,6 +264,9 @@ class Threads(commands.Cog):
             "children": ",".join(media_ids),
             "text": text
         }
+        if post_tag != "無標籤":
+            payload["topic_tag"] = f"{post_tag}"
+        
         response = requests.post(carousel_url, data=payload)
         data = response.json()
         carousel_id = data.get("id")
@@ -279,6 +293,22 @@ class Threads(commands.Cog):
             await self.channel.send(embed=embed)
             return True
 
+    def read_json_file(self, file_path):
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return data
+
+    def write_json_file(self, file_path, data):
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+    async def generate_post_embed(self, post_info):
+        embed = discord.Embed(title="貼文預覽", description="以下是您即將發布的貼文內容預覽：", color=0x00ff00)
+        embed.add_field(name="貼文 ID", value=post_info['post_id'], inline=False)
+        embed.add_field(name="貼文內容", value=post_info['text'], inline=False)
+        embed.add_field(name="標籤", value=post_info.get('tag', '無標籤'), inline=False)
+        return embed
+
     @commands.Cog.listener()
     async def on_ready(self):
         # 註冊持久化按鈕 View，並傳入本 Cog 實例供回呼使用
@@ -294,16 +324,13 @@ class Threads(commands.Cog):
         @discord.ui.button(label="發布貼文", style=discord.ButtonStyle.primary, custom_id="post_button")
         async def post(self, button: discord.ui.Button, interaction: discord.Interaction):
             message_id = interaction.message.id
-            with open('JSON/threads.json', 'r', encoding='utf-8') as f:
-                threads_data = json.load(f)
+            threads_data = self.cog.read_json_file('JSON/threads.json')
             if str(message_id) not in threads_data:
                 await interaction.response.send_message("找不到對應的貼文資料。", ephemeral=True)
                 return
             post_info = threads_data[str(message_id)]
-            view = Threads.ConfirmButton(self.cog, str(message_id))
-            embed = discord.Embed(title="確認發布貼文", description="請確認以下貼文內容是否正確，然後選擇操作。", color=0x0000ff)
-            embed.add_field(name="貼文 ID", value=post_info['post_id'], inline=False)
-            embed.add_field(name="貼文內容", value=post_info['text'], inline=False)
+            view = Threads.TagButton(self.cog, str(message_id), post_info=post_info)
+            embed = discord.Embed(title="請選擇標籤", description="請選擇以下標籤之一：", color=0x0000ff)
             await interaction.response.send_message(embed=embed, view=view)
         
         @discord.ui.button(label="不發布貼文", style=discord.ButtonStyle.danger, custom_id="delete_button")
@@ -318,13 +345,61 @@ class Threads(commands.Cog):
             await interaction.response.send_message("已取消發布貼文。", ephemeral=True)
             await interaction.message.delete()
             
-    class ConfirmButton(discord.ui.View):
-        def __init__(self, cog, mes_id):
+    class CustomTagModal(discord.ui.Modal):
+        def __init__(self, cog, message_id, post_info=None):
+            super().__init__(title="自訂標籤")
+            self.cog: "Threads" = cog
+            self.message_id = message_id
+            self.post_info = post_info
+            self.add_item(discord.ui.InputText(label="請輸入自訂標籤", style=discord.InputTextStyle.short))
+            
+        async def callback(self, interaction: discord.Interaction):
+            custom_tag = self.children[0].value
+            view = Threads.ConfirmButton(self.cog, self.message_id, post_info=self.post_info)
+            self.post_info['tag'] = custom_tag
+            embed = await self.cog.generate_post_embed(self.post_info)
+            
+            await interaction.response.send_message(f"已設定自訂標籤：{custom_tag}", embed=embed, view=view)
+            await interaction.message.delete()
+            
+    class TagButton(discord.ui.View):   
+        def __init__(self, cog, message_id=None, post_info=None):
             super().__init__(timeout=None)
             self.cog: "Threads" = cog
-            with open('JSON/threads.json', 'r', encoding='utf-8') as f:
-                threads_data = json.load(f)
-            post_info = threads_data[mes_id]
+            self.message_id = message_id
+            self.post_info = post_info
+
+        @discord.ui.button(label="MyGO", style=discord.ButtonStyle.primary)
+        async def MyGO_tag(self, button: discord.ui.Button, interaction: discord.Interaction):
+            self.post_info['tag'] = "MyGO"
+            view = Threads.ConfirmButton(self.cog, self.message_id, post_info=self.post_info)
+            embed = await self.cog.generate_post_embed(self.post_info)
+            await interaction.response.send_message("已選擇標籤:MyGO", embed=embed, view=view)
+            
+        @discord.ui.button(label="GBC", style=discord.ButtonStyle.green)
+        async def GBC_tag(self, button: discord.ui.Button, interaction: discord.Interaction):
+            self.post_info['tag'] = "Girls Band Cry"
+            view = Threads.ConfirmButton(self.cog, self.message_id, post_info=self.post_info)
+            embed = await self.cog.generate_post_embed(self.post_info)
+            await interaction.response.send_message("已選擇標籤:Girls Band Cry", embed=embed, view=view)
+            
+        @discord.ui.button(label="自行輸入", style=discord.ButtonStyle.gray)
+        async def custom_tag(self, button: discord.ui.Button, interaction: discord.Interaction):
+            modal = Threads.CustomTagModal(self.cog, self.message_id, post_info=self.post_info)
+            await interaction.response.send_modal(modal)
+            await interaction.message.delete()
+            
+        @discord.ui.button(label="無標籤", style=discord.ButtonStyle.danger)
+        async def no_tag(self, button: discord.ui.Button, interaction: discord.Interaction):
+            view = Threads.ConfirmButton(self.cog, self.message_id, post_info=self.post_info)
+            embed = await self.cog.generate_post_embed(self.post_info)
+            await interaction.response.send_message("已選擇無標籤", embed=embed, view=view)
+            await interaction.message.delete()
+            
+    class ConfirmButton(discord.ui.View):
+        def __init__(self, cog, mes_id, post_info=None):
+            super().__init__(timeout=None)
+            self.cog: "Threads" = cog
             self.mes_id = mes_id
             self.post_info = post_info
 
@@ -334,7 +409,7 @@ class Threads(commands.Cog):
             await interaction.message.delete()
             await self.cog._handle_posting(int(self.mes_id))
             
-        @discord.ui.button(label="修改文字", style=discord.ButtonStyle.danger)
+        @discord.ui.button(label="修改內容", style=discord.ButtonStyle.danger)
         async def edit_text(self, button: discord.ui.Button, interaction: discord.Interaction):
             modal = Threads.EditPost(self.cog, self.post_info, self.mes_id)
             await interaction.message.delete()
@@ -342,20 +417,20 @@ class Threads(commands.Cog):
             
     class EditPost(discord.ui.Modal):
         def __init__(self, cog, post_info, mes_id):
-            super().__init__(title="編輯貼文文字")
+            super().__init__(title="編輯貼文內容")
             self.cog: "Threads" = cog
             self.post_info = post_info
             self.mes_id = mes_id
+            self.add_item(discord.ui.InputText(label="標籤", style=discord.InputTextStyle.short, value=post_info.get('tag', '無標籤')))
             self.add_item(discord.ui.InputText(label="新的貼文文字", style=discord.InputTextStyle.long, value=post_info['text']))
             
         async def callback(self, interaction: discord.Interaction):
-            self.post_info['text'] = self.children[0].value
-            with open('JSON/threads.json', 'r', encoding='utf-8') as f:
-                threads_data = json.load(f)
+            self.post_info['tag'] = self.children[0].value
+            self.post_info['text'] = self.children[1].value
+            threads_data = self.cog.read_json_file('JSON/threads.json')
             threads_data[str(self.mes_id)] = self.post_info
-            with open('JSON/threads.json', 'w', encoding='utf-8') as f:
-                json.dump(threads_data, f, ensure_ascii=False, indent=4)
-            await interaction.response.send_message("已更新貼文文字並發布", ephemeral=True)
+            self.cog.write_json_file('JSON/threads.json', threads_data)
+            await interaction.response.send_message("已更新貼文內容並發布", ephemeral=True)
             await self.cog._handle_posting(int(self.mes_id))
 
     async def post_new_thread(self, post_info):
