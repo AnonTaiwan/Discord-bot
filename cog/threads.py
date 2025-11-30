@@ -303,7 +303,7 @@ class Threads(commands.Cog):
             json.dump(data, f, ensure_ascii=False, indent=4)
 
     async def generate_post_embed(self, post_info):
-        embed = discord.Embed(title="貼文預覽", description="以下是您即將發布的貼文內容預覽：", color=0x00ff00)
+        embed = discord.Embed(title="貼文預覽", description="以下是您即將發布的貼文內容預覽：", color=0x0000ff)
         embed.add_field(name="貼文 ID", value=post_info['post_id'], inline=False)
         embed.add_field(name="貼文內容", value=post_info['text'], inline=False)
         embed.add_field(name="標籤", value=post_info.get('tag', '無標籤'), inline=False)
@@ -328,9 +328,10 @@ class Threads(commands.Cog):
             if str(message_id) not in threads_data:
                 await interaction.response.send_message("找不到對應的貼文資料。", ephemeral=True)
                 return
+            
             post_info = threads_data[str(message_id)]
             view = Threads.TagButton(self.cog, str(message_id), post_info=post_info)
-            embed = discord.Embed(title="請選擇標籤", description="請選擇以下標籤之一：", color=0x0000ff)
+            embed = discord.Embed(title="請選擇標籤", description="請選擇以下標籤之一：", color=0x80009a)
             await interaction.response.send_message(embed=embed, view=view)
         
         @discord.ui.button(label="不發布貼文", style=discord.ButtonStyle.danger, custom_id="delete_button")
@@ -374,6 +375,7 @@ class Threads(commands.Cog):
             self.post_info['tag'] = "MyGO"
             view = Threads.ConfirmButton(self.cog, self.message_id, post_info=self.post_info)
             embed = await self.cog.generate_post_embed(self.post_info)
+            await interaction.message.delete()
             await interaction.response.send_message("已選擇標籤:MyGO", embed=embed, view=view)
             
         @discord.ui.button(label="GBC", style=discord.ButtonStyle.green)
@@ -381,20 +383,22 @@ class Threads(commands.Cog):
             self.post_info['tag'] = "Girls Band Cry"
             view = Threads.ConfirmButton(self.cog, self.message_id, post_info=self.post_info)
             embed = await self.cog.generate_post_embed(self.post_info)
+            await interaction.message.delete()
             await interaction.response.send_message("已選擇標籤:Girls Band Cry", embed=embed, view=view)
             
         @discord.ui.button(label="自行輸入", style=discord.ButtonStyle.gray)
         async def custom_tag(self, button: discord.ui.Button, interaction: discord.Interaction):
             modal = Threads.CustomTagModal(self.cog, self.message_id, post_info=self.post_info)
-            await interaction.response.send_modal(modal)
             await interaction.message.delete()
+            await interaction.response.send_modal(modal)
             
         @discord.ui.button(label="無標籤", style=discord.ButtonStyle.danger)
         async def no_tag(self, button: discord.ui.Button, interaction: discord.Interaction):
             view = Threads.ConfirmButton(self.cog, self.message_id, post_info=self.post_info)
             embed = await self.cog.generate_post_embed(self.post_info)
-            await interaction.response.send_message("已選擇無標籤", embed=embed, view=view)
             await interaction.message.delete()
+            await interaction.response.send_message("已選擇無標籤", embed=embed, view=view)
+            
             
     class ConfirmButton(discord.ui.View):
         def __init__(self, cog, mes_id, post_info=None):
