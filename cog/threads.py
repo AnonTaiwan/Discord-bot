@@ -95,6 +95,7 @@ class Threads(commands.Cog):
         post_type = post_info['type']
         post_id = post_info['post_id']
         post_link = post_info.get('link', '無連結')
+        post_tag = post_info.get('tag', '無標籤')
         
         if post_type == "TEXT":
             success = await self.__text_post(post_id, message_id)
@@ -148,8 +149,10 @@ class Threads(commands.Cog):
         payload = {
             "access_token": API,
             "media_type": "TEXT",
-            "text": text + f"\n\n # {post_tag}" if post_tag != "無標籤" else text
+            "text": text
         }
+        if post_tag != "無標籤":
+            payload["topic_tag"] = f"{post_tag}"
 
         response = requests.post(post_url, data=payload)
         data = response.json()
@@ -176,8 +179,10 @@ class Threads(commands.Cog):
             "access_token": API,
             "media_type": "IMAGE",
             "image_url": media_url,
-            "text": text + f"\n\n # {post_tag}" if post_tag != "無標籤" else text
+            "text": text
         }
+        if post_tag != "無標籤":
+            payload["topic_tag"] = f"{post_tag}"
         
         response = requests.post(create_media_url, data=payload)
         data = response.json()
@@ -206,8 +211,10 @@ class Threads(commands.Cog):
             "access_token": API,
             "media_type": "VIDEO",
             "video_url": media_url,
-            "text": text + f"\n\n # {post_tag}" if post_tag != "無標籤" else text
+            "text": text
         }
+        if post_tag != "無標籤":
+            payload["topic_tag"] = f"{post_tag}"
         
         response = requests.post(create_media_url, data=payload)
         
@@ -255,8 +262,10 @@ class Threads(commands.Cog):
             "access_token": API,
             "media_type": "CAROUSEL",
             "children": ",".join(media_ids),
-            "text": text + f"\n\n # {post_tag}" if post_tag != "無標籤" else text
+            "text": text
         }
+        if post_tag != "無標籤":
+            payload["topic_tag"] = f"{post_tag}"
         
         response = requests.post(carousel_url, data=payload)
         data = response.json()
