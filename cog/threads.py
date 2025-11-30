@@ -359,9 +359,8 @@ class Threads(commands.Cog):
             view = Threads.ConfirmButton(self.cog, self.message_id, post_info=self.post_info)
             self.post_info['tag'] = custom_tag
             embed = await self.cog.generate_post_embed(self.post_info)
-            
-            await interaction.response.send_message(f"已設定自訂標籤：{custom_tag}", embed=embed, view=view)
             await interaction.message.delete()
+            await interaction.response.send_message(f"已設定自訂標籤：{custom_tag}", embed=embed, view=view)
             
     class TagButton(discord.ui.View):   
         def __init__(self, cog, message_id=None, post_info=None):
