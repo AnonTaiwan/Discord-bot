@@ -78,10 +78,11 @@ class SayItOnce(commands.Cog):
         for target in self.target_messages:
             if message.author == target.author and message.channel == target.channel:
                 try:
-                    if not await self.__timeout_user(message.author, timedelta(minutes=1), reason="你還真的再一句啊！"):
-                        return
-                    embed = discord.Embed(title="你再一句！", description=f"{message.author.mention} 你還真的再一句啊！我討厭你 (60s)", color=discord.Color.gold())
-                    await message.reply(embed=embed)
+                    # if not await self.__timeout_user(message.author, timedelta(minutes=1), reason="你還真的再一句啊！"):
+                    #     return
+                    # embed = discord.Embed(title="你再一句！", description=f"{message.author.mention} 你還真的再一句啊！我討厭你 (60s)", color=discord.Color.gold())
+                    # await message.reply(embed=embed)
+                    pass
                 except Exception as e:
                     self.logger.error(f"你再一句：{e}")
                 break
