@@ -27,19 +27,19 @@ class X(commands.Cog):
     async def on_ready(self):
         self.logger.info("cog/x.py: Bot 已準備就緒")
         # self.gt_value, self.cookies = self.__get_gt_cookies()
-        self.new_post = {}
-        for post in self.users:
-            post = str(post)
-            data = await self.__fetch_tweets(post)
-            if data is None:
-                return
-            self.new_post[post] = data['id_str']
-            self.logger.info(f"初始貼文 - 使用者 ID: {post}, 使用者：{self.X_ID_TO_NAME.get(post, 'Unknown')} 貼文 ID: {data['id_str']}")
-            await asyncio.sleep(3) 
-        await asyncio.sleep(300)
-        if not self.check_post_updates.is_running():
-            self.logger.info("啟動 X 貼文檢查任務")
-            self.check_post_updates.start()
+        # self.new_post = {}
+        # for post in self.users:
+        #     post = str(post)
+        #     data = await self.__fetch_tweets(post)
+        #     if data is None:
+        #         return
+        #     self.new_post[post] = data['id_str']
+        #     self.logger.info(f"初始貼文 - 使用者 ID: {post}, 使用者：{self.X_ID_TO_NAME.get(post, 'Unknown')} 貼文 ID: {data['id_str']}")
+        #     await asyncio.sleep(3) 
+        # await asyncio.sleep(300)
+        # if not self.check_post_updates.is_running():
+        #     self.logger.info("啟動 X 貼文檢查任務")
+        #     self.check_post_updates.start()
         # if not self.update_gt_cookies.is_running():
         #     await asyncio.sleep(2 * 3600)
         #     self.logger.info("啟動 X gt 和 cookies 更新任務")
