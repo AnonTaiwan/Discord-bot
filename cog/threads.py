@@ -401,6 +401,11 @@ class Threads(commands.Cog):
         async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
             await interaction.response.send_message("貼文已確認，正在發布...", ephemeral=True)
             await interaction.message.delete()
+            
+            data = self.cog.read_json_file('JSON/threads.json')
+            data[str(self.mes_id)] = self.post_info
+            self.cog.write_json_file('JSON/threads.json', data)
+            
             await self.cog._handle_posting(int(self.mes_id))
             
         @discord.ui.button(label="修改內容", style=discord.ButtonStyle.danger)
