@@ -376,7 +376,15 @@ class Threads(commands.Cog):
             embed = await self.cog.generate_post_embed(self.post_info)
             await interaction.message.delete()
             await interaction.response.send_message("已選擇標籤:MyGO", embed=embed, view=view)
-            
+        
+        @discord.ui.button(label="Ave Mujica", style=discord.ButtonStyle.primary)
+        async def Ave_Mujica_tag(self, button: discord.ui.Button, interaction: discord.Interaction):
+            self.post_info['tag'] = "Ave Mujica"
+            view = Threads.ConfirmButton(self.cog, self.message_id, post_info=self.post_info)
+            embed = await self.cog.generate_post_embed(self.post_info)
+            await interaction.message.delete()
+            await interaction.response.send_message("已選擇標籤:Ave Mujica", embed=embed, view=view)
+        
         @discord.ui.button(label="GBC", style=discord.ButtonStyle.green)
         async def GBC_tag(self, button: discord.ui.Button, interaction: discord.Interaction):
             self.post_info['tag'] = "Girls Band Cry"
