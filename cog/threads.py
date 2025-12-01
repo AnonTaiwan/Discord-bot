@@ -290,8 +290,62 @@ class Threads(commands.Cog):
             return False
         else:
             embed = discord.Embed(title="貼文已發布", description=f"貼文 ID: {post_id} 已成功發布到 Threads。\n Threads ID: {data_id}", color=0x00ff00)
-            await self.channel.send(embed=embed)
+            embed.add_field(name="引流連結", value=f"發布中...", inline=False)
+            message = await self.channel.send(embed=embed)
+            await self.__reply_post(data_id, message)
             return True
+
+    async def __reply_post(self, threads_id, message):
+        text = '''
+Anon Taiwan x 女團哭迷因（GIRLS BAND CRY Memes）
+各平台帳號與同好聊天社群
+https://www.anontaiwan.meme/'''
+        ID = utils.THREADS_ID
+        API = utils.THREADS_TOKEN
+        API_URL = f"https://graph.threads.net/v1.0/{ID}/threads" 
+        payload = {
+            "media_type": "TEXT",
+            "text": text,
+            "reply_to_id": threads_id,
+            "access_token": API
+        }
+
+        try:
+            response = requests.post(API_URL, data=payload)
+
+            response_data = response.json()
+            creation_id = response_data.get("id")
+            
+            if creation_id:
+                await asyncio.sleep(5)
+                
+                publish_url = f"https://graph.threads.net/v1.0/{ID}/threads_publish"
+                publish_payload = {
+                    "creation_id": creation_id,
+                    "access_token": API
+                }
+                
+                publish_response = requests.post(publish_url, data=publish_payload)
+                publish_response.raise_for_status()
+                
+                embed = message.embeds[0]
+                embed.set_field_at(0, name="引流連結", value=f"已成功發布", inline=False)
+                await message.edit(embed=embed)
+            else:
+                embed = message.embeds[0]
+                embed.set_field_at(0, name="引流連結", value=f"發布回覆失敗", inline=False)
+                embed.color = 0xff0000
+                await message.edit(embed=embed)
+
+        except requests.exceptions.HTTPError as errh:
+            print(f"❌ HTTP 錯誤發生 (請檢查 Access Token, Threads ID 和權限): {errh}")
+            # 打印詳細的響應內容
+            try:
+                self.logger.error(f"HTTP 錯誤詳細資訊：{response.text}")
+            except:
+                self.logger.error("無法獲取響應內容")
+        except requests.exceptions.RequestException as err:
+            print(f"❌ 連接或超時錯誤：{err}")
 
     def read_json_file(self, file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -472,12 +526,7 @@ class Threads(commands.Cog):
             return
         data = await self.get_post_details(post['id'])
         text = post.get('message', '無內容')
-        text += '''\n
---
-Anon Taiwan x 女團哭迷因（GIRLS BAND CRY Memes）
-各平台帳號與同好聊天社群
-https://www.anontaiwan.meme/
-'''
+
         embed = discord.Embed(title="新貼文偵測", description=f"在頁面 ID {page_id} 偵測到新貼文", url=post.get('permalink_url', '無連結'), color=0x00ff00)
         embed.add_field(name="貼文 ID", value=post['id'], inline=False)
         embed.add_field(name="貼文內容", value=text, inline=False)
