@@ -12,6 +12,7 @@ class AutoReply(commands.Cog):
         self.logger.info("cog/auto_reply.py: 日誌系統初始化完成")
         self.reply = {
             "mi1mi1luo4de2": ("咪咪洛德 幹他", 1),
+            "mi1mi1luo4de5": ("咪咪洛德 幹他", 1),
             "掐": ("掐囉～(∠·ω< )⌒★", 1),
             "羊駝": ("# 羊 駝 病 毒", 0.25),
         }
