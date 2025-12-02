@@ -18,9 +18,12 @@ class AutoReply(commands.Cog):
     async def on_ready(self):
         pass
 
+    def __channel_check(self, message: discord.Message) -> bool:
+        return message.author.id == self.bot.user.id or message.channel.id == utils.TTS_CHANNEL_ID
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.author.id == self.bot.user.id or message.channel.id == utils.TTS_CHANNEL_ID:
+        if self.__channel_check(message):
             return
 
         for key, reply_msg in self.reply.items():
