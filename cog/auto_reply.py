@@ -30,12 +30,12 @@ class AutoReply(commands.Cog):
             return
 
         content_pinyin = "".join(lazy_pinyin(message.content, style=Style.TONE2, tone_sandhi=True, neutral_tone_with_five=True))
+        replied = False
         
         for (reply_msg, probability, match_strings) in self.reply:
             for match_str in match_strings:
                 if (match_str in content_pinyin or match_str in message.content) and random.random() <= probability:
-                    if message.reference is not None:
-                        replied = False
+                    if message.reference is not None and not replied:
                         try:
                             ref_msg = await message.channel.fetch_message(message.reference.message_id)
                             if ref_msg.author.id == self.bot.user.id:
@@ -46,9 +46,6 @@ class AutoReply(commands.Cog):
                             break
                         except Exception as e:
                             self.logger.error(f"無法取得引用訊息：{e}")
-                            
-                        if replied:
-                            break
                         
                     await message.channel.send(reply_msg)
                     break
