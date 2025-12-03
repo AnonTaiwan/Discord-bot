@@ -13,7 +13,8 @@ class AutoReply(commands.Cog):
         self.reply = [  # (reply, probability, [match substrings])
             ("咪咪洛德 幹他", 1, ["mi1mi1luo4de2", "mi1mi1luo4de5"]),
             ("掐囉～(∠·ω< )⌒★", 1, ["掐"]),
-            ("# 羊 駝 病 毒", 0.25, ["羊駝"])
+            ("# 羊 駝 病 毒", 0.25, ["羊駝"]),
+            ("對了！說到機...", 1, ["機吧"])
         ]
 
     @commands.Cog.listener()
