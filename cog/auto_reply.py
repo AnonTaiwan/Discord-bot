@@ -34,6 +34,18 @@ class AutoReply(commands.Cog):
         for (reply_msg, probability, match_strings) in self.reply:
             for match_str in match_strings:
                 if (match_str in content_pinyin or match_str in message.content) and random.random() <= probability:
+                    if message.reference is not None:
+                        try:
+                            ref_msg = await message.channel.fetch_message(message.reference.message_id)
+                            if ref_msg.author.id == self.bot.user.id:
+                                return
+                            
+                            await ref_msg.reply(reply_msg)
+                            return
+                        except Exception as e:
+                            self.logger.error(f"無法取得引用訊息：{e}")
+                            
+                        
                     await message.channel.send(reply_msg)
                     break
                 
