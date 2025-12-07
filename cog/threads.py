@@ -98,11 +98,8 @@ class Threads(commands.Cog):
         post_tag = post_info.get('tag', '無標籤')
         
         if post_type == "TEXT":
-            success = await self.__text_post(post_id, message_id)
-            if success:
-                threads_data = self.read_json_file('JSON/threads.json')
-                del threads_data[str(message_id)]
-                self.write_json_file('JSON/threads.json', threads_data)
+            post_data = await self.__text_post(post_id, message_id)
+            await self.__after_post(post_data, post_id, message_id)
             return
         
         data = await self.get_post_details(post_id)
@@ -117,25 +114,31 @@ class Threads(commands.Cog):
                         dc_url = await self.__media_to_Discord(url, "IMAGE")
                         if dc_url is not None:
                             media_urls.append(dc_url)
-                    success = await self.__multi_post(post_id, message_id, media_urls)
+                    post_data = await self.__multi_post(post_id, message_id, media_urls)
                 else:
                     media_url = data[0]["media"]["image"]["src"]
                     dc_url = await self.__media_to_Discord(media_url, "IMAGE")
-                    success = await self.__single_post(post_id, message_id, dc_url)
+                    post_data = await self.__single_post(post_id, message_id, dc_url)
             elif post_type == "VIDEO":
                 media_url = data[0]["media"]["source"]
                 await self.__get_video_audio(post_id, post_link)
                 dc_url = await self.__media_to_Discord(media_url, "VIDEO", post_id)
-                success = await self.__video_post(post_id, message_id, dc_url)
-            if success:
-                with open('JSON/threads.json', 'r', encoding='utf-8') as f:
-                    threads_data = json.load(f)
-                del threads_data[str(message_id)]
-                with open('JSON/threads.json', 'w', encoding='utf-8') as f:
-                    json.dump(threads_data, f, ensure_ascii=False, indent=4)
-                channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
-                message = await channel.fetch_message(message_id)
-                await message.delete()
+                post_data = await self.__video_post(post_id, message_id, dc_url)
+                
+            await self.__after_post(post_data, post_id, message_id)
+
+    async def __after_post(self, data, post_id, message_id):
+        success = await self.__check_post_status(data, post_id, message_id)
+        
+        if success:
+            with open('JSON/threads.json', 'r', encoding='utf-8') as f:
+                threads_data = json.load(f)
+            del threads_data[str(message_id)]
+            with open('JSON/threads.json', 'w', encoding='utf-8') as f:
+                json.dump(threads_data, f, ensure_ascii=False, indent=4)
+            channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
+            message = await channel.fetch_message(message_id)
+            await message.delete()
 
     async def __text_post(self, post_id, message_id):
         ID = utils.THREADS_ID
@@ -164,7 +167,7 @@ class Threads(commands.Cog):
         }
         response = requests.post(post_media_url, data=payload)
         data = response.json()
-        return await self.__check_post_status(data, post_id)
+        return data
 
     async def __single_post(self, post_id, message_id, media_url):
         ID = utils.THREADS_ID
@@ -195,7 +198,7 @@ class Threads(commands.Cog):
         }
         response = requests.post(post_media_url, data=payload)
         data = response.json()
-        return await self.__check_post_status(data, post_id)
+        return data
 
     async def __video_post(self, post_id, message_id, media_url):
         ID = utils.THREADS_ID
@@ -233,7 +236,7 @@ class Threads(commands.Cog):
         }
         response = requests.post(post_media_url, data=payload)
         data = response.json()
-        return await self.__check_post_status(data, post_id)
+        return data
         
     async def __multi_post(self, post_id, message_id, media_urls):
         ID = utils.THREADS_ID
@@ -278,9 +281,9 @@ class Threads(commands.Cog):
         }
         response = requests.post(post_carousel_url, data=payload)
         data = response.json()
-        return await self.__check_post_status(data, post_id)
+        return data
         
-    async def __check_post_status(self, data, post_id):
+    async def __check_post_status(self, data, post_id, message_id):
         data_id = data.get("id")
         self.channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
         print("Posted thread with media ID:", data_id)
@@ -289,10 +292,14 @@ class Threads(commands.Cog):
             await self.channel.send(embed=embed)
             return False
         else:
+            threads_data = self.read_json_file('JSON/threads.json')
+            
             embed = discord.Embed(title="貼文已發布", description=f"貼文 ID: {post_id} 已成功發布到 Threads。\n Threads ID: {data_id}", color=0x00ff00)
-            embed.add_field(name="引流連結", value=f"發布中...", inline=False)
+            embed.add_field(name="引流連結", value=f"發布中..." if threads_data[str(message_id)].get('reply_enabled', True) else "未啟用", inline=False)
             message = await self.channel.send(embed=embed)
-            await self.__reply_post(data_id, message)
+            
+            if threads_data[str(message_id)].get('reply_enabled', True):
+                await self.__reply_post(data_id, message)
             return True
 
     async def __reply_post(self, threads_id, message):
@@ -484,6 +491,13 @@ https://www.anontaiwan.meme/'''
             modal = Threads.EditPost(self.cog, self.post_info, self.mes_id)
             await interaction.message.delete()
             await interaction.response.send_modal(modal)
+            
+        @discord.ui.button(label="關閉引流留言", style=discord.ButtonStyle.gray)
+        async def close_reply(self, button: discord.ui.Button, interaction: discord.Interaction):
+            data = self.cog.read_json_file('JSON/threads.json')
+            data[str(self.mes_id)]['reply_enabled'] = False
+            self.cog.write_json_file('JSON/threads.json', data)
+            await interaction.response.send_message("引流留言已關閉。", ephemeral=True)
             
     class EditPost(discord.ui.Modal):
         def __init__(self, cog, post_info, mes_id):
