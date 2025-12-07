@@ -73,6 +73,10 @@ class Omikuji(commands.Cog):
         if not self.daily_message.is_running():
             self.daily_message.start()
 
+        self.commend_cog = self.bot.get_cog('Commend')
+        if not self.commend_cog:
+            print('CommendCog not found!')
+
     @omikuji_command_group.command(name="draw", description="每日運勢抽籤 (此功能由 Kevin 提供)")
     async def draw_omikuji(self, ctx: discord.ApplicationContext):
         try:
@@ -99,6 +103,9 @@ class Omikuji(commands.Cog):
                 await ctx.respond(f"抽到的籤是：{result}")
             self.omikuji.append(ctx.author.id)
             self.save_omikuji()
+
+            if result == "Daikyo" and self.commend_cog:
+                self.commend_cog.send_commendation(ctx.author, "抽到大凶，給予安慰表揚")
         except Exception as e:
             self.logger.error(f"Error responding to omikuji command: {e}")
             await ctx.respond("抽籤失敗，請稍後再試。")
