@@ -494,9 +494,7 @@ https://www.anontaiwan.meme/'''
             
         @discord.ui.button(label="關閉引流留言", style=discord.ButtonStyle.gray)
         async def close_reply(self, button: discord.ui.Button, interaction: discord.Interaction):
-            data = self.cog.read_json_file('JSON/threads.json')
-            data[str(self.mes_id)]['reply_enabled'] = False
-            self.cog.write_json_file('JSON/threads.json', data)
+            self.post_info['reply_enabled'] = False
             await interaction.response.send_message("引流留言已關閉。", ephemeral=True)
             
     class EditPost(discord.ui.Modal):
