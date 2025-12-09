@@ -17,8 +17,6 @@ class Commend(commands.Cog):
         commendation = utils.read_json(self.logger, RECORD_FILE, default_content={"commendation": {}}).get("commendation", {})
         self.commendation = {int(k): v for k, v in commendation.items()}
 
-        self.channel = self.bot.get_channel(utils.BOT_PLAYGROUND_CHANNEL_ID)
-
     commend_command_group = discord.SlashCommandGroup(name="commend", description="表揚相關指令")
 
     async def __save_commend(self):
@@ -41,6 +39,8 @@ class Commend(commands.Cog):
     async def on_ready(self):
         pass
 
+        self.play_ground_channel = self.bot.get_channel(utils.BOT_PLAYGROUND_CHANNEL_ID)
+
     async def send_commendation(self, user: discord.Member, reason: str):
         if user.id not in self.commendation:
             self.commendation[user.id] = 0
@@ -51,7 +51,7 @@ class Commend(commands.Cog):
         embed.add_field(name="表揚理由", value=reason if reason else "N/A", inline=False)
 
         try:
-            await self.channel.send(embed=embed)
+            await self.play_ground_channel.send(embed=embed)
 
             # if self.commendation[user.id] == 3:
             #     self.commendation[user.id] = 0
@@ -68,7 +68,7 @@ class Commend(commands.Cog):
             #     await ctx.send(embed=embed)
         except Exception as e:
             self.logger.error(f"表揚成員時發生錯誤：{e}")
-            await self.channel.send("❌ 發生錯誤，無法完成表揚。")
+            await self.play_ground_channel.send("❌ 發生錯誤，無法完成表揚。")
 
     @commend_command_group.command(name="new", description="表揚成員")
     async def commend(self, ctx: discord.ApplicationContext,
