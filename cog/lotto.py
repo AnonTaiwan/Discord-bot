@@ -30,7 +30,10 @@ class Lotto(commands.Cog):
     async def draw(self, ctx: discord.ApplicationContext): # type: ignore
         try:
             user = random.choice(self.lotto_pool)
-            await ctx.respond(f"抽到 <@{user}> 了！")
+
+            embed = discord.Embed(title="🎉 抽選結果 🎉", description=f"抽到 <@{user}> 了！", color=discord.Color.gold())
+
+            await ctx.respond(embed=embed)
         except Exception as e:
             self.logger.error(f"抽選成員時發生錯誤：{e}")
             await ctx.respond("❌ 發生錯誤，無法完成抽選", ephemeral=True)
