@@ -17,7 +17,7 @@ class AutoReply(commands.Cog):
             ("對了！說到機...", 1, False, ["機吧"]),
             ("不行", 1, False, ["我可不可以吃東西"]),
             ("你再問問看", 1, False, ["你除了說不行，還會說什麼"]),
-            ("%s 被琪涵雅的女裝 可愛死了", 1, True, ["琪涵雅女裝"])
+            ("%s 被 琪涵雅的女裝 可愛死了", 1, True, ["琪涵雅女裝"])
         ]
 
     @commands.Cog.listener()
@@ -40,7 +40,7 @@ class AutoReply(commands.Cog):
                 if (match_str in content_pinyin or match_str in message.content) and random.random() <= probability:
                     if tag_user:
                         reply_msg = reply_msg % (message.author.mention)
-                        
+
                     if message.reference is not None and not replied:
                         try:
                             ref_msg = await message.channel.fetch_message(message.reference.message_id)
