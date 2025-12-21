@@ -98,15 +98,19 @@ async def main():
             logger.info(f"日誌系統已更新至 {today}")
 
         setup_tmp_dir()
-            
-        async with MyBot() as bot:
+        
+        # 使用顯式生命週期管理，避免 async context 造成 session 預先關閉
+        bot = MyBot()
+        try:
             if os.environ.get("CI_RUNNING") == "true":
                 logger.info("CI 環境中，將不會啟動機器人")
                 await asyncio.sleep(30)
 
             bot.load_extensions()
-
             await bot.start(utils.BOT_TOKEN, reconnect=True)
+        finally:
+            # 確保正常關閉，避免殘留資源或已關閉的會話被重用
+            await bot.close()
         await asyncio.sleep(10)  # 確保在重啟前有短暫的延遲
 
 if __name__ == "__main__":
