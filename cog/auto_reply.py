@@ -10,13 +10,14 @@ class AutoReply(commands.Cog):
         self.bot = bot
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/auto_reply.py: 日誌系統初始化完成")
-        self.reply = [  # (reply, probability, [match substrings])
-            ("咪咪洛德 幹他", 1, ["mi1mi1luo4de2", "mi1mi1luo4de5"]),
-            ("掐囉～(∠·ω< )⌒★", 1, ["掐"]),
-            ("# 羊 駝 病 毒", 0.25, ["羊駝"]),
-            ("對了！說到機...", 1, ["機吧"]),
-            ("不行", 1, ["我可不可以吃東西"]),
-            ("你再問問看", 1, ["你除了說不行，還會說什麼"])
+        self.reply = [  # (reply, probability, tag user, [match substrings])
+            ("咪咪洛德 幹他", 1, False, ["mi1mi1luo4de2", "mi1mi1luo4de5"]),
+            ("掐囉～(∠·ω< )⌒★", 1, False, ["掐"]),
+            ("# 羊 駝 病 毒", 0.25, False, ["羊駝"]),
+            ("對了！說到機...", 1, False, ["機吧"]),
+            ("不行", 1, False, ["我可不可以吃東西"]),
+            ("你再問問看", 1, False, ["你除了說不行，還會說什麼"]),
+            ("%s 被 琪涵雅的女裝 可愛死了", 1, True, ["琪涵雅女裝"])
         ]
 
     @commands.Cog.listener()
@@ -34,9 +35,12 @@ class AutoReply(commands.Cog):
         content_pinyin = "".join(lazy_pinyin(message.content, style=Style.TONE2, tone_sandhi=True, neutral_tone_with_five=True))
         replied = False
         
-        for (reply_msg, probability, match_strings) in self.reply:
+        for (reply_msg, probability, tag_user, match_strings) in self.reply:
             for match_str in match_strings:
                 if (match_str in content_pinyin or match_str in message.content) and random.random() <= probability:
+                    if tag_user:
+                        reply_msg = reply_msg % (message.author.mention)
+
                     if message.reference is not None and not replied:
                         try:
                             ref_msg = await message.channel.fetch_message(message.reference.message_id)

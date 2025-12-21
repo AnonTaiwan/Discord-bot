@@ -13,7 +13,7 @@ fall_remind_time = [
     time(hour=20, minute=0, second=0, tzinfo=utils.TIME_ZONE),
 ]
 
-GSAT_remind_time = [
+GSAT_CAP_remind_time = [
     time(hour=8, minute=0, second=0, tzinfo=utils.TIME_ZONE)
 ]
 
@@ -22,6 +22,12 @@ GSAT_day = datetime(year=2026, month=1, day=17, hour=0, minute=0, second=0, micr
 GSAT_candidates = [
     741308613993300058,
     838291392047743016
+]
+
+CAP_day = datetime(year=2026, month=5, day=16, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
+
+CAP_candidates = [
+    854559172522409994
 ]
 
 class RoutineMessage(commands.Cog):
@@ -82,7 +88,7 @@ class RoutineMessage(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error sending fall remind message: {e}")
 
-    @tasks.loop(time=GSAT_remind_time)
+    @tasks.loop(time=GSAT_CAP_remind_time)
     async def GSAT_remind(self):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 
@@ -97,6 +103,22 @@ class RoutineMessage(commands.Cog):
             await channel.send(f"距離 2026 大學學科能力測驗還有 {days} 天，考生加油！\n\n{candidates_mentions}")
         except Exception as e:
             self.logger.error(f"Error reminding GSAT candidates: {e}")
+
+    @tasks.loop(time=GSAT_CAP_remind_time)
+    async def CAP_remind(self):
+        channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+
+        now = datetime.now(utils.TIME_ZONE)
+        today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+        days = (CAP_day - today).days
+
+        try:
+            candidates_mentions = "\n".join([f"<@{candidate_id}>" for candidate_id in CAP_candidates])
+
+            await channel.send(f"距離 2026 國中教育會考還有 {days} 天，考生加油！\n\n{candidates_mentions}")
+        except Exception as e:
+            self.logger.error(f"Error reminding CAP candidates: {e}")
 
 def setup(bot: commands.Bot):
     bot.add_cog(RoutineMessage(bot))
