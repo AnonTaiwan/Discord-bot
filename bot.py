@@ -107,10 +107,12 @@ async def main():
                 await asyncio.sleep(30)
 
             bot.load_extensions()
-            await bot.start(utils.BOT_TOKEN, reconnect=True)
+            # 交由外層 while-loop 負責重啟，避免在關閉時與內部重連產生競態
+            await bot.start(utils.BOT_TOKEN, reconnect=False)
         finally:
             # 確保正常關閉，避免殘留資源或已關閉的會話被重用
-            await bot.close()
+            if not bot.is_closed():
+                await bot.close()
         await asyncio.sleep(10)  # 確保在重啟前有短暫的延遲
 
 if __name__ == "__main__":
