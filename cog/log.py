@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import os
 import asyncio
+import sys
 from datetime import datetime
 import utils
 import chat_exporter
@@ -85,9 +86,9 @@ class Log(commands.Cog):
         if ctx.author.id in utils.DEVELOPER:
             await ctx.respond("🔄 機器人正在重啟...", ephemeral=True)
             self.logger.info(f"🔄 {ctx.author.name} 使用指令重啟機器人")
-            # 使用進程級退出交由 Systemd/外層監控重啟，避免 Discord 內部嘗試 RESUME 導致已關閉 Session 被使用
+            # 進程內重啟（re-exec）：重新以相同參數啟動程式，避免僅關閉導致 RESUME 使用已關閉 Session
             await asyncio.sleep(1)
-            os._exit(0)
+            os.execl(sys.executable, sys.executable, *sys.argv)
         else:
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用重啟指令，但沒有權限。")
