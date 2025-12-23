@@ -116,7 +116,9 @@ class Record(commands.Cog):
         except Exception as e:
             self.logger.error(f"處理錄音檔案時發生嚴重錯誤：{e}", exc_info=True)
             
-    @discord.slash_command(name="start", description="開始錄製語音頻道")
+    command_group = discord.SlashCommandGroup("record", "語音錄製相關指令")
+            
+    @command_group.command(name="start", description="開始錄製語音頻道")
     async def start_recording(self, ctx: discord.ApplicationContext):
         """開始錄製當前語音頻道"""
         if not utils.is_operator(ctx.author):
@@ -171,7 +173,7 @@ class Record(commands.Cog):
             self.logger.error(f"開始錄音時發生錯誤：{e}")
             await ctx.respond(f"❌ 開始錄音時發生錯誤：{e}", ephemeral=True)
     
-    @discord.slash_command(name="stop", description="停止錄製語音頻道")
+    @command_group.command(name="stop", description="停止錄製語音頻道")
     async def stop_recording(self, ctx: discord.ApplicationContext):
         """停止錄製並保存檔案"""
         if not utils.is_operator(ctx.author):
@@ -201,7 +203,7 @@ class Record(commands.Cog):
             self.logger.error(f"停止錄音時發生錯誤：{e}")
             await ctx.respond(f"❌ 停止錄音時發生錯誤：{e}", ephemeral=True)
     
-    @discord.slash_command(name="status", description="查看錄音狀態")
+    @command_group.command(name="status", description="查看錄音狀態")
     async def recording_status(self, ctx: discord.ApplicationContext):
         """查看當前錄音狀態"""
         if not self.__is_valid_request(ctx):
