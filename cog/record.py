@@ -164,7 +164,7 @@ class Record(commands.Cog):
             
             # 開始錄音
             vc.start_recording(
-                sinks.WaveSink(),
+                TimedWaveSink(),
                 self.finished_callback,
                 ctx.channel
             )
