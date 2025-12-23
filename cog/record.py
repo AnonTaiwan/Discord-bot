@@ -72,7 +72,7 @@ class Record(commands.Cog):
                         audio.file, 
                         sample_width=2, 
                         frame_rate=48000, 
-                        channels=1
+                        channels=2
                     )
                     
                     # 4. 裁切前端雜訊並修正時間偏移
@@ -81,7 +81,7 @@ class Record(commands.Cog):
                         offset_ms += 150  # 因為裁掉了聲音，所以開始時間要往後推 150ms 才能對齊
                     
                     # 5. 淡入處理
-                    audio_segment = audio_segment.fade_in(100)
+                    audio_segment = audio_segment.fade_in(200)
                     users_with_audio.append(user.name)
 
                     # 保存個人 WAV
