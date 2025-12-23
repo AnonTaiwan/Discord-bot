@@ -64,15 +64,23 @@ class Record(commands.Cog):
                 user = self.bot.get_user(user_id)
                 filename = f"{user.name}_{user_id}.{sink.encoding}"
                 filepath = f"{file_path}/{filename}"
+
+                # audio 可能是單一 AudioData 或 list，多段時需串接完整內容
+                audio_list = audio if isinstance(audio, list) else [audio]
                 with open(filepath, "wb") as f:
-                    f.write(audio.file.getvalue())
+                    for chunk in audio_list:
+                        f.write(chunk.file.getvalue())
                     
                 recorded_users.append(f"<@{user_id}>")
                 self.logger.info(f"已保存錄音檔案：{filename}")
             
+            # 合併全體音檔
+            all_audio = sink.get_all_audio()
+            all_list = all_audio if isinstance(all_audio, list) else [all_audio]
             filename = f"開會總紀錄.{sink.encoding}"
             with open(f"{file_path}/{filename}", "wb") as f:
-                f.write(sink.get_all_audio().file.getvalue())
+                for chunk in all_list:
+                    f.write(chunk.file.getvalue())
                 
             filename = f"{timestamp} 開會紀錄"
             shutil.make_archive(f"{file_path}", 'zip', file_path)
@@ -116,10 +124,7 @@ class Record(commands.Cog):
             # 開始錄音
             vc.start_recording(
                 sinks.WaveSink(),
-                lambda sink, *args: asyncio.run_coroutine_threadsafe(
-                    self.finished_callback(sink, *args),
-                    self.bot.loop,
-                ),
+                self.finished_callback,
             )
             
             await ctx.respond(f"🎙️ 開始錄製 {voice_channel.mention}！使用 `/record stop` 停止錄製。")
