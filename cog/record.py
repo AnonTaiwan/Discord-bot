@@ -43,11 +43,7 @@ class Record(commands.Cog):
     async def finished_callback(self, sink: sinks.WaveSink, *args):
         try:
             channel = self.bot.get_channel(utils.WORKER_CHANNEL_ID)
-            self.logger.info("開始處理錄音檔案...")
-
-            # --- 關鍵修正 1：強制執行格式化 ---
-            # 這會確保所有 PCM 數據被封裝進 WAV 格式
-            sink.format_audio(sink.audio_data)
+            self.logger.info("開始處理錄音檔案 (手動解碼模式)...")
 
             timestamp = datetime.now().strftime("%Y%m%d_%H%M")
             combined = AudioSegment.silent(duration=0)
@@ -57,29 +53,34 @@ class Record(commands.Cog):
                 user = self.bot.get_user(user_id)
                 if not user: continue
                 
-                # --- 關鍵修正 2：檔案指標與大小檢查 ---
-                audio.file.seek(0, 2) # 跳到末尾
+                # 重置並檢查數據大小
+                audio.file.seek(0, 2)
                 actual_size = audio.file.tell()
-                audio.file.seek(0) # 回到開頭準備讀取
+                audio.file.seek(0)
 
-                if actual_size < 2000: # 小於 2KB 基本上就是空檔案 (只有 Header)
-                    self.logger.warning(f"跳過用戶 {user.name}：無有效音訊數據 ({actual_size} bytes)")
+                if actual_size < 1000:
+                    self.logger.warning(f"跳過用戶 {user.name}：數據過小 ({actual_size} bytes)")
                     continue
 
-                users_with_audio.append(user.name)
-                
-                # 保存個人原始檔
-                filename = f"{user.name}_{user_id}.wav"
-                filepath = self.recordings_dir / filename
-                with open(filepath, 'wb') as f:
-                    f.write(audio.file.read())
-                
-                # 準備混音
-                audio.file.seek(0)
                 try:
-                    audio_segment = AudioSegment.from_file(audio.file, format="wav")
+                    # --- 關鍵修正：直接讀取原始 PCM 數據 ---
+                    # Discord 的語音通常是 48000Hz, 16-bit, Stereo (2 channels)
+                    # 我們不依賴 Sink 的自動格式化，直接從 Raw 轉 WAV
+                    audio_segment = AudioSegment.from_raw(
+                        audio.file, 
+                        sample_width=2, 
+                        frame_rate=48000, 
+                        channels=2
+                    )
                     
-                    # 使用 TimedWaveSink 的偏移量
+                    users_with_audio.append(user.name)
+
+                    # 保存個人的完整 WAV 檔案
+                    filename = f"{user.name}_{user_id}.wav"
+                    filepath = self.recordings_dir / filename
+                    audio_segment.export(filepath, format="wav")
+                    
+                    # 計算時間偏移並混音
                     offset_ms = int(sink.user_offsets.get(user_id, 0) * 1000)
                     padded_audio = AudioSegment.silent(duration=offset_ms) + audio_segment
                     
@@ -87,14 +88,15 @@ class Record(commands.Cog):
                         combined = padded_audio
                     else:
                         combined = combined.overlay(padded_audio)
-                except Exception as mix_err:
-                    self.logger.error(f"混合 {user.name} 音軌時出錯：{mix_err}")
+                        
+                except Exception as e:
+                    self.logger.error(f"轉換用戶 {user.name} 音軌失敗：{e}")
 
-            # --- 關鍵修正 3：確保有東西可以輸出 ---
             if not users_with_audio:
-                await channel.send("❌ 錄音結束，但沒有偵測到任何有效的語音數據。請確認麥克風是否有聲音輸入。")
+                await channel.send("❌ 錄音結束，但所有音軌均無有效數據。請檢查 Bot 是否有接收語音的權限。")
                 return
 
+            # 導出合併檔案
             combined_filename = f"開會集合_{timestamp}.wav"
             combined_path = self.recordings_dir / combined_filename
             combined.export(combined_path, format="wav")
