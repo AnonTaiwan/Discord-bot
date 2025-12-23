@@ -116,8 +116,9 @@ class Record(commands.Cog):
             # 開始錄音
             vc.start_recording(
                 sinks.WaveSink(),
-                lambda sink, *args: asyncio.create_task(
-                    self.finished_callback(sink, *args)
+                lambda sink, *args: asyncio.run_coroutine_threadsafe(
+                    self.finished_callback(sink, *args),
+                    self.bot.loop,
                 ),
             )
             
