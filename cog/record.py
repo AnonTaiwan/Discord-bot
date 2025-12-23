@@ -40,91 +40,76 @@ class Record(commands.Cog):
         self.logger.info("Record Cog is ready.")
     
     @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
-        """監聽語音狀態更新以處理錄音"""
-        if member.bot:
-            return  # 忽略機器人
-        
-        # 用戶離開語音頻道
-        elif before.channel and not after.channel:
-            if before.channel.id == utils.WORKER_VOICE_CHANNEL_ID:
-                voice_client = discord.utils.get(self.bot.voice_clients,
-                                            guild=before.channel.guild)  # 機器人的語音頻道
-                if voice_client and voice_client.channel == before.channel:
-                    if len(before.channel.members) == 1:  # 頻道只剩機器人
-                        vc = self.connections[before.channel.guild.id]
-                        vc.stop_recording()
-                        await vc.disconnect()
-                        del self.connections[before.channel.guild.id]
-            self.logger.info(f"{member.name} 離開了語音頻道 {before.channel.name}")
-        
-        # 用戶切換語音頻道
-        elif before.channel and after.channel and before.channel != after.channel:
-            self.logger.info(f"{member.name} 從 {before.channel.name} 切換到 {after.channel.name}")
-    
     async def finished_callback(self, sink: sinks.WaveSink, *args):
-        """錄音完成後的回調函數"""
         try:
             channel = self.bot.get_channel(utils.WORKER_CHANNEL_ID)
             self.logger.info("開始處理錄音檔案...")
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M") # 移除檔名中可能的非法字元 :
+
+            # --- 關鍵修正 1：強制執行格式化 ---
+            # 這會確保所有 PCM 數據被封裝進 WAV 格式
+            sink.format_audio(sink.audio_data)
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M")
             combined = AudioSegment.silent(duration=0)
-            users = []
+            users_with_audio = []
             
-            # 遍歷錄音數據
             for user_id, audio in sink.audio_data.items():
                 user = self.bot.get_user(user_id)
-                if not user:
-                    self.logger.warning(f"無法找到用戶 ID {user_id}，跳過錄音處理")
+                if not user: continue
+                
+                # --- 關鍵修正 2：檔案指標與大小檢查 ---
+                audio.file.seek(0, 2) # 跳到末尾
+                actual_size = audio.file.tell()
+                audio.file.seek(0) # 回到開頭準備讀取
+
+                if actual_size < 2000: # 小於 2KB 基本上就是空檔案 (只有 Header)
+                    self.logger.warning(f"跳過用戶 {user.name}：無有效音訊數據 ({actual_size} bytes)")
                     continue
+
+                users_with_audio.append(user.name)
                 
-                users.append(user.name)
-                
-                # 1. 重置指標，確保可以讀取完整數據
-                audio.file.seek(0)
-                file_content = audio.file.read()
-                
-                # 2. 保存原始檔案
+                # 保存個人原始檔
                 filename = f"{user.name}_{user_id}.wav"
                 filepath = self.recordings_dir / filename
                 with open(filepath, 'wb') as f:
-                    f.write(file_content)
-                self.logger.info(f"已保存個人錄音：{filepath}")
+                    f.write(audio.file.read())
                 
-                # 3. 處理合成音軌
-                audio.file.seek(0) # 再次重置以便 pydub 讀取
-                audio_segment = AudioSegment.from_file(audio.file, format="wav")
-                
-                # 從 TimedWaveSink 獲取偏移量 (秒轉毫秒)
-                # 注意：這裡使用 sink.user_offsets，這是我們自定義 Sink 存的地方
-                offset_ms = int(sink.user_offsets.get(user_id, 0) * 1000)
-                
-                # 加上靜音補齊時間差
-                silence = AudioSegment.silent(duration=offset_ms)
-                padded_audio = silence + audio_segment
-                
-                # 混音
-                if combined.duration_seconds == 0:
-                    combined = padded_audio
-                else:
-                    combined = combined.overlay(padded_audio)
-            
-            # 匯出合併後的檔案
+                # 準備混音
+                audio.file.seek(0)
+                try:
+                    audio_segment = AudioSegment.from_file(audio.file, format="wav")
+                    
+                    # 使用 TimedWaveSink 的偏移量
+                    offset_ms = int(sink.user_offsets.get(user_id, 0) * 1000)
+                    padded_audio = AudioSegment.silent(duration=offset_ms) + audio_segment
+                    
+                    if combined.duration_seconds == 0:
+                        combined = padded_audio
+                    else:
+                        combined = combined.overlay(padded_audio)
+                except Exception as mix_err:
+                    self.logger.error(f"混合 {user.name} 音軌時出錯：{mix_err}")
+
+            # --- 關鍵修正 3：確保有東西可以輸出 ---
+            if not users_with_audio:
+                await channel.send("❌ 錄音結束，但沒有偵測到任何有效的語音數據。請確認麥克風是否有聲音輸入。")
+                return
+
             combined_filename = f"開會集合_{timestamp}.wav"
             combined_path = self.recordings_dir / combined_filename
             combined.export(combined_path, format="wav")
             
-            # 打包與發送
+            # 打包發送
             shutil.make_archive(str(utils.TMP_DIR/"recordings"), 'zip', self.recordings_dir)
             file = discord.File(str(utils.TMP_DIR/"recordings.zip"), filename="recordings.zip")
-            await channel.send(f"錄音檔案已準備好，參與者：{', '.join(users)}", file=file)
+            await channel.send(f"🎙️ 錄音處理完成！\n參與者：{', '.join(users_with_audio)}", file=file)
 
-            # 清理臨時檔案
+            # 清理
             shutil.rmtree(self.recordings_dir)
-        except Exception as e:
-            self.logger.error(f"處理錄音檔案時發生錯誤：{e}", exc_info=True)
-            
 
+        except Exception as e:
+            self.logger.error(f"處理錄音檔案時發生嚴重錯誤：{e}", exc_info=True)
+            
     @discord.slash_command(name="start", description="開始錄製語音頻道")
     async def start_recording(self, ctx: discord.ApplicationContext):
         """開始錄製當前語音頻道"""
