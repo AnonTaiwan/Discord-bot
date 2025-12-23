@@ -12,15 +12,18 @@ import time
 class TimedWaveSink(sinks.WaveSink):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.start_recording_time = time.time()  # 錄音啟動的絕對時間
-        self.user_offsets = {}  # 用來存儲每個人的開始偏移量
+        self.start_recording_time = time.time()
+        self.user_offsets = {}
 
     def write(self, data, user_id):
-        # 如果這是該用戶的第一個數據包，記錄下偏移量
-        if user_id not in self.user_offsets:
-            self.user_offsets[user_id] = time.time() - self.start_recording_time
-        
-        super().write(data, user_id)
+        try:
+            if user_id not in self.user_offsets:
+                # 記錄第一個成功接收到的數據包時間
+                self.user_offsets[user_id] = time.time() - self.start_recording_time
+            super().write(data, user_id)
+        except Exception as e:
+            # 捕捉可能發生的寫入錯誤，避免整個錄音中斷
+            print(f"寫入音訊包時發生錯誤 (User: {user_id}): {e}")
 
 class Record(commands.Cog):
     def __init__(self, bot):
