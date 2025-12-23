@@ -48,6 +48,17 @@ class Record(commands.Cog):
         """錄音完成後的回調函數"""
         try:
             channel = self.bot.get_channel(utils.WORKER_CHANNEL_ID)
+
+            def _to_bytes(blob):
+                """將 AudioData/BytesIO/bytes 轉為 raw bytes"""
+                if hasattr(blob, "file") and blob.file:
+                    return blob.file.getvalue()
+                if hasattr(blob, "getvalue"):
+                    return blob.getvalue()
+                try:
+                    return bytes(blob)
+                except Exception:
+                    return b""
             
             recorded_users = []
             
@@ -69,7 +80,7 @@ class Record(commands.Cog):
                 audio_list = audio if isinstance(audio, list) else [audio]
                 with open(filepath, "wb") as f:
                     for chunk in audio_list:
-                        f.write(chunk.file.getvalue())
+                        f.write(_to_bytes(chunk))
                     
                 recorded_users.append(f"<@{user_id}>")
                 self.logger.info(f"已保存錄音檔案：{filename}")
@@ -80,7 +91,7 @@ class Record(commands.Cog):
             filename = f"開會總紀錄.{sink.encoding}"
             with open(f"{file_path}/{filename}", "wb") as f:
                 for chunk in all_list:
-                    f.write(chunk.file.getvalue())
+                    f.write(_to_bytes(chunk))
                 
             filename = f"{timestamp} 開會紀錄"
             shutil.make_archive(f"{file_path}", 'zip', file_path)
