@@ -52,20 +52,22 @@ class Record(commands.Cog):
             for user_id, audio in sink.audio_data.items():
                 user = self.bot.get_user(user_id)
                 if not user: continue
-                
-                # 重置並檢查數據大小
-                audio.file.seek(0, 2)
-                actual_size = audio.file.tell()
-                audio.file.seek(0)
-
-                if actual_size < 1000:
-                    self.logger.warning(f"跳過用戶 {user.name}：數據過小 ({actual_size} bytes)")
-                    continue
 
                 try:
-                    # --- 關鍵修正：直接讀取原始 PCM 數據 ---
-                    # Discord 的語音通常是 48000Hz, 16-bit, Stereo (2 channels)
-                    # 我們不依賴 Sink 的自動格式化，直接從 Raw 轉 WAV
+                    # 1. 先檢查原始數據大小，沒資料就跳過，省下處理資源
+                    audio.file.seek(0, 2)
+                    actual_size = audio.file.tell()
+                    audio.file.seek(0)
+
+                    if actual_size < 1000:
+                        self.logger.warning(f"跳過用戶 {user.name}：數據過小 ({actual_size} bytes)")
+                        continue
+
+                    # 2. 先定義基礎的 offset_ms (秒轉毫秒)
+                    # 這樣後面的 += 150 才不會報錯
+                    offset_ms = int(sink.user_offsets.get(user_id, 0) * 1000)
+
+                    # 3. 讀取原始 PCM 數據 (channels=1 解決電訊雜音)
                     audio_segment = AudioSegment.from_raw(
                         audio.file, 
                         sample_width=2, 
@@ -73,19 +75,21 @@ class Record(commands.Cog):
                         channels=1
                     )
                     
+                    # 4. 裁切前端雜訊並修正時間偏移
                     if len(audio_segment) > 150:
                         audio_segment = audio_segment[150:]
-                        offset_ms += 150
+                        offset_ms += 150  # 因為裁掉了聲音，所以開始時間要往後推 150ms 才能對齊
+                    
+                    # 5. 淡入處理
                     audio_segment = audio_segment.fade_in(100)
                     users_with_audio.append(user.name)
 
-                    # 保存個人的完整 WAV 檔案
+                    # 保存個人 WAV
                     filename = f"{user.name}_{user_id}.wav"
                     filepath = self.recordings_dir / filename
                     audio_segment.export(filepath, format="wav")
                     
-                    # 計算時間偏移並混音
-                    offset_ms = int(sink.user_offsets.get(user_id, 0) * 1000)
+                    # 6. 使用修正後的 offset_ms 進行混音
                     padded_audio = AudioSegment.silent(duration=offset_ms) + audio_segment
                     
                     if combined.duration_seconds == 0:
