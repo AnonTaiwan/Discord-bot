@@ -4,10 +4,23 @@ from discord import sinks
 from datetime import datetime
 import utils
 import os
-import asyncio
 import shutil
 import io
 from pydub import AudioSegment
+import time
+
+class TimedWaveSink(sinks.WaveSink):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.start_recording_time = time.time()  # 錄音啟動的絕對時間
+        self.user_offsets = {}  # 用來存儲每個人的開始偏移量
+
+    def write(self, data, user_id):
+        # 如果這是該用戶的第一個數據包，記錄下偏移量
+        if user_id not in self.user_offsets:
+            self.user_offsets[user_id] = time.time() - self.start_recording_time
+        
+        super().write(data, user_id)
 
 class Record(commands.Cog):
     def __init__(self, bot):
@@ -51,53 +64,62 @@ class Record(commands.Cog):
         try:
             channel = self.bot.get_channel(utils.WORKER_CHANNEL_ID)
             self.logger.info("開始處理錄音檔案...")
-            timestamp = datetime.now().strftime("%Y%m%d_%H:%M")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M") # 移除檔名中可能的非法字元 :
             combined = AudioSegment.silent(duration=0)
             users = []
             
-            start_times = [data.start_time for data in sink.audio_data.values()]
-            base_time = min(start_times) if start_times else 0
-            
+            # 遍歷錄音數據
             for user_id, audio in sink.audio_data.items():
                 user = self.bot.get_user(user_id)
                 if not user:
                     self.logger.warning(f"無法找到用戶 ID {user_id}，跳過錄音處理")
                     continue
+                
                 users.append(user.name)
                 
-                # 生成檔案名稱
+                # 1. 重置指標，確保可以讀取完整數據
+                audio.file.seek(0)
+                file_content = audio.file.read()
+                
+                # 2. 保存原始檔案
                 filename = f"{user.name}_{user_id}.wav"
                 filepath = self.recordings_dir / filename
-                
-                # 將錄音資料寫入檔案
-                filecontext = audio.file.read()
                 with open(filepath, 'wb') as f:
-                    f.write(filecontext)
+                    f.write(file_content)
+                self.logger.info(f"已保存個人錄音：{filepath}")
                 
-                self.logger.info(f"已保存錄音檔案：{filepath}")
-                
-                # 疊加音軌
+                # 3. 處理合成音軌
+                audio.file.seek(0) # 再次重置以便 pydub 讀取
                 audio_segment = AudioSegment.from_file(audio.file, format="wav")
-                offset_ms = (audio.start_time - base_time) * 1000  # 轉換為毫秒
                 
+                # 從 TimedWaveSink 獲取偏移量 (秒轉毫秒)
+                # 注意：這裡使用 sink.user_offsets，這是我們自定義 Sink 存的地方
+                offset_ms = int(sink.user_offsets.get(user_id, 0) * 1000)
+                
+                # 加上靜音補齊時間差
                 silence = AudioSegment.silent(duration=offset_ms)
                 padded_audio = silence + audio_segment
                 
+                # 混音
                 if combined.duration_seconds == 0:
                     combined = padded_audio
                 else:
                     combined = combined.overlay(padded_audio)
-                    
+            
+            # 匯出合併後的檔案
             combined_filename = f"開會集合_{timestamp}.wav"
             combined_path = self.recordings_dir / combined_filename
             combined.export(combined_path, format="wav")
             
+            # 打包與發送
             shutil.make_archive(str(utils.TMP_DIR/"recordings"), 'zip', self.recordings_dir)
             file = discord.File(str(utils.TMP_DIR/"recordings.zip"), filename="recordings.zip")
             await channel.send(f"錄音檔案已準備好，參與者：{', '.join(users)}", file=file)
-        
+
+            # 清理臨時檔案
+            shutil.rmtree(self.recordings_dir)
         except Exception as e:
-            self.logger.error(f"處理錄音檔案時發生錯誤：{e}")
+            self.logger.error(f"處理錄音檔案時發生錯誤：{e}", exc_info=True)
             
 
     @discord.slash_command(name="start", description="開始錄製語音頻道")
