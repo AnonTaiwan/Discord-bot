@@ -50,6 +50,7 @@ class Record(commands.Cog):
         """錄音完成後的回調函數"""
         try:
             channel = self.bot.get_channel(utils.WORKER_CHANNEL_ID)
+            self.logger.info("開始處理錄音檔案...")
 
             def _to_bytes(blob):
                 """將 AudioData/BytesIO/bytes 轉為 raw bytes"""
@@ -64,59 +65,85 @@ class Record(commands.Cog):
 
             def _to_audio_segment(blob):
                 """將單段音訊轉為 AudioSegment 以便混音"""
-                raw = _to_bytes(blob)
-                bio = BytesIO(raw)
-                return AudioSegment.from_file(bio, format=sink.encoding)
+                try:
+                    raw = _to_bytes(blob)
+                    if not raw:
+                        self.logger.warning("空的音訊資料")
+                        return None
+                    bio = BytesIO(raw)
+                    return AudioSegment.from_file(bio, format=sink.encoding)
+                except Exception as e:
+                    self.logger.error(f"轉換音訊片段失敗：{e}")
+                    return None
             
             recorded_users = []
             
             # 生成時間戳記
-            timestamp = datetime.now().strftime("%Y%m%d-%H:%M")
+            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
             
             os.makedirs(f"{self.recordings_dir}/{timestamp} 開會紀錄", exist_ok=True)
             file_path = f"{self.recordings_dir}/{timestamp} 開會紀錄"
             user_tracks = []  # 用於後續混音
             
+            self.logger.info(f"收到 {len(sink.audio_data)} 位用戶的音訊資料")
             
             # 為每個用戶收集音訊並建立軌道（不再輸出單獨檔案）
             for user_id, audio in sink.audio_data.items():
                 user = self.bot.get_user(user_id)
+                username = user.name if user else f"用戶{user_id}"
                 recorded_users.append(f"<@{user_id}>")
 
                 audio_list = audio if isinstance(audio, list) else [audio]
-                segments = [_to_audio_segment(chunk) for chunk in audio_list]
+                self.logger.info(f"處理 {username} 的音訊，共 {len(audio_list)} 段")
+                
+                segments = []
+                for chunk in audio_list:
+                    seg = _to_audio_segment(chunk)
+                    if seg:
+                        segments.append(seg)
+                
                 if segments:
                     track = segments[0]
                     for seg in segments[1:]:
                         track += seg
                     user_tracks.append(track)
+                    self.logger.info(f"成功處理 {username} 的音訊，長度：{len(track)}ms")
+                else:
+                    self.logger.warning(f"{username} 沒有有效的音訊段")
 
             if not user_tracks:
+                self.logger.warning("沒有任何有效的音訊軌道")
                 await channel.send("❌ 沒有錄到任何聲音，未產出開會總紀錄")
                 shutil.rmtree(file_path)
                 return
 
             # 混音：將所有人完整軌道 overlay 成單一檔案（開會總紀錄）
+            self.logger.info(f"開始混音 {len(user_tracks)} 條軌道...")
             mixed = user_tracks[0]
             for track in user_tracks[1:]:
                 mixed = mixed.overlay(track)
 
             mixed_filename = f"開會總紀錄.{sink.encoding}"
             mixed_path = f"{file_path}/{mixed_filename}"
+            self.logger.info(f"匯出混音檔到 {mixed_path}...")
             mixed.export(mixed_path, format=sink.encoding)
+            self.logger.info(f"混音完成！檔案大小：{os.path.getsize(mixed_path)} bytes")
             
-            shutil.make_archive(f"{timestamp} 開會紀錄", 'zip', file_path)
             await channel.send(
                 content=f"✅ 錄音完成！已產出開會總紀錄，參與者：{', '.join(recorded_users)}",
-                file=discord.File(f"{timestamp} 開會紀錄.zip", filename=f"{file_path}/{timestamp} 開會紀錄.zip"))
+                file=discord.File(mixed_path, filename=mixed_filename))
             
-            
-            
+            self.logger.info("錄音檔案已發送，清理暫存檔...")
             shutil.rmtree(file_path)
+            self.logger.info("處理完成！")
             
         except Exception as e:
-            self.logger.error(f"處理錄音檔案時發生錯誤：{e}")
-            await channel.send(f"❌ 處理錄音時發生錯誤：{e}")
+            self.logger.error(f"處理錄音檔案時發生錯誤：{e}", exc_info=True)
+            try:
+                channel = self.bot.get_channel(utils.WORKER_CHANNEL_ID)
+                await channel.send(f"❌ 處理錄音時發生錯誤：{e}")
+            except:
+                pass
     
     @discord.slash_command(name="start", description="開始錄製語音頻道")
     async def start_recording(self, ctx: discord.ApplicationContext):
