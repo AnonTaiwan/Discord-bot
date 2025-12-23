@@ -161,14 +161,22 @@ class NewFB(commands.Cog):
         msg = await self.channel.send(content=f'<@&{utils.ANON_TAIWAN_SUBSCRIBER_ROLE_ID}>', embed=embed, file=file if file else None)
         await msg.publish()
         self.logger.info(f"已發送新貼文通知：{data_id}")
-        os.remove(f"tmp/{data_id}.jpg")
+        file_path = f"tmp/{data_id}.jpg"
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                self.logger.warning(f"無法刪除臨時檔案 {file_path}: {e}")
 
     async def __send_post_update_message(self, data, page_id):
         await self.get_photo(data)
         name = "Anon Taiwan" if page_id == utils.FB_PAGE_ID else "女團哭迷因"
+        url = data.get('permalink_url', 'No URL provided').replace('\\', '')
         message = data.get('message', 'No message provided')
         message = bytes(message, 'utf-8').decode(encoding="utf-8", errors="ignore")
-        url = data.get('permalink_url', 'No URL provided').replace('\\', '')
+        if len(message) > 1024:
+            message = message[:1021] + "..."
+        
         embed = discord.Embed(title=f'{name} 更新了新貼文！', url=url, color=0x00ff00)
         embed.add_field(name='貼文連結', value=url, inline=False)
         embed.add_field(name='貼文內容', value=message or "（無內容）", inline=False)

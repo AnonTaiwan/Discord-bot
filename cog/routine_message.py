@@ -47,6 +47,9 @@ class RoutineMessage(commands.Cog):
         
         if not self.fall_remind.is_running():
             self.fall_remind.start()
+            
+        if not self.CAP_remind.is_running():
+            self.CAP_remind.start()
 
     @tasks.loop(time=retouch_picture_remind_time)
     async def retouch_picture_remind(self):
