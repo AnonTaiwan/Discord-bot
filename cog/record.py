@@ -70,9 +70,13 @@ class Record(commands.Cog):
                         audio.file, 
                         sample_width=2, 
                         frame_rate=48000, 
-                        channels=2
+                        channels=1
                     )
                     
+                    if len(audio_segment) > 150:
+                        audio_segment = audio_segment[150:]
+                        offset_ms += 150
+                    audio_segment = audio_segment.fade_in(100)
                     users_with_audio.append(user.name)
 
                     # 保存個人的完整 WAV 檔案
