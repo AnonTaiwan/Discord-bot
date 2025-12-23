@@ -128,7 +128,7 @@ class Record(commands.Cog):
             self.logger.info(f"匯出混音檔到 {mixed_path}...")
             mixed.export(mixed_path, format=sink.encoding)
             self.logger.info(f"混音完成！檔案大小：{os.path.getsize(mixed_path)} bytes")
-            
+
             await channel.send(
                 content=f"✅ 錄音完成！已產出開會總紀錄，參與者：{', '.join(recorded_users)}",
                 file=discord.File(mixed_path, filename=mixed_filename))
@@ -165,10 +165,24 @@ class Record(commands.Cog):
             await ctx.respond("❌ 此伺服器已經在錄音中！", ephemeral=True)
             return
         
+        # 檢查 bot 是否有足夠權限
+        bot_member = ctx.guild.get_member(self.bot.user.id)
+        if not voice_channel.permissions_for(bot_member).connect:
+            await ctx.respond("❌ Bot 沒有連接語音頻道的權限！", ephemeral=True)
+            return
+        if not voice_channel.permissions_for(bot_member).speak:
+            await ctx.respond("❌ Bot 沒有在語音頻道說話的權限！", ephemeral=True)
+            return
+        
         try:
-            # 加入語音頻道
-            vc = await voice_channel.connect()
+            await ctx.respond("🔄 正在連接語音頻道...")
+            
+            # 加入語音頻道，並啟用語音接收
+            vc = await voice_channel.connect(cls=discord.VoiceClient)
             self.connections[ctx.guild.id] = vc
+            
+            self.logger.info(f"已連接到語音頻道：{voice_channel.name}")
+            self.logger.info(f"頻道內成員：{[m.name for m in voice_channel.members if not m.bot]}")
             
             # 開始錄音
             vc.start_recording(
@@ -176,7 +190,8 @@ class Record(commands.Cog):
                 self.finished_callback,
             )
             
-            await ctx.respond(f"🎙️ 開始錄製 {voice_channel.mention}！使用 `/record stop` 停止錄製。")
+            self.logger.info("錄音已啟動")
+            await ctx.edit(content=f"🎙️ 開始錄製 {voice_channel.mention}！\n使用 `/stop` 停止錄製。\n\n⚠️ 注意：請確認頻道內的人有開啟麥克風並說話。")
             self.logger.info(f"開始在 {voice_channel.name} 錄音，由 {ctx.author.name} 觸發")
             
         except Exception as e:
