@@ -43,7 +43,7 @@ class Record(commands.Cog):
     async def finished_callback(self, sink: sinks.WaveSink, *args):
         try:
             channel = self.bot.get_channel(utils.WORKER_CHANNEL_ID)
-            self.logger.info("開始處理錄音檔案 (手動解碼模式)...")
+            self.logger.info("開始處理錄音檔案...")
 
             timestamp = datetime.now().strftime("%Y%m%d_%H%M")
             combined = AudioSegment.silent(duration=0)
@@ -54,20 +54,16 @@ class Record(commands.Cog):
                 if not user: continue
 
                 try:
-                    # 1. 先檢查原始數據大小，沒資料就跳過，省下處理資源
                     audio.file.seek(0, 2)
                     actual_size = audio.file.tell()
                     audio.file.seek(0)
 
                     if actual_size < 1000:
-                        self.logger.warning(f"跳過用戶 {user.name}：數據過小 ({actual_size} bytes)")
                         continue
 
-                    # 2. 先定義基礎的 offset_ms (秒轉毫秒)
-                    # 這樣後面的 += 150 才不會報錯
                     offset_ms = int(sink.user_offsets.get(user_id, 0) * 1000)
 
-                    # 3. 讀取原始 PCM 數據 (channels=1 解決電訊雜音)
+                    # 讀取個人音軌 (保持原始，不進行 fade_in 或 crop)
                     audio_segment = AudioSegment.from_raw(
                         audio.file, 
                         sample_width=2, 
@@ -75,34 +71,33 @@ class Record(commands.Cog):
                         channels=2
                     )
                     
-                    # 4. 裁切前端雜訊並修正時間偏移
-                    if len(audio_segment) > 150:
-                        audio_segment = audio_segment[150:]
-                        offset_ms += 150  # 因為裁掉了聲音，所以開始時間要往後推 150ms 才能對齊
-                    
-                    # 5. 淡入處理
-                    audio_segment = audio_segment.fade_in(200)
-                    users_with_audio.append(user.name)
-
-                    # 保存個人 WAV
+                    # 匯出個人音軌（這是你要保留的原始版本）
                     filename = f"{user.name}_{user_id}.wav"
                     filepath = self.recordings_dir / filename
                     audio_segment.export(filepath, format="wav")
                     
-                    # 6. 使用修正後的 offset_ms 進行混音
+                    users_with_audio.append(user.name)
+
+                    # 進行混音
                     padded_audio = AudioSegment.silent(duration=offset_ms) + audio_segment
-                    
                     if combined.duration_seconds == 0:
                         combined = padded_audio
                     else:
                         combined = combined.overlay(padded_audio)
-                        
+                            
                 except Exception as e:
                     self.logger.error(f"轉換用戶 {user.name} 音軌失敗：{e}")
 
             if not users_with_audio:
-                await channel.send("❌ 錄音結束，但所有音軌均無有效數據。請檢查 Bot 是否有接收語音的權限。")
                 return
+
+            # --- 針對最後合成的檔案進行處理 ---
+            # 裁切掉合成音檔最前面的 500ms (0.5 秒)，這通常是雜音最集中的地方
+            if len(combined) > 500:
+                combined = combined[500:]
+            
+            # 套用淡入效果，讓合成後的開場更平滑
+            combined = combined.fade_in(300)
 
             # 導出合併檔案
             combined_filename = f"開會集合_{timestamp}.wav"
@@ -114,8 +109,8 @@ class Record(commands.Cog):
             file = discord.File(str(utils.TMP_DIR/"recordings.zip"), filename="recordings.zip")
             await channel.send(f"🎙️ 錄音處理完成！\n參與者：{', '.join(users_with_audio)}", file=file)
 
-            # 清理
             shutil.rmtree(self.recordings_dir)
+            os.remove(str(utils.TMP_DIR/"recordings.zip"))
 
         except Exception as e:
             self.logger.error(f"處理錄音檔案時發生嚴重錯誤：{e}", exc_info=True)
