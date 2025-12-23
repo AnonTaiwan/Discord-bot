@@ -41,8 +41,8 @@ class MyBot(commands.Bot):
         # 算到下個 0 點還有幾秒
         tomorrow = datetime.combine(date.today() + timedelta(days=1), time.min)
         seconds_to_midnight = (tomorrow - now).seconds
-        print(f"將於 {seconds_to_midnight + 300:,} 秒後自動關機")
-        await asyncio.sleep(seconds_to_midnight + 300)
+        print(f"將於 {seconds_to_midnight + 3600*6:,} 秒後自動關機")
+        await asyncio.sleep(seconds_to_midnight + 3600*6)  # 加上 6 小時的偏移
         print('每日 12 點自動關機')
         self.__unload_extensions()
         await self.close()
