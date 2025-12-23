@@ -6,6 +6,8 @@ import utils
 import os
 import asyncio
 import shutil
+from io import BytesIO
+from pydub import AudioSegment
 
 class Record(commands.Cog):
     def __init__(self, bot):
@@ -59,6 +61,12 @@ class Record(commands.Cog):
                     return bytes(blob)
                 except Exception:
                     return b""
+
+            def _to_audio_segment(blob):
+                """將單段音訊轉為 AudioSegment 以便混音"""
+                raw = _to_bytes(blob)
+                bio = BytesIO(raw)
+                return AudioSegment.from_file(bio, format=sink.encoding)
             
             recorded_users = []
             
@@ -67,41 +75,44 @@ class Record(commands.Cog):
             
             os.makedirs(f"{self.recordings_dir}/{timestamp} 開會紀錄", exist_ok=True)
             file_path = f"{self.recordings_dir}/{timestamp} 開會紀錄"
-            files = []
+            user_tracks = []  # 用於後續混音
             
             
-            # 為每個用戶保存音訊檔案
+            # 為每個用戶收集音訊並建立軌道（不再輸出單獨檔案）
             for user_id, audio in sink.audio_data.items():
                 user = self.bot.get_user(user_id)
-                filename = f"{user.name}_{user_id}.{sink.encoding}"
-                filepath = f"{file_path}/{filename}"
-
-                # audio 可能是單一 AudioData 或 list，多段時需串接完整內容
-                audio_list = audio if isinstance(audio, list) else [audio]
-                with open(filepath, "wb") as f:
-                    for chunk in audio_list:
-                        f.write(_to_bytes(chunk))
-                    
                 recorded_users.append(f"<@{user_id}>")
-                self.logger.info(f"已保存錄音檔案：{filename}")
+
+                audio_list = audio if isinstance(audio, list) else [audio]
+                segments = [_to_audio_segment(chunk) for chunk in audio_list]
+                if segments:
+                    track = segments[0]
+                    for seg in segments[1:]:
+                        track += seg
+                    user_tracks.append(track)
+
+            if not user_tracks:
+                await channel.send("❌ 沒有錄到任何聲音，未產出開會總紀錄")
+                shutil.rmtree(file_path)
+                return
+
+            # 混音：將所有人完整軌道 overlay 成單一檔案（開會總紀錄）
+            mixed = user_tracks[0]
+            for track in user_tracks[1:]:
+                mixed = mixed.overlay(track)
+
+            mixed_filename = f"開會總紀錄.{sink.encoding}"
+            mixed_path = f"{file_path}/{mixed_filename}"
+            mixed.export(mixed_path, format=sink.encoding)
             
-            # 合併全體音檔
-            all_audio = sink.get_all_audio()
-            all_list = all_audio if isinstance(all_audio, list) else [all_audio]
-            filename = f"開會總紀錄.{sink.encoding}"
-            with open(f"{file_path}/{filename}", "wb") as f:
-                for chunk in all_list:
-                    f.write(_to_bytes(chunk))
-                
-            filename = f"{timestamp} 開會紀錄"
-            shutil.make_archive(f"{file_path}", 'zip', file_path)
-                
+            shutil.make_archive(f"{timestamp} 開會紀錄", 'zip', file_path)
             await channel.send(
-                content=f"✅ 錄音完成！參與者：{', '.join(recorded_users)}",
-                file=discord.File(f"{file_path}.zip", filename=f"{filename}.zip"))
+                content=f"✅ 錄音完成！已產出開會總紀錄，參與者：{', '.join(recorded_users)}",
+                file=discord.File(f"{timestamp} 開會紀錄.zip", filename=f"{file_path}/{timestamp} 開會紀錄.zip"))
+            
+            
             
             shutil.rmtree(file_path)
-            os.remove(f"{file_path}.zip")
             
         except Exception as e:
             self.logger.error(f"處理錄音檔案時發生錯誤：{e}")
