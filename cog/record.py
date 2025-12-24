@@ -8,6 +8,7 @@ import shutil
 import io
 from pydub import AudioSegment
 import time
+import asyncio
 
 class TimedWaveSink(sinks.WaveSink):
     def __init__(self, *args, **kwargs):
@@ -39,11 +40,10 @@ class Record(commands.Cog):
     async def on_ready(self):
         self.logger.info("Record Cog is ready.")
     
-    @commands.Cog.listener()
     async def finished_callback(self, sink: sinks.WaveSink, *args):
         try:
             channel = self.bot.get_channel(utils.WORKER_CHANNEL_ID)
-            self.logger.info("開始處理錄音檔案...")
+            self.logger.info("開始處理錄音檔案並轉換為 MP3...")
 
             timestamp = datetime.now().strftime("%Y%m%d_%H%M")
             combined = AudioSegment.silent(duration=0)
@@ -54,31 +54,28 @@ class Record(commands.Cog):
                 if not user: continue
 
                 try:
+                    # 檢查數據大小
                     audio.file.seek(0, 2)
-                    actual_size = audio.file.tell()
+                    if audio.file.tell() < 1000: continue
                     audio.file.seek(0)
 
-                    if actual_size < 1000:
-                        continue
-
-                    offset_ms = int(sink.user_offsets.get(user_id, 0) * 1000)
-
-                    # 讀取個人音軌 (保持原始，不進行 fade_in 或 crop)
+                    # 讀取 Raw 數據 (48kHz, 16-bit, Stereo)
                     audio_segment = AudioSegment.from_raw(
-                        audio.file, 
-                        sample_width=2, 
-                        frame_rate=48000, 
-                        channels=2
+                        audio.file, sample_width=2, frame_rate=48000, channels=2
                     )
                     
-                    # 匯出個人音軌（這是你要保留的原始版本）
-                    filename = f"{user.name}_{user_id}.wav"
+                    # 取得時間偏移量
+                    offset_ms = int(sink.user_offsets.get(user_id, 0) * 1000)
+                    
+                    # 保存個人 MP3 檔案 (節省個人音軌佔用的空間)
+                    filename = f"{user.name}_{user_id}.mp3" # 改為 .mp3
                     filepath = self.recordings_dir / filename
-                    audio_segment.export(filepath, format="wav")
+                    # bitrate 可以設為 128k 或 192k 兼顧品質與大小
+                    audio_segment.export(filepath, format="mp3", bitrate="128k")
                     
                     users_with_audio.append(user.name)
 
-                    # 進行混音
+                    # 混音準備
                     padded_audio = AudioSegment.silent(duration=offset_ms) + audio_segment
                     if combined.duration_seconds == 0:
                         combined = padded_audio
@@ -86,31 +83,27 @@ class Record(commands.Cog):
                         combined = combined.overlay(padded_audio)
                             
                 except Exception as e:
-                    self.logger.error(f"轉換用戶 {user.name} 音軌失敗：{e}")
+                    self.logger.error(f"轉換用戶 {user.name} 失敗：{e}")
 
             if not users_with_audio:
                 return
 
-            # --- 針對最後合成的檔案進行處理 ---
-            # 裁切掉合成音檔最前面的 500ms (0.5 秒)，這通常是雜音最集中的地方
+            # --- 針對最後合成的檔案進行處理 (裁切雜音) ---
             if len(combined) > 500:
                 combined = combined[500:]
-            
-            # 套用淡入效果，讓合成後的開場更平滑
             combined = combined.fade_in(300)
 
-            # 導出合併檔案
-            combined_filename = f"開會集合_{timestamp}.wav"
+            # 匯出合成後的 MP3 檔案
+            combined_filename = f"開會集合_{timestamp}.mp3"
             combined_path = self.recordings_dir / combined_filename
-            combined.export(combined_path, format="wav")
+            combined.export(combined_path, format="mp3", bitrate="192k") # 合成檔用較高位元率
             
             # 打包發送
             shutil.make_archive(str(utils.TMP_DIR/"recordings"), 'zip', self.recordings_dir)
             file = discord.File(str(utils.TMP_DIR/"recordings.zip"), filename="recordings.zip")
-            await channel.send(f"🎙️ 錄音處理完成！\n參與者：{', '.join(users_with_audio)}", file=file)
+            await channel.send(f"🎙️ 錄音已轉為 MP3 並處理完成！\n參與者：{', '.join(users_with_audio)}", file=file)
 
             shutil.rmtree(self.recordings_dir)
-            os.remove(str(utils.TMP_DIR/"recordings.zip"))
 
         except Exception as e:
             self.logger.error(f"處理錄音檔案時發生嚴重錯誤：{e}", exc_info=True)
@@ -138,6 +131,12 @@ class Record(commands.Cog):
             await ctx.respond("❌ 此伺服器已經在錄音中！", ephemeral=True)
             return
         
+        guild = ctx.guild
+        if guild.voice_client:
+            self.logger.info("檢測到殘留連接，執行強制中斷...")
+            await guild.voice_client.disconnect(force=True)
+            await asyncio.sleep(2) # 給予足夠時間讓 Discord Gateway 更新狀態
+        
         # 檢查 bot 是否有足夠權限
         bot_member = ctx.guild.get_member(self.bot.user.id)
         if not voice_channel.permissions_for(bot_member).connect:
@@ -149,13 +148,22 @@ class Record(commands.Cog):
         
         try:
             await ctx.respond("🔄 正在連接語音頻道...")
-            
+                
             # 加入語音頻道，並啟用語音接收
             vc = await voice_channel.connect(cls=discord.VoiceClient)
             self.connections[ctx.guild.id] = vc
             
             self.logger.info(f"已連接到語音頻道：{voice_channel.name}")
             self.logger.info(f"頻道內成員：{[m.name for m in voice_channel.members if not m.bot]}")
+            
+            for i in range(5): # 最多嘗試等待 5 秒
+                if vc.is_connected():
+                    break
+                await asyncio.sleep(1)
+                self.logger.info(f"等待語音連線穩定中... ({i+1})")
+
+            if not vc.is_connected():
+                raise Exception("語音連線超時，無法啟動錄音。")
             
             # 開始錄音
             vc.start_recording(
