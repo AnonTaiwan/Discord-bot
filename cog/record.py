@@ -193,6 +193,8 @@ class Record(commands.Cog):
             await ctx.respond("❌ 目前沒有正在進行的錄音！", ephemeral=True)
             return
         
+        await ctx.defer()
+        
         try:
             vc = self.connections[ctx.guild.id]
             
