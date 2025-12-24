@@ -8,6 +8,7 @@ import shutil
 import io
 from pydub import AudioSegment
 import time
+from functools import partial
 import asyncio
 
 class TimedWaveSink(sinks.WaveSink):
@@ -43,12 +44,16 @@ class Record(commands.Cog):
     async def finished_callback(self, sink: sinks.WaveSink, *args):
         try:
             channel = self.bot.get_channel(utils.WORKER_CHANNEL_ID)
-            self.logger.info("開始處理錄音檔案並轉換為 MP3...")
+            self.logger.info("開始處理錄音檔案並轉換為 MP3 (非同步模式)...")
 
             timestamp = datetime.now().strftime("%Y%m%d_%H%M")
             combined = AudioSegment.silent(duration=0)
             users_with_audio = []
             
+            # 定義同步轉檔函數以供執行緒調用
+            def export_audio_sync(audio_seg, path, fmt, br):
+                return audio_seg.export(path, format=fmt, bitrate=br)
+
             for user_id, audio in sink.audio_data.items():
                 user = self.bot.get_user(user_id)
                 if not user: continue
@@ -67,11 +72,14 @@ class Record(commands.Cog):
                     # 取得時間偏移量
                     offset_ms = int(sink.user_offsets.get(user_id, 0) * 1000)
                     
-                    # 保存個人 MP3 檔案 (節省個人音軌佔用的空間)
-                    filename = f"{user.name}_{user_id}.mp3" # 改為 .mp3
+                    # 設定路徑
+                    filename = f"{user.name}_{user_id}.mp3"
                     filepath = self.recordings_dir / filename
-                    # bitrate 可以設為 128k 或 192k 兼顧品質與大小
-                    audio_segment.export(filepath, format="mp3", bitrate="128k")
+                    
+                    # ✅ 使用 asyncio.to_thread 進行非同步匯出個人音軌
+                    await asyncio.to_thread(
+                        export_audio_sync, audio_segment, filepath, "mp3", "128k"
+                    )
                     
                     users_with_audio.append(user.name)
 
@@ -86,6 +94,7 @@ class Record(commands.Cog):
                     self.logger.error(f"轉換用戶 {user.name} 失敗：{e}")
 
             if not users_with_audio:
+                self.logger.warning("沒有錄製到任何有效音訊。")
                 return
 
             # --- 針對最後合成的檔案進行處理 (裁切雜音) ---
@@ -96,14 +105,23 @@ class Record(commands.Cog):
             # 匯出合成後的 MP3 檔案
             combined_filename = f"開會集合_{timestamp}.mp3"
             combined_path = self.recordings_dir / combined_filename
-            combined.export(combined_path, format="mp3", bitrate="192k") # 合成檔用較高位元率
             
-            # 打包發送
-            shutil.make_archive(str(utils.TMP_DIR/"recordings"), 'zip', self.recordings_dir)
+            # ✅ 使用 asyncio.to_thread 進行非同步匯出合成音軌
+            await asyncio.to_thread(
+                export_audio_sync, combined, combined_path, "mp3", "192k"
+            )
+            
+            # 打包發送 (這部分涉及磁碟 I/O，建議也放入線程處理或保持現狀)
+            await asyncio.to_thread(
+                shutil.make_archive, str(utils.TMP_DIR/"recordings"), 'zip', self.recordings_dir
+            )
+            
             file = discord.File(str(utils.TMP_DIR/"recordings.zip"), filename="recordings.zip")
             await channel.send(f"🎙️ 錄音已轉為 MP3 並處理完成！\n參與者：{', '.join(users_with_audio)}", file=file)
 
+            # 清理臨時目錄
             shutil.rmtree(self.recordings_dir)
+            self.logger.info("錄音處理與發送完成。")
 
         except Exception as e:
             self.logger.error(f"處理錄音檔案時發生嚴重錯誤：{e}", exc_info=True)

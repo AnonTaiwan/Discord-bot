@@ -2,4 +2,7 @@
     "DISCORD_BOT_TOKEN": "Put your discord bot token here",
     "DEVELOPER": [discord_id_1, discord_id_2, ...],
     "FACEBOOK_TOKEN": "Put your facebook access token here"
+    "GEMINI_TOKEN": "Put your Gemini access token here",
+    "GBC_TOKEN": "Put your second facebook access token here",
+    "THREADS_TOKEN": "Put your threads access token here"
 }
