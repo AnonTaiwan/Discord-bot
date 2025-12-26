@@ -119,7 +119,7 @@ class Record(commands.Cog):
             
             # 上傳至 Google Drive
             creds = gdrive.get_detailed_token_info(utils.GOOGLE_CLIENT_ID, utils.GOOGLE_CLIENT_SECRET, utils.GOOGLE_REFRESH_TOKEN)
-            result = gdrive.upload_to_drive(file_path=str(utils.TMP_DIR/"recordings.zip"), folder_id=utils.CONFERENCE_FOLDER_ID, creds=creds)
+            result = gdrive.upload_to_drive(file_path=str(utils.TMP_DIR/"recordings.zip"), folder_id=utils.CONFERENCE_FOLDER_ID, creds=creds, name=f"會議錄音_{timestamp}.zip")
             await channel.send(f"🎙️ 錄音已上傳至 Google Drive！\n下載連結：{result.get('webViewLink')}")
             
             # file = discord.File(str(utils.TMP_DIR/"recordings.zip"), filename="recordings.zip")

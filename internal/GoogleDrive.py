@@ -7,12 +7,12 @@ from googleapiclient.discovery import build, MediaFileUpload
 
 current_dir = Path(__file__).parent
 
-def get_detailed_token_info(client_id=None, client_secret=None, refresh_token=None):
+def get_detailed_token_info(client_id, client_secret, refresh_token):
     # 填入你的憑證資訊
     info = {
-        "client_id": client_id or input("你的_CLIENT_ID: "),
-        "client_secret": client_secret or input("你的_CLIENT_SECRET: "),
-        "refresh_token": refresh_token or input("你的_REFRESH_TOKEN: "),
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "refresh_token": refresh_token,
         "token_uri": "https://oauth2.googleapis.com/token",
     }
 
