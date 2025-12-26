@@ -211,9 +211,9 @@ def upload_to_drive(file_path, folder_id, creds, name=None):
     service = build('drive', 'v3', credentials=creds)
     
     if name is None:
-        name, ext = Path(file_path).stem, "".join(Path("archive.tar.gz").suffixes)
+        name, ext = Path(file_path).stem, "".join(Path(file_path).suffixes)
     else:
-        ext = "".join(Path("archive.tar.gz").suffixes)
+        ext = "".join(Path(file_path).suffixes)
     
     file_metadata = {
         'name': f"{name}{ext}",
