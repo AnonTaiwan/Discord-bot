@@ -233,6 +233,8 @@ def upload_to_drive(file_path, folder_id, creds, name=None):
         fields='id, webViewLink'
     ).execute()
     
+    return file
+
 # --- 使用方式 ---
 # folder_id = get_or_create_folder("我的備份資料夾", creds)
 # 然後再用這個 folder_id 去執行上傳動作
