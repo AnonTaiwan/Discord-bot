@@ -230,7 +230,7 @@ def upload_to_drive(file_path, folder_id, creds, name=None):
         body=file_metadata,
         media_body=media,
         supportsAllDrives=True, # 必須加入此參數
-        fields='id'
+        fields='id, webViewLink'
     ).execute()
     
 # --- 使用方式 ---
