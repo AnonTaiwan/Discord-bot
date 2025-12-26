@@ -10,6 +10,7 @@ from pydub import AudioSegment
 import time
 from functools import partial
 import asyncio
+import internal.GoogleDrive as gdrive
 
 class TimedWaveSink(sinks.WaveSink):
     def __init__(self, *args, **kwargs):
@@ -116,11 +117,17 @@ class Record(commands.Cog):
                 shutil.make_archive, str(utils.TMP_DIR/"recordings"), 'zip', self.recordings_dir
             )
             
-            file = discord.File(str(utils.TMP_DIR/"recordings.zip"), filename="recordings.zip")
-            await channel.send(f"🎙️ 錄音已轉為 MP3 並處理完成！\n參與者：{', '.join(users_with_audio)}", file=file)
+            # 上傳至 Google Drive
+            creds = gdrive.get_detailed_token_info(utils.GOOGLE_CLIENT_ID, utils.GOOGLE_CLIENT_SECRET, utils.GOOGLE_REFRESH_TOKEN)
+            result = gdrive.upload_to_drive(file_path=str(utils.TMP_DIR/"recordings.zip"), folder_id=utils.CONFERENCE_FOLDER_ID, creds=creds)
+            await channel.send(f"🎙️ 錄音已上傳至 Google Drive！\n下載連結：{result.get('webViewLink')}")
+            
+            # file = discord.File(str(utils.TMP_DIR/"recordings.zip"), filename="recordings.zip")
+            # await channel.send(f"🎙️ 錄音已轉為 MP3 並處理完成！\n參與者：{', '.join(users_with_audio)}", file=file)
 
             # 清理臨時目錄
             shutil.rmtree(self.recordings_dir)
+            os.remove(str(utils.TMP_DIR/"recordings.zip"))
             self.logger.info("錄音處理與發送完成。")
 
         except Exception as e:

@@ -8,6 +8,9 @@ pillow>=10.4.0
 google-genai>=1.38.0
 chat_exporter>=2.8.4
 pydub>=0.25.1
+google-api-python-client>=2.100.0
+google-auth-httplib2>=0.1.0
+google-auth-oauthlib>=1.0.0
 # 可選套件 (提升性能)
 lxml>=4.9.0
 html5lib>=1.1

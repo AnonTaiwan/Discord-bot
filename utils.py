@@ -30,6 +30,9 @@ try:
     FACEBOOK_TOKEN = config.get("FACEBOOK_TOKEN", "")
     GBC_TOKEN = config.get("GBC_TOKEN", "")
     THREADS_TOKEN = config.get("THREADS_TOKEN", "")
+    GOOGLE_CLIENT_ID = config.get("GOOGLE_CLIENT_ID", "")
+    GOOGLE_CLIENT_SECRET = config.get("GOOGLE_CLIENT_SECRET", "")
+    GOOGLE_REFRESH_TOKEN = config.get("GOOGLE_REFRESH_TOKEN", "")
 except Exception as e:
     print(f"Error reading {BOT_CONFIG_FILE}: {e}")
 
@@ -99,6 +102,9 @@ MC_MANAGER_ROLE_ID = 1435187605229801572
 SOCIAL_MEDIA_MANAGER_ROLE_ID = 1359938675768557719
 BOT_ROLE_ID = 1354877034991456480
 DEVELOPER_ROLE_ID = 1361994254536409088
+
+# Google Drive 相關配置
+CONFERENCE_FOLDER_ID = '11IjCJgEVHM7Uimzr8QrswknHbb1vBkzo'  # 會議錄音資料夾 ID
 
 # 通用函數
 
