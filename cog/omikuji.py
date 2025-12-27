@@ -67,6 +67,11 @@ class Omikuji(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error sending sticker: {e}")
             return True
+        
+    def __is_exam_days(self) -> bool:
+        now = datetime.now(utils.TIME_ZONE)
+        gsat_month_days = [(1, 17), (1, 18), (1, 19), (5, 16), (5, 17)]
+        return (now.month, now.day) in gsat_month_days
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -91,15 +96,20 @@ class Omikuji(commands.Cog):
             weights = [0.05, 0.1, 0.2, 0.3, 0.2, 0.1, 0.05]  
             result = random.choices(omikuji_results, weights=weights)[0]
 
+            if self.__is_exam_days():
+                result = "Daikichi"
+
+            if await self.__fun_event(ctx):
+                return
+
             PIC_PATH = OMIKUJI_STATIC_DIR / f'{result}.jpg'
             if PIC_PATH.exists():
                 pic = discord.File(str(PIC_PATH), filename=PIC_PATH.name)
-                if await self.__fun_event(ctx):
-                    return
-                await ctx.respond(file=pic, content=f"抽到的籤是：{result}")
+                if self.__is_exam_days():
+                    await ctx.respond(file=pic, content=f"抽到的籤是：{result}，祝各位考生考試順利！")
+                else:
+                    await ctx.respond(file=pic, content=f"抽到的籤是：{result}")
             else:
-                if await self.__fun_event(ctx):
-                    return
                 await ctx.respond(f"抽到的籤是：{result}")
             self.omikuji.append(ctx.author.id)
             self.save_omikuji()
