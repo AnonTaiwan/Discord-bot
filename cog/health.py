@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from curl_cffi import requests
 from datetime import time
+import asyncio
 import utils
 
 health_message_time = [
@@ -54,11 +55,23 @@ class Health(commands.Cog):
             content = '### Health Check:'
 
             for endpoint in health_check_endpoints:
-                response = requests.get(endpoint)
-                if response.status_code == 200:
-                    content += f'\n- ✅ <{endpoint}>'
-                else:
-                    content += f'\n- ❌ <{endpoint}>'
+                # 使用 asyncio.to_thread 避免阻塞事件循環，並添加 5 秒超時
+                try:
+                    response = await asyncio.wait_for(
+                        asyncio.to_thread(requests.get, endpoint, timeout=5),
+                        timeout=10
+                    )
+                    if response.status_code == 200:
+                        content += f'\n- ✅ <{endpoint}>'
+                    else:
+                        content += f'\n- ❌ <{endpoint}> (Status: {response.status_code})'
+                except asyncio.TimeoutError:
+                    content += f'\n- ⏱️ <{endpoint}> (Timeout)'
+                    self.logger.warning(f"Health check timeout for {endpoint}")
+                except Exception as e:
+                    content += f'\n- ❌ <{endpoint}> (Error: {str(e)[:50]})'
+                    self.logger.error(f"Health check error for {endpoint}: {e}")
+                
                 await message.edit(content=content)
         except Exception as e:
             self.logger.error(f"Health check failed: {e}")
