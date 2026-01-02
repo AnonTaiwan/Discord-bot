@@ -17,6 +17,10 @@ GSAT_CAP_remind_time = [
     time(hour=8, minute=0, second=0, tzinfo=utils.TIME_ZONE)
 ]
 
+anon_taiwan_anniversary_remind_time = [
+    time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)
+]
+
 GSAT_day = datetime(year=2026, month=1, day=17, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
 
 GSAT_candidates = [
@@ -29,6 +33,8 @@ CAP_day = datetime(year=2026, month=5, day=16, hour=0, minute=0, second=0, micro
 CAP_candidates = [
     854559172522409994
 ]
+
+anon_taiwan_creation_day = datetime(year=2025, month=1, day=3, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
 
 class RoutineMessage(commands.Cog):
     def __init__(self, bot):
@@ -50,6 +56,9 @@ class RoutineMessage(commands.Cog):
             
         if not self.CAP_remind.is_running():
             self.CAP_remind.start()
+
+        if not self.anon_taiwan_anniversary_remind.is_running():
+            self.anon_taiwan_anniversary_remind.start()
 
     @tasks.loop(time=retouch_picture_remind_time)
     async def retouch_picture_remind(self):
@@ -122,6 +131,21 @@ class RoutineMessage(commands.Cog):
             await channel.send(f"距離 2026 國中教育會考還有 {days} 天，考生加油！\n\n{candidates_mentions}")
         except Exception as e:
             self.logger.error(f"Error reminding CAP candidates: {e}")
+
+    @tasks.loop(time=anon_taiwan_anniversary_remind_time)
+    async def anon_taiwan_anniversary_remind(self):
+        channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+
+        now = datetime.now(utils.TIME_ZONE)
+        if now.month != anon_taiwan_creation_day.month or now.day != anon_taiwan_creation_day.day:
+            return
+
+        anni = now.year - anon_taiwan_creation_day.year
+
+        try:
+            await channel.send(f"今天是阿農台灣成立 {anni} 週年紀念日！🎉🎉🎉\n大家要支持阿農台灣一輩子喔！👊")
+        except Exception as e:
+            self.logger.error(f"Error sending anon taiwan anniversary message: {e}")
 
 def setup(bot: commands.Bot):
     bot.add_cog(RoutineMessage(bot))
