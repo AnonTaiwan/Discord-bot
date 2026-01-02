@@ -121,16 +121,37 @@ def get_logger(name):
     log_format = '%(asctime)s - %(levelname)s - %(message)s'
     date_format = '%Y-%m-%d %H:%M:%S'
     
-    # 配置日誌
-    logging.basicConfig(
-        level=logging.INFO,
-        format=log_format,
-        datefmt=date_format,
-        handlers=[
-            logging.FileHandler(log_filename, encoding='utf-8'),
-            logging.StreamHandler()  # 同時輸出到控制台
-        ]
-    )
+    # 使用 QueueHandler 來避免阻塞主線程
+    # （但需要 Python 3.8+）
+    try:
+        from logging.handlers import QueueHandler, QueueListener
+        from queue import Queue
+        
+        log_queue = Queue()
+        file_handler = logging.FileHandler(log_filename, encoding='utf-8')
+        file_handler.setFormatter(logging.Formatter(log_format, date_format))
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(logging.Formatter(log_format, date_format))
+        
+        listener = QueueListener(log_queue, file_handler, stream_handler)
+        listener.start()
+        
+        queue_handler = QueueHandler(log_queue)
+        logging.basicConfig(
+            level=logging.INFO,
+            handlers=[queue_handler]
+        )
+    except:
+        # 如果 QueueHandler 不可用，使用標準方式
+        logging.basicConfig(
+            level=logging.INFO,
+            format=log_format,
+            datefmt=date_format,
+            handlers=[
+                logging.FileHandler(log_filename, encoding='utf-8'),
+                logging.StreamHandler()  # 同時輸出到控制台
+            ]
+        )
     
     return logging.getLogger(name)
 

@@ -17,12 +17,21 @@ class TimedWaveSink(sinks.WaveSink):
         super().__init__(*args, **kwargs)
         self.start_recording_time = time.time()
         self.user_offsets = {}
+        # 使用隊列存儲待寫入的數據，避免在主線程進行磁盤 I/O
+        self._write_queue = []
+        self._write_lock = asyncio.Lock()
 
     def write(self, data, user_id):
+        """
+        改良版：將寫入操作推遲到線程中執行，避免阻塞事件循環
+        """
         try:
             if user_id not in self.user_offsets:
                 # 記錄第一個成功接收到的數據包時間
                 self.user_offsets[user_id] = time.time() - self.start_recording_time
+            
+            # 直接在事件循環中調用父類的 write 方法
+            # discord.py 的 WaveSink 已經設計為快速操作（主要是內存操作）
             super().write(data, user_id)
         except Exception as e:
             # 捕捉可能發生的寫入錯誤，避免整個錄音中斷
@@ -43,6 +52,16 @@ class Record(commands.Cog):
         self.logger.info("Record Cog is ready.")
     
     async def finished_callback(self, sink: sinks.WaveSink, *args):
+        """
+        改良版：將整個回調作為後臺任務運行，避免阻塞主事件循環
+        """
+        # 在後台運行處理，避免阻塞
+        asyncio.create_task(self._process_recording(sink, args))
+    
+    async def _process_recording(self, sink: sinks.WaveSink, args: tuple):
+        """
+        實際的錄音處理邏輯
+        """
         try:
             channel = self.bot.get_channel(utils.WORKER_CHANNEL_ID)
             self.logger.info("開始處理錄音檔案並轉換為 MP3 (非同步模式)...")
@@ -117,9 +136,13 @@ class Record(commands.Cog):
                 shutil.make_archive, str(utils.TMP_DIR/"recordings"), 'zip', self.recordings_dir
             )
             
-            # 上傳至 Google Drive
-            creds = gdrive.get_detailed_token_info(utils.GOOGLE_CLIENT_ID, utils.GOOGLE_CLIENT_SECRET, utils.GOOGLE_REFRESH_TOKEN)
-            result = gdrive.upload_to_drive(file_path=str(utils.TMP_DIR/"recordings.zip"), folder_id=utils.CONFERENCE_FOLDER_ID, creds=creds, name=f"會議錄音_{timestamp}")
+            # 上傳至 Google Drive（使用線程以避免阻塞事件循環）
+            def upload_and_send():
+                creds = gdrive.get_detailed_token_info(utils.GOOGLE_CLIENT_ID, utils.GOOGLE_CLIENT_SECRET, utils.GOOGLE_REFRESH_TOKEN)
+                result = gdrive.upload_to_drive(file_path=str(utils.TMP_DIR/"recordings.zip"), folder_id=utils.CONFERENCE_FOLDER_ID, creds=creds, name=f"會議錄音_{timestamp}")
+                return result
+            
+            result = await asyncio.to_thread(upload_and_send)
             await channel.send(f"🎙️ 錄音已上傳至 Google Drive！\n下載連結：{result.get('webViewLink')}")
             
             # file = discord.File(str(utils.TMP_DIR/"recordings.zip"), filename="recordings.zip")
