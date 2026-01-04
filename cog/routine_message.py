@@ -13,7 +13,7 @@ fall_remind_time = [
     time(hour=20, minute=0, second=0, tzinfo=utils.TIME_ZONE),
 ]
 
-GSAT_CAP_remind_time = [
+GSAT_AST_CAP_remind_time = [
     time(hour=8, minute=0, second=0, tzinfo=utils.TIME_ZONE)
 ]
 
@@ -22,8 +22,9 @@ anon_taiwan_anniversary_remind_time = [
 ]
 
 GSAT_day = datetime(year=2026, month=1, day=17, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
+AST_day = datetime(year=2026, month=7, day=11, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
 
-GSAT_candidates = [
+GSAT_AST_candidates = [
     741308613993300058,
     838291392047743016
 ]
@@ -100,8 +101,8 @@ class RoutineMessage(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error sending fall remind message: {e}")
 
-    @tasks.loop(time=GSAT_CAP_remind_time)
-    async def GSAT_remind(self):
+    @tasks.loop(time=GSAT_AST_CAP_remind_time)
+    async def GSAT_AST_remind(self):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 
         now = datetime.now(utils.TIME_ZONE)
@@ -109,14 +110,23 @@ class RoutineMessage(commands.Cog):
 
         days = (GSAT_day - today).days
 
+        message = ""
+        if days > 0:
+            message = f"距離 2026 大學學科能力測驗還有 {days} 天，考生加油！"
+        elif -2 <= days <= 0:
+            message = f"今天是 2026 大學學科能力測驗 Day {1 - days}，考生加油！"
+        else:
+            days = (AST_day - today).days
+            message = f"距離 2026 大學入學分科測驗還有 {days} 天，考生加油！"
+
         try:
-            candidates_mentions = "\n".join([f"<@{candidate_id}>" for candidate_id in GSAT_candidates])
+            candidates_mentions = "\n".join([f"<@{candidate_id}>" for candidate_id in GSAT_AST_candidates])
 
-            await channel.send(f"距離 2026 大學學科能力測驗還有 {days} 天，考生加油！\n\n{candidates_mentions}")
+            await channel.send(f"{message}\n\n{candidates_mentions}")
         except Exception as e:
-            self.logger.error(f"Error reminding GSAT candidates: {e}")
+            self.logger.error(f"Error reminding GSAT_AST candidates: {e}")
 
-    @tasks.loop(time=GSAT_CAP_remind_time)
+    @tasks.loop(time=GSAT_AST_CAP_remind_time)
     async def CAP_remind(self):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 
