@@ -49,8 +49,8 @@ class RoutineMessage(commands.Cog):
         if not self.retouch_picture_remind.is_running():
             self.retouch_picture_remind.start()
 
-        if not self.GSAT_remind.is_running():
-            self.GSAT_remind.start()
+        if not self.GSAT_AST_remind.is_running():
+            self.GSAT_AST_remind.start()
         
         if not self.fall_remind.is_running():
             self.fall_remind.start()
