@@ -53,16 +53,20 @@ class Omikuji(commands.Cog):
 
     async def __fun_event(self, ctx: discord.ApplicationContext) -> bool:
         now = datetime.now(utils.TIME_ZONE)
-        if now.month != 10 or now.day != 16:
+        if now.month != 1 or now.day != 8:
             return False
 
         try:
-            PIC_PATH = OMIKUJI_STATIC_DIR / 'pig.jpg'
+            female_suit = [838291392047743016, 1083753847220076574, 741308613993300058, 776808814455685120, 654273506921414656]
+            if ctx.author.id not in female_suit:
+                return False
+            
+            PIC_PATH = OMIKUJI_STATIC_DIR / 'female_suit.png'
             if PIC_PATH.exists():
                 pic = discord.File(str(PIC_PATH), filename=PIC_PATH.name)
-                await ctx.respond(file=pic, content="抽到的籤是：朱大哥\n祝朱大哥生日快樂")
+                await ctx.respond(file=pic, content="抽到的籤是：大吉\n祝長期素食生日快樂")
             else:
-                await ctx.respond(content="抽到的籤是：朱大哥\n祝朱大哥生日快樂")
+                await ctx.respond(content="抽到的籤是：大吉\n祝長期素食生日快樂")
             return True
         except Exception as e:
             self.logger.error(f"Error sending sticker: {e}")
