@@ -26,7 +26,6 @@ AST_day = datetime(year=2026, month=7, day=11, hour=0, minute=0, second=0, micro
 
 GSAT_AST_candidates = [
     741308613993300058,
-    838291392047743016
 ]
 
 CAP_day = datetime(year=2026, month=5, day=16, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
