@@ -43,6 +43,7 @@ class Record(commands.Cog):
         self.logger = utils.get_logger('record')
         self.connections = {}
         self.recording_data = {}
+        self.auto_restart_tasks = {}
         # 確保錄音目錄存在
         self.recordings_dir = utils.TMP_DIR/"recordings"
         os.makedirs(self.recordings_dir, exist_ok=True)
@@ -219,6 +220,14 @@ class Record(commands.Cog):
                 self.finished_callback,
                 ctx.channel
             )
+
+            # 一小時後自動重啟錄音，避免長時間佔用記憶體
+            self._schedule_auto_restart(
+                guild_id=ctx.guild.id,
+                text_channel_id=ctx.channel.id,
+                voice_channel_id=voice_channel.id,
+                delay_seconds=3600
+            )
             
             self.logger.info("錄音已啟動")
             await ctx.edit(content=f"🎙️ 開始錄製 {voice_channel.mention}！\n使用 `/stop` 停止錄製。\n\n⚠️ 注意：請確認頻道內的人有開啟麥克風並說話。")
@@ -253,6 +262,7 @@ class Record(commands.Cog):
             # 斷開連接
             await vc.disconnect()
             del self.connections[ctx.guild.id]
+            self._cancel_auto_restart(ctx.guild.id)
             
             self.logger.info(f"停止錄音，由 {ctx.author.name} 觸發")
             
@@ -281,6 +291,70 @@ class Record(commands.Cog):
                 self.bot.loop.create_task(vc.disconnect())
             except:
                 pass
+
+    def _cancel_auto_restart(self, guild_id: int):
+        task = self.auto_restart_tasks.pop(guild_id, None)
+        if task and not task.done():
+            task.cancel()
+
+    def _schedule_auto_restart(self, guild_id: int, text_channel_id: int, voice_channel_id: int, delay_seconds: int):
+        self._cancel_auto_restart(guild_id)
+        task = asyncio.create_task(
+            self._auto_restart_after(guild_id, text_channel_id, voice_channel_id, delay_seconds)
+        )
+        self.auto_restart_tasks[guild_id] = task
+
+    async def _auto_restart_after(self, guild_id: int, text_channel_id: int, voice_channel_id: int, delay_seconds: int):
+        try:
+            await asyncio.sleep(delay_seconds)
+            await self._restart_recording(guild_id, text_channel_id, voice_channel_id)
+        except asyncio.CancelledError:
+            return
+        except Exception as e:
+            self.logger.error(f"自動重啟錄音時發生錯誤：{e}", exc_info=True)
+
+    async def _restart_recording(self, guild_id: int, text_channel_id: int, voice_channel_id: int):
+        if guild_id not in self.connections:
+            return
+
+        text_channel = self.bot.get_channel(text_channel_id)
+        voice_channel = self.bot.get_channel(voice_channel_id)
+        vc = self.connections.get(guild_id)
+
+        if not voice_channel or not vc:
+            return
+
+        if text_channel:
+            await text_channel.send("⏹️ 自動停止錄音以清空記憶體，正在重新開始...")
+
+        # 停止並斷線，讓 callback 處理檔案與清理
+        try:
+            vc.stop_recording()
+            await vc.disconnect()
+        except Exception as e:
+            self.logger.error(f"自動停止錄音失敗：{e}")
+
+        self.connections.pop(guild_id, None)
+
+        # 重新連線並啟動錄音
+        try:
+            new_vc = await voice_channel.connect(cls=discord.VoiceClient)
+            self.connections[guild_id] = new_vc
+            new_vc.start_recording(
+                TimedWaveSink(),
+                self.finished_callback,
+                text_channel
+            )
+            self.logger.info(f"已自動重啟錄音，頻道：{voice_channel.name}")
+            if text_channel:
+                await text_channel.send("✅ 已重新開始錄音（每小時自動重啟以減少記憶體佔用）")
+
+            # 重新排程下一次自動重啟
+            self._schedule_auto_restart(guild_id, text_channel_id, voice_channel_id, 3600)
+        except Exception as e:
+            self.logger.error(f"自動重啟錄音失敗：{e}", exc_info=True)
+            if text_channel:
+                await text_channel.send(f"❌ 自動重啟錄音失敗：{e}")
             
 def setup(bot):
     bot.add_cog(Record(bot))

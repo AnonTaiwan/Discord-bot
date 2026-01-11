@@ -102,6 +102,7 @@ MC_MANAGER_ROLE_ID = 1435187605229801572
 SOCIAL_MEDIA_MANAGER_ROLE_ID = 1359938675768557719
 BOT_ROLE_ID = 1354877034991456480
 DEVELOPER_ROLE_ID = 1361994254536409088
+MOM_ROLE_ID = 1444384762213961864
 
 # Google Drive 相關配置
 CONFERENCE_FOLDER_ID = '11IjCJgEVHM7Uimzr8QrswknHbb1vBkzo'  # 會議錄音資料夾 ID
@@ -168,6 +169,16 @@ def is_operator(user: discord.Member | discord.User) -> bool:
     if any(role.id == DEVELOPER_ROLE_ID for role in user.roles):
         return True
     if any(role.id == SOCIAL_MEDIA_MANAGER_ROLE_ID for role in user.roles):
+        return True
+    return False
+
+def is_mom(user: discord.Member | discord.User) -> bool:
+    """檢查使用者是否為 MOM"""
+    if not isinstance(user, discord.Member):
+        return False
+    if user.id in DEVELOPER:
+        return True
+    if any(role.id == MOM_ROLE_ID for role in user.roles):
         return True
     return False
 
