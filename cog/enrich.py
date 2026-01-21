@@ -24,7 +24,7 @@ class EnrichCog(commands.Cog):
             return
         
         # 允許管理員用 .force_enrich 強制觸發
-        is_force =  ".enrich" in message.content and utils.is_operator(message.author)
+        is_force =  ".enrich" in message.content and utils.is_developer(message.author)
         
         # 如果不是強制觸發，則檢查條件
         if not is_force:
