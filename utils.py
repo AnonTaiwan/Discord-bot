@@ -172,6 +172,12 @@ def is_operator(user: discord.Member | discord.User) -> bool:
         return True
     return False
 
+def is_admin(user: discord.Member | discord.User) -> bool:
+    """檢查使用者是否為管理員"""
+    if not isinstance(user, discord.Member):
+        return False
+    return bool(user.guild_permissions and user.guild_permissions.administrator)
+
 def is_mom(user: discord.Member | discord.User) -> bool:
     """檢查使用者是否為 MOM"""
     if not isinstance(user, discord.Member):
