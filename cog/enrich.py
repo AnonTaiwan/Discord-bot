@@ -75,7 +75,7 @@ class EnrichCog(commands.Cog):
                     # 是開發者且符合「數字 + 內容」格式
                     # group(2) 就是後面的文字
                     mes = dev_match.group(2).strip()
-                elif is_force:
+                elif is_force and not utils.is_developer(message.author):
                     # 一般強行執行模式，直接用全部內容
                     mes = content
                 else:
