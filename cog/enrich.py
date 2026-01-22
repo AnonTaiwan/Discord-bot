@@ -24,7 +24,7 @@ class EnrichCog(commands.Cog):
             return
         
         # 允許管理員用 .force_enrich 強制觸發
-        is_force =  ".enrich" in message.content and utils.is_developer(message.author)
+        is_force =  ".enrich" in message.content and utils.is_operator(message.author)
         
         # 如果不是強制觸發，則檢查條件
         if not is_force:
@@ -43,8 +43,10 @@ class EnrichCog(commands.Cog):
         
         if is_force:
             if len(message.content.split()) != 1:
-                user_id = message.content.split()[1].strip()
-
+                tmp = message.content.split()[1].strip()
+                if tmp.isdigit() and utils.is_developer(message.author):
+                    user_id = str(tmp)
+            
         if user_id in enrich_data and message.content is not None:
             with open("JSON/webhook.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -59,10 +61,13 @@ class EnrichCog(commands.Cog):
                 for msg in enrich_data[user_id]["custom_messages"]:
                     choice.append(msg)
             
-            pattern = r"^\.enrich\s+(\d+)\s+(.*)"
-            match = re.match(pattern, message.content)
-            if match:
+            dev_pattern = r"^\.enrich\s+(\d+)\s+(.*)"
+            oper_pattern = r"^\.enrich\s+(.*)"
+            match = re.match(dev_pattern, message.content)
+            if match and utils.is_developer(message.author):
                 mes = match.group(2).strip()
+            elif re.match(oper_pattern, message.content) and is_force:
+                mes = re.match(oper_pattern, message.content).group(1).strip()
             else:
                 mes = random.choice(choice)
             
