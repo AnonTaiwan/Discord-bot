@@ -61,13 +61,14 @@ class EnrichCog(commands.Cog):
                 for msg in enrich_data[user_id]["custom_messages"]:
                     choice.append(msg)
             
-            dev_pattern = r"^\.enrich\s+(\d+)\s+(.*)"
-            oper_pattern = r"^\.enrich\s+(.*)"
+            dev_pattern = r"^\.enrich\s+(\d+)\s+(.?*)"
+            oper_pattern = r"^\.enrich\s+(.?*)"
             match = re.match(dev_pattern, message.content)
+            oper_match = re.match(oper_pattern, message.content)
             if match and utils.is_developer(message.author):
                 mes = match.group(2).strip()
-            elif re.match(oper_pattern, message.content) and is_force:
-                mes = re.match(oper_pattern, message.content).group(1).strip()
+            elif oper_match and is_force:
+                mes = oper_match.group(1).strip()
             else:
                 mes = random.choice(choice)
             
