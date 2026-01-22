@@ -61,15 +61,27 @@ class EnrichCog(commands.Cog):
                 for msg in enrich_data[user_id]["custom_messages"]:
                     choice.append(msg)
             
-            dev_pattern = r"^\.enrich\s+(\d+)\s+(.?*)"
-            oper_pattern = r"^\.enrich\s+(.?*)"
-            match = re.match(dev_pattern, message.content)
-            oper_match = re.match(oper_pattern, message.content)
-            if match and utils.is_developer(message.author):
-                mes = match.group(2).strip()
-            elif oper_match and is_force:
-                mes = oper_match.group(1).strip()
+            # 只抓一次
+            main_pattern = r"^\.enrich\s+(.*)"
+            match = re.match(main_pattern, message.content)
+
+            if match:
+                content = match.group(1).strip()
+                
+                # 嘗試解析數字 (開發者模式)
+                dev_match = re.match(r"^(\d+)\s+(.*)", content)
+                
+                if dev_match and utils.is_developer(message.author):
+                    # 是開發者且符合「數字 + 內容」格式
+                    # group(2) 就是後面的文字
+                    mes = dev_match.group(2).strip()
+                elif is_force:
+                    # 一般強行執行模式，直接用全部內容
+                    mes = content
+                else:
+                    mes = random.choice(choice)
             else:
+                # 連 .enrich 都沒對上
                 mes = random.choice(choice)
             
             if user_id in data:
