@@ -74,11 +74,6 @@ class RoutineMessage(commands.Cog):
             await channel.send(message)
         except Exception as e:
             self.logger.error(f"Error sending retouch picture remind message: {e}")
-
-        if now.hour == 14:
-            message = "每日監督霧冥修圖 (1/2)"
-        elif now.hour == 20:
-            message = "每日監督霧冥修圖 (2/2)"
         
         try:
             await channel.send(message)
