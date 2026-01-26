@@ -103,6 +103,7 @@ SOCIAL_MEDIA_MANAGER_ROLE_ID = 1359938675768557719
 BOT_ROLE_ID = 1354877034991456480
 DEVELOPER_ROLE_ID = 1361994254536409088
 MOM_ROLE_ID = 1444384762213961864
+WORKER_ROLE_ID = 1447639989126037534
 
 # Google Drive 相關配置
 CONFERENCE_FOLDER_ID = '11IjCJgEVHM7Uimzr8QrswknHbb1vBkzo'  # 會議錄音資料夾 ID
@@ -178,15 +179,11 @@ def is_admin(user: discord.Member | discord.User) -> bool:
         return False
     return bool(user.guild_permissions and user.guild_permissions.administrator)
 
-def is_mom(user: discord.Member | discord.User) -> bool:
-    """檢查使用者是否為 MOM"""
+def is_worker(user: discord.Member | discord.User) -> bool:
+    """檢查使用者是否為工作人員"""
     if not isinstance(user, discord.Member):
         return False
-    if user.id in DEVELOPER:
-        return True
-    if any(role.id == MOM_ROLE_ID for role in user.roles):
-        return True
-    return False
+    return any(role.id == WORKER_ROLE_ID for role in user.roles)
 
 def is_in_bot_playground(channel: discord.TextChannel) -> bool:
     """檢查使用者是否在 Bot Playground 頻道"""

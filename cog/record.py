@@ -336,25 +336,48 @@ class Record(commands.Cog):
 
         self.connections.pop(guild_id, None)
 
-        # 重新連線並啟動錄音
-        try:
-            new_vc = await voice_channel.connect(cls=discord.VoiceClient)
-            self.connections[guild_id] = new_vc
-            new_vc.start_recording(
-                TimedWaveSink(),
-                self.finished_callback,
-                text_channel
-            )
-            self.logger.info(f"已自動重啟錄音，頻道：{voice_channel.name}")
-            if text_channel:
-                await text_channel.send("✅ 已重新開始錄音（每小時自動重啟以減少記憶體佔用）")
+        # 等待 Discord 連接完全關閉
+        self.logger.info("等待 Discord 連接完全關閉...")
+        await asyncio.sleep(5)
 
-            # 重新排程下一次自動重啟
-            self._schedule_auto_restart(guild_id, text_channel_id, voice_channel_id, 3600)
-        except Exception as e:
-            self.logger.error(f"自動重啟錄音失敗：{e}", exc_info=True)
-            if text_channel:
-                await text_channel.send(f"❌ 自動重啟錄音失敗：{e}")
+        # 重新連線並啟動錄音（最多重試 3 次）
+        for attempt in range(3):
+            try:
+                self.logger.info(f"嘗試重新連接語音頻道（第 {attempt + 1} 次）...")
+                new_vc = await voice_channel.connect(cls=discord.VoiceClient)
+                
+                # 等待連接穩定
+                for i in range(5):
+                    if new_vc.is_connected():
+                        break
+                    await asyncio.sleep(1)
+                    self.logger.info(f"等待語音連線穩定中... ({i+1})")
+
+                if not new_vc.is_connected():
+                    raise Exception("語音連線超時，無法啟動錄音。")
+                
+                self.connections[guild_id] = new_vc
+                new_vc.start_recording(
+                    TimedWaveSink(),
+                    self.finished_callback,
+                    text_channel
+                )
+                self.logger.info(f"已自動重啟錄音，頻道：{voice_channel.name}")
+                if text_channel:
+                    await text_channel.send("✅ 已重新開始錄音（每小時自動重啟以減少記憶體佔用）")
+
+                # 重新排程下一次自動重啟
+                self._schedule_auto_restart(guild_id, text_channel_id, voice_channel_id, 3600)
+                return  # 成功後離開
+                
+            except Exception as e:
+                self.logger.error(f"自動重啟錄音失敗（第 {attempt + 1} 次）：{e}", exc_info=True)
+                if attempt < 2:  # 如果不是最後一次嘗試
+                    self.logger.info(f"等待 {5 * (attempt + 1)} 秒後重試...")
+                    await asyncio.sleep(5 * (attempt + 1))
+                else:  # 最後一次嘗試失敗
+                    if text_channel:
+                        await text_channel.send(f"❌ 自動重啟錄音失敗（已重試 3 次）：{e}\n請手動使用 `/record start` 重新開始錄音。")
             
 def setup(bot):
     bot.add_cog(Record(bot))
