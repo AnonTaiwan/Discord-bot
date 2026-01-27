@@ -15,46 +15,37 @@ class ManageCog(commands.Cog):
     async def on_ready(self):
         utils.get_logger(__name__).info("ManageCog 已準備就緒")
         
-    async def record_channel_message(self, channel: discord.TextChannel):
-        """在指定頻道記錄訊息"""
-        transcript = await chat_exporter.export(channel, limit=None, tz_info="Asia/Taipei")
-        channel_log_channel = self.bot.get_channel(utils.CHANNEL_LOG_CHANNEL_ID)
-        
-        if channel_log_channel is not None and transcript is not None:
-            file = discord.File(io.BytesIO(transcript.encode()), filename=f"{channel.name}.html")
-            await channel_log_channel.send(file=file)
-        
     command_group = discord.SlashCommandGroup("delete", "刪除相關指令")
         
-    @command_group.command(name="message", description="刪除訊息")
-    async def check_mom(self, ctx: discord.ApplicationContext, message_id: str):
-        """檢查使用者是否為 MOM 或管理員"""
-        if not isinstance(ctx.author, discord.Member):
-            await ctx.respond("此指令僅限伺服器成員使用。", ephemeral=True)
-            return
-        if not utils.is_mom(ctx.author) and not utils.is_operator(ctx.author):
-            await ctx.respond("你沒有使用此指令的權限。", ephemeral=True)
-            return
-        await ctx.defer(ephemeral=True)
+    class CloseConfirmation(discord.ui.View):
+        def __init__(self, channel: discord.TextChannel):
+            super().__init__(timeout=None)
+            self.value = None
+            self.channel = channel
+
+        async def record_channel_message(self, channel: discord.TextChannel):
+            """在指定頻道記錄訊息"""
+            transcript = await chat_exporter.export(channel, limit=None, tz_info="Asia/Taipei")
+            channel_log_channel = self.bot.get_channel(utils.CHANNEL_LOG_CHANNEL_ID)
+            
+            if channel_log_channel is not None and transcript is not None:
+                file = discord.File(io.BytesIO(transcript.encode()), filename=f"{channel.name}.html")
+                await channel_log_channel.send(file=file)
         
-        message_ids = message_id.split()
-        in_valid_ids = [i for i in message_ids if not i.isdigit()]
-        valid_ids = [i for i in message_ids if i.isdigit()]
-        
-        for i in valid_ids:
+        @discord.ui.button(label="確認刪除", style=discord.ButtonStyle.danger)
+        async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
             try:
-                msg_id = int(i)
-                msg = await ctx.channel.fetch_message(msg_id)
-                await msg.delete()
+                await interaction.response.send_message(f"頻道 {self.channel.mention} 將被刪除。", ephemeral=True)
+                await self.record_channel_message(self.channel)
+                await self.channel.delete(reason=f"Channel deleted by {interaction.user} via ManageCog.")
+                
             except Exception as e:
-                valid_ids.remove(i)
-                in_valid_ids.append(i)
-                await ctx.respond(f"無法刪除訊息 ID: {i}，錯誤：{e}", ephemeral=True)
-        
-        if in_valid_ids:
-            await ctx.respond(f"已刪除以下訊息：{'\n'.join(valid_ids)} 以下訊息 ID 無效或無法刪除：{'\n'.join(in_valid_ids)}", ephemeral=True)
-        else:
-            await ctx.respond(f"已刪除以下訊息：{'\n'.join(valid_ids)}", ephemeral=True)
+                utils.get_logger(__name__).error(f"Error exporting channel messages: {e}")
+                await interaction.response.send_message("無法導出工單紀錄。", ephemeral=True)
+                
+        @discord.ui.button(label="取消", style=discord.ButtonStyle.secondary)
+        async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
+            await interaction.response.send_message("已取消刪除頻道。", ephemeral=True)
         
     @command_group.command(name="channel", description="刪除指定頻道")
     async def delete_channel(self, ctx: discord.ApplicationContext, channel: discord.Option(discord.TextChannel, "選擇要刪除的頻道", default=None)): # type: ignore
@@ -66,10 +57,16 @@ class ManageCog(commands.Cog):
             """刪除指定頻道"""
             if channel is None:
                 channel = ctx.channel  # 如果沒有指定頻道，則使用當前頻道
-            await ctx.respond(f"正在記錄頻道 {channel.mention} 的訊息...", ephemeral=True)
-            await self.record_channel_message(channel)
-            await channel.delete(reason=f"由 {ctx.author} 使用指令刪除")
-            self.logger.info(f"✅ {ctx.author.name} 使用指令刪除頻道 {channel.name}。")
+            
+            embed = discord.Embed(
+                title="確認刪除頻道",
+                description=f"你確定要刪除頻道 {channel.mention} 嗎？此操作無法復原。",
+                color=discord.Color.red()
+            )
+            view = self.CloseConfirmation(channel)
+            
+            await ctx.respond(embed=embed, view=view, ephemeral=True)
+            self.logger.info(f"⚠️ {ctx.author.name} 嘗試刪除頻道 {channel.name}，等待確認中。")
         
 def setup(bot):
     bot.add_cog(ManageCog(bot))

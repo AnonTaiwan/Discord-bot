@@ -45,8 +45,8 @@ class RoutineMessage(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        if not self.retouch_picture_remind.is_running():
-            self.retouch_picture_remind.start()
+        # if not self.retouch_picture_remind.is_running():
+        #     self.retouch_picture_remind.start()
 
         # if not self.GSAT_AST_remind.is_running():
         #     self.GSAT_AST_remind.start()
@@ -69,11 +69,6 @@ class RoutineMessage(commands.Cog):
             message = "每日監督椰子修圖 (1/2)"
         elif now.hour == 20:
             message = "每日監督椰子修圖 (2/2)"
-        
-        try:
-            await channel.send(message)
-        except Exception as e:
-            self.logger.error(f"Error sending retouch picture remind message: {e}")
         
         try:
             await channel.send(message)
