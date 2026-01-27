@@ -183,6 +183,8 @@ def is_worker(user: discord.Member | discord.User) -> bool:
     """檢查使用者是否為工作人員"""
     if not isinstance(user, discord.Member):
         return False
+    if is_developer(user):
+        return True
     return any(role.id == WORKER_ROLE_ID for role in user.roles)
 
 def is_in_bot_playground(channel: discord.TextChannel) -> bool:
