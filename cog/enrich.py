@@ -66,7 +66,7 @@ class EnrichCog(commands.Cog):
             # 只抓一次
             main_pattern = r"^\.enrich\s+(.*)"
             match = re.match(main_pattern, message.content)
-
+            
             if match:
                 content = match.group(1).strip()
                 
@@ -74,9 +74,8 @@ class EnrichCog(commands.Cog):
                 dev_match = re.match(r"^(\d+)\s+(.*)", content)
                 
                 if dev_match and utils.is_developer(message.author):
-                    # 是開發者且符合「數字 + 內容」格式
-                    # group(2) 就是後面的文字
                     mes = dev_match.group(2).strip()
+                    
                 elif is_force and not utils.is_developer(message.author):
                     # 一般強行執行模式，直接用全部內容
                     mes = content
@@ -84,10 +83,17 @@ class EnrichCog(commands.Cog):
                     mes = random.choice(choice)
                     
                 if is_force:
-                    files = message.attachments
+                    files = [await attachment.to_file() for attachment in message.attachments]
+                else:
+                    files = None
             else:
                 # 連 .enrich 都沒對上
                 mes = random.choice(choice)
+                
+                if is_force:
+                    files = [await attachment.to_file() for attachment in message.attachments]
+                    mes = None
+                files = None
             
             if user_id in data:
                 webhook_id = data[user_id]["id"]
@@ -96,16 +102,15 @@ class EnrichCog(commands.Cog):
                         webhook = Webhook.partial(webhook_id, webhook_token, session=session)
                         try:
                             await webhook.fetch()
-                            await webhook.send(content=mes, files =files if is_force else None)
+                            await webhook.send(content=mes, files=files)
                             await message.delete() if is_force else None
                             return
                         except:
                             pass
             
             webhook = await self.create_webhook(message.channel, user_id)
-            await webhook.send(content=mes, files=files if is_force else None)
+            await webhook.send(content=mes, files=files)
             await message.delete() if is_force else None
-            return
 
     async def create_webhook(self, channel: discord.TextChannel, userid):
         userid = str(userid)
