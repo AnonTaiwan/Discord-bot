@@ -68,6 +68,11 @@ class EnrichCog(commands.Cog):
             match = re.match(main_pattern, message.content)
             
             if match:
+                if is_force:
+                    files = [await attachment.to_file() for attachment in message.attachments]
+                if message.attachments is None or len(message.attachments) == 0:
+                    files = None
+                
                 content = match.group(1).strip()
                 
                 # 嘗試解析數字 (開發者模式)
@@ -79,13 +84,11 @@ class EnrichCog(commands.Cog):
                 elif is_force and not utils.is_developer(message.author):
                     # 一般強行執行模式，直接用全部內容
                     mes = content
+                elif files:
+                    mes = None
                 else:
                     mes = random.choice(choice)
                     
-                if is_force:
-                    files = [await attachment.to_file() for attachment in message.attachments]
-                else:
-                    files = None
             else:
                 # 連 .enrich 都沒對上
                 mes = random.choice(choice)
