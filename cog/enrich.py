@@ -82,6 +82,9 @@ class EnrichCog(commands.Cog):
                     mes = content
                 else:
                     mes = random.choice(choice)
+                    
+                if is_force:
+                    files = message.attachments
             else:
                 # 連 .enrich 都沒對上
                 mes = random.choice(choice)
@@ -93,14 +96,14 @@ class EnrichCog(commands.Cog):
                         webhook = Webhook.partial(webhook_id, webhook_token, session=session)
                         try:
                             await webhook.fetch()
-                            await webhook.send(content=mes)
+                            await webhook.send(content=mes, files =files if is_force else None)
                             await message.delete() if is_force else None
                             return
                         except:
                             pass
             
             webhook = await self.create_webhook(message.channel, user_id)
-            await webhook.send(content=mes)
+            await webhook.send(content=mes, files=files if is_force else None)
             await message.delete() if is_force else None
             return
 
