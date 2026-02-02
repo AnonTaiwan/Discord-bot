@@ -117,7 +117,7 @@ class EnrichCog(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.author.bot or message.channel.id == utils.WORK_TTS_CHANNEL_ID or message.channel.type != discord.ChannelType.text or message.channel.id == utils.TTS_CHANNEL_ID:
+        if message.author.bot or message.channel.id in utils.NO_ENRICH_CHANNEL_IDS:
             return
         
         if random.random() > 0.25:
@@ -216,8 +216,14 @@ class EnrichCog(commands.Cog):
                 return
             
             if webhook_user is not None:
-                webhook_user = next((wu for wu in webhook_users if wu["name"] == webhook_user), None)
-                if webhook_user is None:
+                NotFound = True
+                for u in webhook_users:
+                    if webhook_user in u["name"]:
+                        webhook_user = u["name"]
+                        NotFound = False
+                        break
+                    
+                if NotFound:
                     await ctx.respond("❌ 找不到指定的 Enrich Webhook 用戶，請確認名稱是否正確。", ephemeral=True)
                     return
             else:
