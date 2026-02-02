@@ -48,11 +48,11 @@ class Activity(commands.Cog):
         if not self.enrich_cog:
             print('EnrichCog not found!')
 
-    def __is_playing_league_of_legends(self, member):
-        for activity in member.activities:
-            if activity.type == discord.ActivityType.playing and activity.name == "League of Legends":
-                return True
-        return False
+    # def __is_playing_league_of_legends(self, member):
+    #     for activity in member.activities:
+    #         if activity.type == discord.ActivityType.playing and activity.name == "League of Legends":
+    #             return True
+    #     return False
     
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
@@ -94,48 +94,48 @@ class Activity(commands.Cog):
             await self.channel.send(content = content)
             return
         
-    @commands.Cog.listener()
-    async def on_presence_update(self, before, after):
-        if before.id != JERRY_ID:
-            return
+    # @commands.Cog.listener()
+    # async def on_presence_update(self, before, after):
+    #     if before.id != JERRY_ID:
+    #         return
 
-        if after.status == discord.Status.offline and before.status != discord.Status.offline:
-            self.offline_time = datetime.now()
-            self.logger.info(f"Member {after.name} is offline")
+        # if after.status == discord.Status.offline and before.status != discord.Status.offline:
+        #     self.offline_time = datetime.now()
+        #     self.logger.info(f"Member {after.name} is offline")
 
-            content = f'啊...老公離開了...我會想你的... <@{JERRY_ID}>，這段時間我來繼續為你織紅地毯吧！'
-            await self.enrich_cog.invoke_jerry_webhook(content, str(JERRY_ID))
+        #     content = f'啊...老公離開了...我會想你的... <@{JERRY_ID}>，這段時間我來繼續為你織紅地毯吧！'
+        #     await self.enrich_cog.invoke_jerry_webhook(content, str(JERRY_ID))
             
-            # content = f'偵測到 <@{JERRY_ID}> 下線，紅地毯長度每秒增加 0.5 公尺'
-            # self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
-            # await self.channel.send(content = content)
-            return
+        #     # content = f'偵測到 <@{JERRY_ID}> 下線，紅地毯長度每秒增加 0.5 公尺'
+        #     # self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+        #     # await self.channel.send(content = content)
+        #     return
 
-        if after.status == discord.Status.online and before.status == discord.Status.offline:
-            if self.offline_time:
-                offline_duration = datetime.now() - self.offline_time
-                self.length += offline_duration.total_seconds() * 0.5
-                self.logger.info(f"Member {after.name} was offline for {offline_duration}, length updated to {self.length}")
-                self.__write_config()
+        # if after.status == discord.Status.online and before.status == discord.Status.offline:
+        #     if self.offline_time:
+        #         offline_duration = datetime.now() - self.offline_time
+        #         self.length += offline_duration.total_seconds() * 0.5
+        #         self.logger.info(f"Member {after.name} was offline for {offline_duration}, length updated to {self.length}")
+        #         self.__write_config()
 
-                content = f'歡迎老公 <@{JERRY_ID}> 回來，我等你回來等了 {offline_duration.total_seconds()} 秒呢！\n這段期間我把紅地毯長度延長至 {self.__format_length()} 公尺了喔！'
-                await self.enrich_cog.invoke_jerry_webhook(content, str(JERRY_ID))
+        #         content = f'歡迎老公 <@{JERRY_ID}> 回來，我等你回來等了 {offline_duration.total_seconds()} 秒呢！\n這段期間我把紅地毯長度延長至 {self.__format_length()} 公尺了喔！'
+        #         await self.enrich_cog.invoke_jerry_webhook(content, str(JERRY_ID))
 
-                # content = f'<@{JERRY_ID}> 已上線，共下線 {offline_duration.total_seconds()} 秒，紅地毯長度增加至 {self.__format_length()} 公尺'
-                # self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
-                # await self.channel.send(content = content)
+        #         # content = f'<@{JERRY_ID}> 已上線，共下線 {offline_duration.total_seconds()} 秒，紅地毯長度增加至 {self.__format_length()} 公尺'
+        #         # self.channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+        #         # await self.channel.send(content = content)
 
-        if not self.__is_playing_league_of_legends(before) and self.__is_playing_league_of_legends(after):
-            if after.name not in self.cooldown_list or datetime.now() - self.cooldown_list[after.name] > timedelta(minutes=5):
-                self.logger.info(f"Member {after.name} started playing League of Legends")
-                self.length += 1.5
-                self.logger.info(f"Length updated to {self.length}")
-                self.__write_config()
-                await self.send_message()
+        # if not self.__is_playing_league_of_legends(before) and self.__is_playing_league_of_legends(after):
+        #     if after.name not in self.cooldown_list or datetime.now() - self.cooldown_list[after.name] > timedelta(minutes=5):
+        #         self.logger.info(f"Member {after.name} started playing League of Legends")
+        #         self.length += 1.5
+        #         self.logger.info(f"Length updated to {self.length}")
+        #         self.__write_config()
+        #         await self.send_message()
 
-        if self.__is_playing_league_of_legends(before) and not self.__is_playing_league_of_legends(after):
-            self.logger.info(f"Member {after.name} stopped playing League of Legends")
-            self.cooldown_list[after.name] = datetime.now()
+        # if self.__is_playing_league_of_legends(before) and not self.__is_playing_league_of_legends(after):
+        #     self.logger.info(f"Member {after.name} stopped playing League of Legends")
+        #     self.cooldown_list[after.name] = datetime.now()
 
 def setup(bot: commands.Bot):
     bot.add_cog(Activity(bot))
