@@ -52,9 +52,16 @@ class EnrichCog(commands.Cog):
             return None, None
         
     def __load_json(self, file_path):
-        with open(file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        return data
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return data
+        except FileNotFoundError:
+            self.logger.warning(f"找不到檔案：{file_path}，已回傳空資料。")
+            return {}
+        except json.JSONDecodeError as e:
+            self.logger.error(f"JSON 解析失敗：{file_path}，錯誤：{e}")
+            return {}
     
     def __write_json(self, file_path, data):
         with open(file_path, 'w', encoding='utf-8') as f:
@@ -216,16 +223,16 @@ class EnrichCog(commands.Cog):
                 return
             
             if webhook_user is not None:
-                NotFound = True
+                selected_user = None
                 for u in webhook_users:
                     if webhook_user in u["name"]:
-                        webhook_user = u["name"]
-                        NotFound = False
+                        selected_user = u
                         break
-                    
-                if NotFound:
+                
+                if selected_user is None:
                     await ctx.respond("❌ 找不到指定的 Enrich Webhook 用戶，請確認名稱是否正確。", ephemeral=True)
                     return
+                webhook_user = selected_user
             else:
                 webhook_user = self.__choose_webhook_user(webhook_users) # 選擇一個 webhook 用戶，返回 name, avatar_base64, custom_messages 的 dict
             
