@@ -7,6 +7,7 @@ import json
 import base64
 import aiohttp
 import re
+import io
 from discord import Webhook
 
 class EnrichCog(commands.Cog):
@@ -59,7 +60,7 @@ class EnrichCog(commands.Cog):
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
     
-    async def __send_webhook(self, channel: discord.TextChannel, user_id: str, webhook_user: dict, mes: str, files: list = None):
+    async def __send_webhook(self, channel: discord.TextChannel, user_id: str, webhook_user: dict, mes: str, files = None):
         data = self.__load_json("JSON/webhook.json")
             
         webhook_id, webhook_token = self.__get_webhook_data(user_id, webhook_user["name"], str(channel.id), data)
@@ -68,14 +69,14 @@ class EnrichCog(commands.Cog):
                     webhook = Webhook.partial(webhook_id, webhook_token, session=session)
                     try:
                         await webhook.fetch()
-                        await webhook.send(content=mes, files=files if files else None)
+                        await webhook.send(content=mes, files=files)
                         return
                     except:
                         pass
             return
         
         webhook = await self.create_webhook(channel, user_id, webhook_user, data)
-        await webhook.send(content=mes, files=files if files else None)
+        await webhook.send(content=mes, files=files)
         pass
     
     async def create_webhook(self, channel: discord.TextChannel, userid, webhook_user, webhook_datas: dict):
@@ -141,7 +142,7 @@ class EnrichCog(commands.Cog):
             choice = self.__get_messages(webhook_user, gender)
             mes = random.choice(choice)
             
-            await self.__send_webhook(message, user_id, webhook_user, mes)
+            await self.__send_webhook(message.channel, user_id, webhook_user, mes)
 
     @commands.Cog.listener()
     async def on_presence_update(self, before: discord.Member, after: discord.Member):
@@ -226,12 +227,17 @@ class EnrichCog(commands.Cog):
             files = None
             mes = ""
             
+            # 處理附件：將 Attachment 轉換為 File
+            attachments = [f for f in [file1, file2, file3] if f is not None]
+            if attachments:
+                files = []
+                for attachment in attachments:
+                    file_data = await attachment.read()
+                    files.append(discord.File(fp=io.BytesIO(file_data), filename=attachment.filename))
+            
             if content is None and file1 is None and file2 is None and file3 is None:
                 choice = self.__get_messages(webhook_user, enrich_data[user_id].get("gender", "Male"))
                 mes = random.choice(choice)
-                
-            if file1 is not None or file2 is not None or file3 is not None:
-                files = [f for f in [file1, file2, file3] if f is not None]
                 
             if content is not None:
                 mes = content
