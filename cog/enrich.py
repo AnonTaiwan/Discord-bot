@@ -181,7 +181,7 @@ class EnrichCog(commands.Cog):
                         file2 : discord.Option(discord.Attachment, "選擇要發送的檔案", default=None), # type: ignore
                         file3 : discord.Option(discord.Attachment, "選擇要發送的檔案", default=None), # type: ignore
                         user : discord.Option(discord.Member, "選擇用戶", default=None), # type: ignore
-                        webhook_user : discord.Option(str, "選擇 webhook 用戶", default=None)) # type: ignore
+                        webhook_user : discord.Option(str, "選擇 webhook 用戶", default=None)): # type: ignore
         if not utils.is_worker(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name}嘗試使用 Enrich 發送訊息指令，但沒有權限。")
