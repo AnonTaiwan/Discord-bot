@@ -221,10 +221,13 @@ class EnrichCog(commands.Cog):
                     return
             else:
                 webhook_user = self.__choose_webhook_user(webhook_users) # 選擇一個 webhook 用戶，返回 name, avatar_base64, custom_messages 的 dict
-                
+            
+            # 初始化變數
+            files = None
+            mes = ""
+            
             if content is None and file1 is None and file2 is None and file3 is None:
                 choice = self.__get_messages(webhook_user, enrich_data[user_id].get("gender", "Male"))
-                files = None
                 mes = random.choice(choice)
                 
             if file1 is not None or file2 is not None or file3 is not None:
@@ -232,8 +235,6 @@ class EnrichCog(commands.Cog):
                 
             if content is not None:
                 mes = content
-            else:
-                mes = ""
             
             await self.__send_webhook(channel, user_id, webhook_user, mes, files)
             
