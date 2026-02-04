@@ -124,7 +124,7 @@ class EnrichCog(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.author.bot or message.channel.id in utils.NO_ENRICH_CHANNEL_IDS:
+        if message.author.bot or message.channel.id in utils.NO_ENRICH_CHANNEL_IDS or message.channel.type != discord.ChannelType.text:
             return
         
         if random.random() > 0.25:
