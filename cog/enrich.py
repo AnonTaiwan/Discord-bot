@@ -80,11 +80,10 @@ class EnrichCog(commands.Cog):
                         return
                     except:
                         pass
-            return
         
         webhook = await self.create_webhook(channel, user_id, webhook_user, data)
         await webhook.send(content=mes, files=files)
-        pass
+        return
     
     async def create_webhook(self, channel: discord.TextChannel, userid, webhook_user, webhook_datas: dict):
         userid = str(userid)
