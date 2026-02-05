@@ -312,15 +312,8 @@ class Record(commands.Cog):
             await vc.disconnect()
             del self.connections[ctx.guild.id]
             
-            # 清理此次錄音的目錄和時間戳記錄
-            if ctx.guild.id in self.recording_timestamps:
-                try:
-                    session_dir = self.recordings_dir / self.recording_timestamps[ctx.guild.id]
-                    shutil.rmtree(session_dir)
-                    self.logger.info(f"已刪除錄音目錄：{session_dir}")
-                except Exception as e:
-                    self.logger.warning(f"刪除錄音目錄時發生警告：{e}")
-                del self.recording_timestamps[ctx.guild.id]
+            # 注意：不在此處刪除錄音目錄，應該由 _process_recording 在完成處理後刪除
+            # 這樣可以確保非同步回調能夠順利存取錄音文件
             
             self.logger.info(f"停止錄音，由 {ctx.author.name} 觸發")
             
