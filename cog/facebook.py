@@ -19,7 +19,7 @@ class ConfirmButton(discord.ui.View):
         self.link = link
         self.type = type
         self.original_msg = original_msg
-        self.posted_id = []
+        
 
     async def __send_comments(self):
         url = f"https://graph.facebook.com/v23.0/{self.post_id}/comments"
@@ -102,6 +102,7 @@ class NewFB(commands.Cog):
         self.comment_unchecked_posts = utils.PriorityQueue(self.__save_facebook_record)
         self.gbc_latest = []
         self.logger = utils.get_logger(__name__)
+        self.posted_id = []
         self.logger.info("cog/facebook.py: 日誌系統初始化完成")
 
         utils.check_exist_or_create_json(self.logger, RECORD_FILE, {"comment_unchecked_posts": []})
