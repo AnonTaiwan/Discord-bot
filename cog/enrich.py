@@ -123,7 +123,7 @@ class EnrichCog(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.author.bot or message.channel.id in utils.NO_ENRICH_CHANNEL_IDS or message.channel.type != discord.ChannelType.text:
+        if message.author.bot or message.channel.id not in utils.ENRICH_CHANNEL_IDS or message.channel.type != discord.ChannelType.text:
             return
         
         if random.random() > 0.25:
@@ -203,6 +203,10 @@ class EnrichCog(commands.Cog):
         """透過 Enrich Webhook 發送訊息"""
         if channel is None:
             channel = ctx.channel  # 如果沒有指定頻道，則使用當前頻道
+        
+        if channel.type != discord.ChannelType.text:
+            await ctx.respond("❌ 只能選擇文字頻道。", ephemeral=True)
+            return
         
         enrich_data = self.__load_json("JSON/enrich.json")
         
