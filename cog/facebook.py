@@ -19,7 +19,7 @@ class ConfirmButton(discord.ui.View):
         self.link = link
         self.type = type
         self.original_msg = original_msg
-        self.posted_id = set() 
+        self.posted_id = []
 
     async def __send_comments(self):
         url = f"https://graph.facebook.com/v23.0/{self.post_id}/comments"
@@ -177,7 +177,7 @@ class NewFB(commands.Cog):
         message = bytes(message, 'utf-8').decode(encoding="utf-8", errors="ignore")
         if len(message) > 1024:
             message = message[:1021] + "..."
-        if data.get('id', None) in self.posted_id:
+        if data.get('id') is not None and data.get('id') in self.posted_id:
             self.logger.info(f"貼文 {data['id']} 已經發送過通知，跳過。")
             return
         
@@ -192,7 +192,9 @@ class NewFB(commands.Cog):
         else:
             file = None
         await self.__send_update_message(data.get('id', None), embed, file)
-        self.posted_id.add(data.get('id', None))
+        self.posted_id.append(data.get('id') if data.get('id') else '')
+        if len(self.posted_id) > 10:
+            self.posted_id.pop(0)
     
     async def __send_reel_update_message(self, reel):
         reel_data_id = reel['id']

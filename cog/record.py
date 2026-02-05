@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import sinks
 from datetime import datetime
 import utils
@@ -20,6 +20,9 @@ class TimedWaveSink(sinks.WaveSink):
         # 使用隊列存儲待寫入的數據，避免在主線程進行磁盤 I/O
         self._write_queue = []
         self._write_lock = asyncio.Lock()
+        self.record_guild = None
+        self.record_channel = None
+        
 
     def write(self, data, user_id):
         """
@@ -43,10 +46,11 @@ class Record(commands.Cog):
         self.logger = utils.get_logger('record')
         self.connections = {}
         self.recording_data = {}
-        self.auto_restart_tasks = {}
         # 確保錄音目錄存在
         self.recordings_dir = utils.TMP_DIR/"recordings"
         os.makedirs(self.recordings_dir, exist_ok=True)
+        # 追蹤各 guild 的錄音時間戳和目錄
+        self.recording_timestamps = {}  # {guild_id: timestamp}
         
     @commands.Cog.listener()
     async def on_ready(self):
@@ -68,6 +72,19 @@ class Record(commands.Cog):
             self.logger.info("開始處理錄音檔案並轉換為 MP3 (非同步模式)...")
 
             timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+            
+            # 使用對應的 guild 錄音目錄
+            guild_id = None
+            for gid, ts in self.recording_timestamps.items():
+                # 找到對應的 guild（假設同時只有一個在錄音）
+                guild_id = gid
+                break
+            
+            if guild_id:
+                session_dir = self.recordings_dir / self.recording_timestamps[guild_id]
+            else:
+                session_dir = self.recordings_dir / timestamp
+                
             combined = AudioSegment.silent(duration=0)
             users_with_audio = []
             
@@ -95,7 +112,7 @@ class Record(commands.Cog):
                     
                     # 設定路徑
                     filename = f"{user.name}_{user_id}.mp3"
-                    filepath = self.recordings_dir / filename
+                    filepath = session_dir / filename
                     
                     # ✅ 使用 asyncio.to_thread 進行非同步匯出個人音軌
                     await asyncio.to_thread(
@@ -116,6 +133,13 @@ class Record(commands.Cog):
 
             if not users_with_audio:
                 self.logger.warning("沒有錄製到任何有效音訊。")
+                # 清理空的會話目錄
+                if guild_id and guild_id in self.recording_timestamps:
+                    try:
+                        shutil.rmtree(session_dir)
+                    except:
+                        pass
+                    del self.recording_timestamps[guild_id]
                 return
 
             # --- 針對最後合成的檔案進行處理 (裁切雜音) ---
@@ -125,7 +149,7 @@ class Record(commands.Cog):
 
             # 匯出合成後的 MP3 檔案
             combined_filename = f"開會集合_{timestamp}.mp3"
-            combined_path = self.recordings_dir / combined_filename
+            combined_path = session_dir / combined_filename
             
             # ✅ 使用 asyncio.to_thread 進行非同步匯出合成音軌
             await asyncio.to_thread(
@@ -133,14 +157,15 @@ class Record(commands.Cog):
             )
             
             # 打包發送 (這部分涉及磁碟 I/O，建議也放入線程處理或保持現狀)
+            zip_path = utils.TMP_DIR/f"recordings_{self.recording_timestamps.get(guild_id, timestamp)}"
             await asyncio.to_thread(
-                shutil.make_archive, str(utils.TMP_DIR/"recordings"), 'zip', self.recordings_dir
+                shutil.make_archive, str(zip_path), 'zip', str(session_dir)
             )
             
             # 上傳至 Google Drive（使用線程以避免阻塞事件循環）
             def upload_and_send():
                 creds = gdrive.get_detailed_token_info(utils.GOOGLE_CLIENT_ID, utils.GOOGLE_CLIENT_SECRET, utils.GOOGLE_REFRESH_TOKEN)
-                result = gdrive.upload_to_drive(file_path=str(utils.TMP_DIR/"recordings.zip"), folder_id=utils.CONFERENCE_FOLDER_ID, creds=creds, name=f"會議錄音_{timestamp}")
+                result = gdrive.upload_to_drive(file_path=str(zip_path) + ".zip", folder_id=utils.CONFERENCE_FOLDER_ID, creds=creds, name=f"會議錄音_{timestamp}")
                 return result
             
             result = await asyncio.to_thread(upload_and_send)
@@ -150,12 +175,17 @@ class Record(commands.Cog):
             # await channel.send(f"🎙️ 錄音已轉為 MP3 並處理完成！\n參與者：{', '.join(users_with_audio)}", file=file)
 
             # 清理臨時目錄
-            shutil.rmtree(self.recordings_dir)
-            os.remove(str(utils.TMP_DIR/"recordings.zip"))
+            shutil.rmtree(session_dir)
+            os.remove(str(zip_path) + ".zip")
+            if guild_id and guild_id in self.recording_timestamps:
+                del self.recording_timestamps[guild_id]
             self.logger.info("錄音處理與發送完成。")
 
         except Exception as e:
             self.logger.error(f"處理錄音檔案時發生嚴重錯誤：{e}", exc_info=True)
+            # 確保清理記錄
+            for guild_id in list(self.recording_timestamps.keys()):
+                del self.recording_timestamps[guild_id]
             
     command_group = discord.SlashCommandGroup("record", "語音錄製相關指令")
             
@@ -173,7 +203,14 @@ class Record(commands.Cog):
             return
         
         voice_channel = ctx.author.voice.channel
-        os.makedirs(self.recordings_dir, exist_ok=True)
+        
+        # 建立此次錄音的時間戳目錄
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        session_dir = self.recordings_dir / timestamp
+        os.makedirs(session_dir, exist_ok=True)
+        self.recording_timestamps[ctx.guild.id] = timestamp
+        
+        self.logger.info(f"為 guild {ctx.guild.id} 建立錄音目錄：{session_dir}")
         
         # 檢查是否已經在錄音
         if ctx.guild.id in self.connections:
@@ -220,14 +257,12 @@ class Record(commands.Cog):
                 self.finished_callback,
                 ctx.channel
             )
-
-            # 一小時後自動重啟錄音，避免長時間佔用記憶體
-            self._schedule_auto_restart(
-                guild_id=ctx.guild.id,
-                text_channel_id=ctx.channel.id,
-                voice_channel_id=voice_channel.id,
-                delay_seconds=3600
-            )
+            
+            self.record_guild = ctx.guild
+            self.record_channel = ctx.channel
+            
+            if not self.restart_recording.is_running():
+                self.restart_recording.start()
             
             self.logger.info("錄音已啟動")
             await ctx.edit(content=f"🎙️ 開始錄製 {voice_channel.mention}！\n使用 `/stop` 停止錄製。\n\n⚠️ 注意：請確認頻道內的人有開啟麥克風並說話。")
@@ -235,6 +270,14 @@ class Record(commands.Cog):
             
         except Exception as e:
             self.logger.error(f"開始錄音時發生錯誤：{e}")
+            # 清理已建立的目錄
+            if ctx.guild.id in self.recording_timestamps:
+                try:
+                    session_dir = self.recordings_dir / self.recording_timestamps[ctx.guild.id]
+                    shutil.rmtree(session_dir)
+                except:
+                    pass
+                del self.recording_timestamps[ctx.guild.id]
             await ctx.respond(f"❌ 開始錄音時發生錯誤：{e}", ephemeral=True)
     
     @command_group.command(name="stop", description="停止錄製語音頻道")
@@ -253,16 +296,31 @@ class Record(commands.Cog):
         await ctx.defer()
         
         try:
+            
+            if self.restart_recording.is_running():
+                self.restart_recording.cancel()
+            
             vc = self.connections[ctx.guild.id]
             
             # 停止錄音
             vc.stop_recording()
             await ctx.respond("⏹️ 正在停止錄音並處理檔案...")
+            self.record_guild = None
+            self.record_channel = None
             
             # 斷開連接
             await vc.disconnect()
             del self.connections[ctx.guild.id]
-            self._cancel_auto_restart(ctx.guild.id)
+            
+            # 清理此次錄音的目錄和時間戳記錄
+            if ctx.guild.id in self.recording_timestamps:
+                try:
+                    session_dir = self.recordings_dir / self.recording_timestamps[ctx.guild.id]
+                    shutil.rmtree(session_dir)
+                    self.logger.info(f"已刪除錄音目錄：{session_dir}")
+                except Exception as e:
+                    self.logger.warning(f"刪除錄音目錄時發生警告：{e}")
+                del self.recording_timestamps[ctx.guild.id]
             
             self.logger.info(f"停止錄音，由 {ctx.author.name} 觸發")
             
@@ -273,7 +331,7 @@ class Record(commands.Cog):
     @command_group.command(name="status", description="查看錄音狀態")
     async def recording_status(self, ctx: discord.ApplicationContext):
         """查看當前錄音狀態"""
-        if not self.__is_valid_request(ctx):
+        if not utils.is_operator(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令", ephemeral=True)
             return
         
@@ -291,93 +349,35 @@ class Record(commands.Cog):
                 self.bot.loop.create_task(vc.disconnect())
             except:
                 pass
-
-    def _cancel_auto_restart(self, guild_id: int):
-        task = self.auto_restart_tasks.pop(guild_id, None)
-        if task and not task.done():
-            task.cancel()
-
-    def _schedule_auto_restart(self, guild_id: int, text_channel_id: int, voice_channel_id: int, delay_seconds: int):
-        self._cancel_auto_restart(guild_id)
-        task = asyncio.create_task(
-            self._auto_restart_after(guild_id, text_channel_id, voice_channel_id, delay_seconds)
-        )
-        self.auto_restart_tasks[guild_id] = task
-
-    async def _auto_restart_after(self, guild_id: int, text_channel_id: int, voice_channel_id: int, delay_seconds: int):
-        try:
-            await asyncio.sleep(delay_seconds)
-            await self._restart_recording(guild_id, text_channel_id, voice_channel_id)
-        except asyncio.CancelledError:
-            return
-        except Exception as e:
-            self.logger.error(f"自動重啟錄音時發生錯誤：{e}", exc_info=True)
-
-    async def _restart_recording(self, guild_id: int, text_channel_id: int, voice_channel_id: int):
-        if guild_id not in self.connections:
-            return
-
-        text_channel = self.bot.get_channel(text_channel_id)
-        voice_channel = self.bot.get_channel(voice_channel_id)
-        vc = self.connections.get(guild_id)
-
-        if not voice_channel or not vc:
-            return
-
-        if text_channel:
-            await text_channel.send("⏹️ 自動停止錄音以清空記憶體，正在重新開始...")
-
-        # 停止並斷線，讓 callback 處理檔案與清理
-        try:
-            vc.stop_recording()
-            await vc.disconnect()
-        except Exception as e:
-            self.logger.error(f"自動停止錄音失敗：{e}")
-
-        self.connections.pop(guild_id, None)
-
-        # 等待 Discord 連接完全關閉
-        self.logger.info("等待 Discord 連接完全關閉...")
-        await asyncio.sleep(5)
-
-        # 重新連線並啟動錄音（最多重試 3 次）
-        for attempt in range(3):
+            
+    @tasks.loop(hours=1)
+    async def restart_recording(self):
+        """定時重啟錄音以防止長時間錄音導致的問題"""
+        vc = self.connections.get(self.record_guild.id) if self.record_guild else None
+        if vc and vc.recording:
+            self.logger.info("定時重啟錄音中...")
             try:
-                self.logger.info(f"嘗試重新連接語音頻道（第 {attempt + 1} 次）...")
-                new_vc = await voice_channel.connect(cls=discord.VoiceClient)
+                vc.stop_recording()
+                await asyncio.sleep(2) # 給予足夠時間讓錄音停止
                 
-                # 等待連接穩定
-                for i in range(5):
-                    if new_vc.is_connected():
-                        break
-                    await asyncio.sleep(1)
-                    self.logger.info(f"等待語音連線穩定中... ({i+1})")
-
-                if not new_vc.is_connected():
-                    raise Exception("語音連線超時，無法啟動錄音。")
+                # 重要：確保不會刪除會話目錄
+                # restart 時保持相同的時間戳和目錄，不建立新目錄
+                guild_id = self.record_guild.id
+                if guild_id not in self.recording_timestamps:
+                    # 如果沒有記錄，建立新的時間戳
+                    self.recording_timestamps[guild_id] = datetime.now().strftime("%Y%m%d_%H%M%S")
                 
-                self.connections[guild_id] = new_vc
-                new_vc.start_recording(
+                session_dir = self.recordings_dir / self.recording_timestamps[guild_id]
+                os.makedirs(session_dir, exist_ok=True)
+                
+                vc.start_recording(
                     TimedWaveSink(),
                     self.finished_callback,
-                    text_channel
+                    self.record_channel
                 )
-                self.logger.info(f"已自動重啟錄音，頻道：{voice_channel.name}")
-                if text_channel:
-                    await text_channel.send("✅ 已重新開始錄音（每小時自動重啟以減少記憶體佔用）")
-
-                # 重新排程下一次自動重啟
-                self._schedule_auto_restart(guild_id, text_channel_id, voice_channel_id, 3600)
-                return  # 成功後離開
-                
+                self.logger.info(f"錄音已成功重啟，使用同一會話目錄：{session_dir}")
             except Exception as e:
-                self.logger.error(f"自動重啟錄音失敗（第 {attempt + 1} 次）：{e}", exc_info=True)
-                if attempt < 2:  # 如果不是最後一次嘗試
-                    self.logger.info(f"等待 {5 * (attempt + 1)} 秒後重試...")
-                    await asyncio.sleep(5 * (attempt + 1))
-                else:  # 最後一次嘗試失敗
-                    if text_channel:
-                        await text_channel.send(f"❌ 自動重啟錄音失敗（已重試 3 次）：{e}\n請手動使用 `/record start` 重新開始錄音。")
+                self.logger.error(f"定時重啟錄音時發生錯誤：{e}")
             
 def setup(bot):
     bot.add_cog(Record(bot))
