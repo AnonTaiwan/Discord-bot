@@ -19,6 +19,7 @@ class ConfirmButton(discord.ui.View):
         self.link = link
         self.type = type
         self.original_msg = original_msg
+        self.posted_id = set() 
 
     async def __send_comments(self):
         url = f"https://graph.facebook.com/v23.0/{self.post_id}/comments"
@@ -176,17 +177,22 @@ class NewFB(commands.Cog):
         message = bytes(message, 'utf-8').decode(encoding="utf-8", errors="ignore")
         if len(message) > 1024:
             message = message[:1021] + "..."
+        if data.get('id', None) in self.posted_id:
+            self.logger.info(f"貼文 {data['id']} 已經發送過通知，跳過。")
+            return
         
         embed = discord.Embed(title=f'{name} 更新了新貼文！', url=url, color=0x00ff00)
         embed.add_field(name='貼文連結', value=url, inline=False)
         embed.add_field(name='貼文內容', value=message or "（無內容）", inline=False)
+
         file_path = f"tmp/{data['id']}.jpg"
         if os.path.exists(file_path):
             file = discord.File(file_path, filename=f"{data['id']}.jpg")
             embed.set_image(url=f"attachment://{data['id']}.jpg")
         else:
             file = None
-        await self.__send_update_message(data['id'], embed, file)
+        await self.__send_update_message(data.get('id', None), embed, file)
+        self.posted_id.add(data.get('id', None))
     
     async def __send_reel_update_message(self, reel):
         reel_data_id = reel['id']
@@ -208,6 +214,7 @@ class NewFB(commands.Cog):
         embed.add_field(name='Reel 連結', value=url, inline=False)
         embed.add_field(name='Reel 內容', value=message or "（無內容）", inline=False)
         await self.__send_update_message(reel_data_id, embed, file)
+        self.posted_id.add(reel_data_id)
         
     async def __check_comments(self, post_id, message, post_url):
         message = bytes(message, 'utf-8').decode(encoding="utf-8", errors="ignore")
