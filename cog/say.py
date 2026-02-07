@@ -5,9 +5,9 @@ import utils
 class Say(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/say.py: 日誌系統初始化完成")
+        self.option = ["# 羊 駝 病 毒", "對了！說到機...","咪咪洛德 幹他","掐囉～(∠·ω< )⌒★","要支持阿農台灣一輩子喔 👊"]
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -17,7 +17,8 @@ class Say(commands.Cog):
     async def say(self, ctx: discord.ApplicationContext,
                                message: discord.Option(str, description="輸入訊息", required=True), # type: ignore
                                reply: discord.Option(str, description="選擇要回覆的訊息 ID", required=False, default=None), # type: ignore
-                               channel: discord.Option(discord.TextChannel, description="選擇頻道", required=False)): # type: ignore
+                               channel: discord.Option(discord.TextChannel, description="選擇頻道", required=False), # type: ignore
+                               quick_message: discord.Option(str, description="選擇預設訊息", required=False, choices=self.option)): # type: ignore
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             return
@@ -31,11 +32,15 @@ class Say(commands.Cog):
             return
         
         try:
-            if channel and reply:
-                await ctx.respond("❌ 只能選擇頻道或回覆其中一個。", ephemeral=True)
-
+            if quick_message and message:
+                await ctx.respond("❌ 只能選擇預設訊息或自訂訊息其中一個。", ephemeral=True)
+                return
+            
             if reply is not None:
-                msg = await ctx.channel.fetch_message(int(reply))
+                if channel:
+                    msg = await channel.fetch_message(int(reply))
+                else:
+                    msg = await ctx.channel.fetch_message(int(reply))
                 await msg.reply(message)
                 if msg.channel != ctx.channel:
                     await ctx.respond(f"✅ 已成功回覆訊息。", ephemeral=True)
