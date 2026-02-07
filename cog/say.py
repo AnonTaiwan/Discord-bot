@@ -17,7 +17,7 @@ class Say(commands.Cog):
 
     @discord.slash_command(name="say", description="使用彩奈傳送訊息")
     async def say(self, ctx: discord.ApplicationContext,
-                               message: discord.Option(str, description="輸入訊息", required=True), # type: ignore
+                               message: discord.Option(str, description="輸入訊息", required=False), # type: ignore
                                reply: discord.Option(str, description="選擇要回覆的訊息 ID", required=False, default=None), # type: ignore
                                channel: discord.Option(discord.TextChannel, description="選擇頻道", required=False), # type: ignore
                                quick_message: discord.Option(str, description="選擇預設訊息", required=False, choices=QUICK_MESSAGE_OPTIONS)): # type: ignore
@@ -29,8 +29,12 @@ class Say(commands.Cog):
             await ctx.respond("❌ 只能在 CRYCHIC 伺服器使用此指令。", ephemeral=True)
             return
 
-        if len(message) > 2000:
+        if message and len(message) > 2000:
             await ctx.respond("❌ 訊息長度不能超過 2000 個字元。", ephemeral=True)
+            return
+        
+        if not (quick_message or message):
+            await ctx.respond("❌ 請至少選擇預設訊息或自訂訊息其中一個。", ephemeral=True)
             return
         
         try:
@@ -43,7 +47,7 @@ class Say(commands.Cog):
                     msg = await channel.fetch_message(int(reply))
                 else:
                     msg = await ctx.channel.fetch_message(int(reply))
-                await msg.reply(message)
+                await msg.reply(message if message else quick_message)
                 if msg.channel != ctx.channel:
                     await ctx.respond(f"✅ 已成功回覆訊息。", ephemeral=True)
                 else:
@@ -54,7 +58,7 @@ class Say(commands.Cog):
             if channel is None:
                 channel = ctx.channel
 
-            await channel.send(message)
+            await channel.send(message if message else quick_message)
             if channel != ctx.channel:
                 await ctx.respond(f"✅ 已成功在 {channel.mention} 傳送訊息。", ephemeral=True)
             else:
