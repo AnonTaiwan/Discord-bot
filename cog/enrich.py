@@ -39,9 +39,9 @@ class EnrichCog(commands.Cog):
     
     def __online_remind_message(self, gender, user: discord.Member):
         if gender == "Female":
-            choice = [f"哇！是{user.mention}老婆上線啦！",f"{user.mention}老婆回來了！歡迎回家～",f"{user.mention}老婆上線啦！有什麼需要幫忙的嗎？"]
+            choice = [f"哇！是 {user.mention} 老婆上線啦！",f"{user.mention} 老婆回來了！歡迎回家～",f"{user.mention} 老婆上線啦！有什麼需要幫忙的嗎？"]
         else:
-            choice = [f"哇！是{user.mention}老公上線啦！",f"{user.mention}老公回來了！歡迎回家～",f"{user.mention}老公上線啦！有什麼需要幫忙的嗎？"]
+            choice = [f"哇！是 {user.mention} 老公上線啦！",f"{user.mention} 老公回來了！歡迎回家～",f"{user.mention} 老公上線啦！有什麼需要幫忙的嗎？"]
         return choice
     
     def __get_webhook_data(self, user_id, name, channel_id, webhook_datas):
