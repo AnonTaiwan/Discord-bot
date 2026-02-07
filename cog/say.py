@@ -2,12 +2,14 @@ import discord
 from discord.ext import commands
 import utils
 
+# 預設訊息選項
+QUICK_MESSAGE_OPTIONS = ["# 羊 駝 病 毒", "對了！說到機...","咪咪洛德 幹他","掐囉～(∠·ω< )⌒★","要支持阿農台灣一輩子喔 👊"]
+
 class Say(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/say.py: 日誌系統初始化完成")
-        self.option = ["# 羊 駝 病 毒", "對了！說到機...","咪咪洛德 幹他","掐囉～(∠·ω< )⌒★","要支持阿農台灣一輩子喔 👊"]
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -18,7 +20,7 @@ class Say(commands.Cog):
                                message: discord.Option(str, description="輸入訊息", required=True), # type: ignore
                                reply: discord.Option(str, description="選擇要回覆的訊息 ID", required=False, default=None), # type: ignore
                                channel: discord.Option(discord.TextChannel, description="選擇頻道", required=False), # type: ignore
-                               quick_message: discord.Option(str, description="選擇預設訊息", required=False, choices=self.option)): # type: ignore
+                               quick_message: discord.Option(str, description="選擇預設訊息", required=False, choices=QUICK_MESSAGE_OPTIONS)): # type: ignore
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             return
