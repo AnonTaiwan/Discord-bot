@@ -261,6 +261,7 @@ class EnrichCog(commands.Cog):
             await self.__send_webhook(channel, user_id, webhook_user, mes, files)
             
             await ctx.respond(f"✅ 已透過 Enrich Webhook 在 {channel.mention} 發送訊息。", ephemeral=True)
+            self.logger.info(f"✅ {ctx.author.name} 透過 Enrich Webhook 在 {channel.name} 發送訊息。")
             
     @command_group.command(name="list", description="列出你的 Enrich Webhook 用戶")
     async def enrich_list(self, ctx: discord.ApplicationContext):
