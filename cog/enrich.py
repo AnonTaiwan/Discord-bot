@@ -160,6 +160,9 @@ class EnrichCog(commands.Cog):
             if user_id in enrich_data:
                 if not enrich_data[user_id].get("online_remind", False):
                     return
+                if not enrich_data[user_id].get("status", True):
+                    return
+                
                 if random.random() > 0.25:
                     return
                     
