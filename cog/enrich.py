@@ -319,6 +319,31 @@ class EnrichCog(commands.Cog):
         else:
             await ctx.respond(f"❌ <@{member.id}> 的 Enrich 功能尚未啟用。", ephemeral=True)
             
+    @command_group.command(name="change_online_remind", description="切換上線提醒")
+    async def enrich_change_online_remind(self, ctx: discord.ApplicationContext, member: discord.Member):
+        if not utils.is_developer(ctx.author):
+            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
+            self.logger.warning(f"❌ {ctx.author.name}嘗試使用 Enrich Change Online Remind 指令，但沒有權限。")
+            return
+        
+        await ctx.defer(ephemeral=True)
+        """切換上線提醒"""
+        enrich_data = self.__load_json("JSON/enrich.json")
+        user_id = str(member.id)
+        if user_id in enrich_data:
+            
+            if enrich_data[user_id].get("online_remind", False):
+                enrich_data[user_id]["online_remind"] = False
+                self.__write_json("JSON/enrich.json", enrich_data)
+                await ctx.respond(f"✅ 已關閉 <@{member.id}> 的 Enrich 上線提醒。", ephemeral=True)
+                return
+            else:
+                enrich_data[user_id]["online_remind"] = True
+                self.__write_json("JSON/enrich.json", enrich_data)
+                await ctx.respond(f"✅ 已開啟 <@{member.id}> 的 Enrich 上線提醒。", ephemeral=True)
+        else:
+            await ctx.respond(f"❌ <@{member.id}> 的 Enrich 功能尚未啟用。", ephemeral=True)
+            
             
     # async def invoke_jerry_webhook(self, content: str, user_id: str):
     #     with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
