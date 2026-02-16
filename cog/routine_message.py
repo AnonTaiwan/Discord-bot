@@ -17,7 +17,7 @@ GSAT_AST_CAP_remind_time = [
     time(hour=8, minute=0, second=0, tzinfo=utils.TIME_ZONE)
 ]
 
-anon_taiwan_anniversary_remind_time = [
+midnight = [
     time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)
 ]
 
@@ -131,7 +131,7 @@ class RoutineMessage(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error reminding CAP candidates: {e}")
 
-    @tasks.loop(time=anon_taiwan_anniversary_remind_time)
+    @tasks.loop(time=midnight)
     async def anon_taiwan_anniversary_remind(self):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 
@@ -145,6 +145,19 @@ class RoutineMessage(commands.Cog):
             await channel.send(f"今天是阿農台灣成立 {anni} 週年紀念日！🎉🎉🎉\n大家要支持阿農台灣一輩子喔！👊")
         except Exception as e:
             self.logger.error(f"Error sending anon taiwan anniversary message: {e}")
+
+    @tasks.loop(time=midnight)
+    async def lunar_new_year_remind(self):
+        channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+
+        now = datetime.now(utils.TIME_ZONE)
+        if now.year != 2026 or now.month != 2 or now.day != 17:
+            return
+        
+        try:
+            await channel.send("終於度過除夕來到了大年初一！\n祝大家新年快樂！🎉🎉🎉\n今年也要開開心心的一起當邦豚喔！！！")
+        except Exception as e:
+            self.logger.error(f"Error sending lunar new year message: {e}")
 
 def setup(bot: commands.Bot):
     bot.add_cog(RoutineMessage(bot))
