@@ -22,6 +22,7 @@ class AutoReply(commands.Cog):
             ("不行", 1, False, ["我可不可以吃東西"]),
             ("你再問問看", 1, False, ["你除了說不行，還會說什麼"]),
             ("%s 被 琪涵雅的女裝 可愛死了", 1, True, ["琪涵雅女裝"]),
+            ("%s 被 優打的女裝 可愛死了", 1, True, ["優打女裝", "yoda 女裝", "yoda女裝"]),
             ("要支持阿農台灣一輩子喔 👊", 1, False, ["一輩子"]),
         ]
         self.special_care = [  # (USER ID, reply, probability)
