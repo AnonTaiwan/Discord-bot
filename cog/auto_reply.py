@@ -5,6 +5,10 @@ import utils
 import random
 from pypinyin import pinyin, lazy_pinyin, Style
 
+LLAMA_ID = 870191937913774091
+
+LLAMA_VIRUS_RATIO = 0.003
+
 class AutoReply(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -21,17 +25,30 @@ class AutoReply(commands.Cog):
             ("要支持阿農台灣一輩子喔 👊", 1, False, ["一輩子"]),
         ]
 
+    def __ignore_message(self, message: discord.Message) -> bool:
+        return message.author.id == self.bot.user.id or message.channel.id == utils.TTS_CHANNEL_ID
+    
+    def __is_llama(self, message: discord.Message) -> bool:
+        return message.author.id == LLAMA_ID
+    
+    async def __llama_virus(self, message: discord.Message):
+        if random.random() <= LLAMA_VIRUS_RATIO:
+            try:
+                await message.channel.send("# 羊 駝 病 毒")
+            except Exception as e:
+                self.logger.error(f"無法發送羊駝病毒：{e}")
+
     @commands.Cog.listener()
     async def on_ready(self):
         pass
-
-    def __ignore_message(self, message: discord.Message) -> bool:
-        return message.author.id == self.bot.user.id or message.channel.id == utils.TTS_CHANNEL_ID
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if self.__ignore_message(message):
             return
+
+        if self.__is_llama(message):
+            await self.__llama_virus(message)
 
         content_pinyin = "".join(lazy_pinyin(message.content, style=Style.TONE2, tone_sandhi=True, neutral_tone_with_five=True))
         replied = False
