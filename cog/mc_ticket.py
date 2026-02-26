@@ -214,7 +214,7 @@ class MCTicket(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if not utils.is_operator(message.author):
+        if not utils.is_operator(message.author) or not any(role.id == utils.MC_MANAGER_ROLE_ID for role in message.author.roles):
             return
         if message.content == '!mcticket':
             view = MCTicket.TicketButton()
