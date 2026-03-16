@@ -60,7 +60,7 @@ class AutoReply(commands.Cog):
             for match_str in match_strings:
                 if (match_str in content_pinyin or match_str in message.content) and random.random() <= probability:
                     if tag_user:
-                        reply_msg = reply_msg % (message.author.mention)
+                        reply_msg = reply_msg % (message.author.mention if message.reference is None else (await message.channel.fetch_message(message.reference.message_id)).author.mention)
 
                     if message.reference is not None and not replied:
                         try:
