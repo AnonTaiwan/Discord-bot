@@ -24,6 +24,7 @@ class AutoReply(commands.Cog):
             ("%s 被 琪涵雅的女裝 可愛死了", 1, True, ["琪涵雅女裝"]),
             ("%s 被 優打的女裝 可愛死了", 1, True, ["優打女裝", "yoda 女裝", "yoda女裝"]),
             ("要支持阿農台灣一輩子喔 👊", 1, False, ["一輩子"]),
+            ("%s 你是湊企鵝 你是湊企鵝 你是湊企鵝 你是誰呀？", 1, True, ["湊企鵝"])
         ]
         self.special_care = [  # (USER ID, reply, probability)
             (870191937913774091, "# 羊 駝 病 毒", 0.003),  # llama
