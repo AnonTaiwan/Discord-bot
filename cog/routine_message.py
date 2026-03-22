@@ -81,9 +81,9 @@ class RoutineMessage(commands.Cog):
 
         now = datetime.now(utils.TIME_ZONE)
         if now.hour == 13:
-            message = "每日提醒琪涵雅女裝 (1/2)"
+            message = "每日提醒琪涵雅女裝 (1/2)\n每日提醒優打女裝 (1/2)\n每日提醒高麗菜女裝 (1/2)"
         elif now.hour == 20:
-            message = "每日提醒琪涵雅女裝 (2/2)"
+            message = "每日提醒琪涵雅女裝 (2/2)\n每日提醒優打女裝 (2/2)\n每日提醒高麗菜女裝 (2/2)"
         
         try:
             await channel.send(message)
