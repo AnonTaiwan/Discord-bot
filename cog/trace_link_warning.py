@@ -5,12 +5,12 @@ import asyncio
 import re
 import utils
 
-class InstagramWarning(commands.Cog):
+class TraceLinkWarning(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
         self.logger = utils.get_logger("InstagramTraceLinkWarning")
-        self.logger.info("Instagram Trace Link Warning Cog loaded.")
+        self.logger.info("cog/trace_link_warning.py: 日誌系統初始化完成")
 
         self.FIX_TWEET_USER_ID = 1164651057243238400
 
@@ -103,4 +103,4 @@ class InstagramWarning(commands.Cog):
         await message.channel.send(embed=embed, view=view)
 
 def setup(bot):
-    bot.add_cog(InstagramWarning(bot))
+    bot.add_cog(TraceLinkWarning(bot))
