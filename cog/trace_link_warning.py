@@ -38,9 +38,7 @@ class TraceLinkWarning(commands.Cog):
         
         descriptions = {
             "ig": "此連結帶有追蹤參數 \"igsh\"，可能會洩漏您的個人帳號資料",
-            "fb": """此連結帶有 Facebook 追蹤參數，可能會洩漏您的個人帳號資料
-                     請先使用瀏覽器訪問連結後，再複製轉換過的連結
-                     轉換後的連結不會是 `https://www.facebook.com/share/p/xxx/` 的格式"""
+            "fb": """此連結帶有 Facebook 追蹤參數，可能會洩漏您的個人帳號資料\n請先使用瀏覽器訪問連結後，再複製\n轉換過的連結轉換後的連結不會是 `https://www.facebook.com/share/p/xxx/` 的格式"""
         }
 
         embed = discord.Embed(
