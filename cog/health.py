@@ -13,7 +13,7 @@ health_message_time = [
 
 health_check_endpoints = [
     'https://anontaiwan.meme',
-    'https://urls.anontaiwan.meme',
+    # 'https://urls.anontaiwan.meme'
 ]  # 網頁服務檢查端點
 
 class Health(commands.Cog):
