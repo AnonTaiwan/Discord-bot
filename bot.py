@@ -108,7 +108,7 @@ async def main():
 
             bot.load_extensions()
             # 交由外層 while-loop 負責重啟，避免在關閉時與內部重連產生競態
-            await bot.start(utils.BOT_TOKEN, reconnect=False)
+            await bot.start(utils.BOT_TOKEN)
         finally:
             # 確保正常關閉，避免殘留資源或已關閉的會話被重用
             if not bot.is_closed():
