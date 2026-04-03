@@ -23,6 +23,9 @@ class MyBot(commands.Bot):
         self.remove_command("help")
         self.loop.create_task(self.auto_shutdown_at_midnight())
 
+    async def setup_hook(self):
+        self.load_extensions()
+
     def load_extensions(self):
         for ext in self.initial_extensions:
             try:
@@ -99,20 +102,20 @@ async def main():
 
         setup_tmp_dir()
         
-        # 使用顯式生命週期管理，避免 async context 造成 session 預先關閉
-        bot = MyBot()
-        try:
-            if os.environ.get("CI_RUNNING") == "true":
-                logger.info("CI 環境中，將不會啟動機器人")
-                await asyncio.sleep(30)
+        async with MyBot() as bot:
+            try:
+                if os.environ.get("CI_RUNNING") == "true":
+                    logger.info("CI 環境中，將不會啟動機器人")
+                    await asyncio.sleep(30)
 
-            bot.load_extensions()
-            # 交由外層 while-loop 負責重啟，避免在關閉時與內部重連產生競態
-            await bot.start(utils.BOT_TOKEN)
-        finally:
-            # 確保正常關閉，避免殘留資源或已關閉的會話被重用
-            if not bot.is_closed():
-                await bot.close()
+                async with bot:
+                    bot.load_extensions()
+                    # 交由外層 while-loop 負責重啟，避免在關閉時與內部重連產生競態
+                    await bot.start(utils.BOT_TOKEN)
+            finally:
+                # 確保正常關閉，避免殘留資源或已關閉的會話被重用
+                if not bot.is_closed():
+                    await bot.close()
         await asyncio.sleep(10)  # 確保在重啟前有短暫的延遲
 
 if __name__ == "__main__":
