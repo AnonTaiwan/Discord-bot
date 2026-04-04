@@ -17,11 +17,13 @@ class MyBot(commands.Bot):
                 self.initial_extensions.append(f"cog.{p.stem}")
 
     async def on_ready(self):
-        game = discord.Game("椎名立希")
+        game = discord.Game("🦪")
         print(f"✅ Logged in as {self.user}")
         await self.change_presence(status=discord.Status.online, activity=game)
         self.remove_command("help")
-        self.loop.create_task(self.auto_shutdown_at_midnight())
+        # 防止斷線重連時重複創建 task
+        if not hasattr(self, 'midnight_log_task'):
+            self.midnight_log_task = self.loop.create_task(self.auto_update_log_at_midnight())
 
     async def setup_hook(self):
         self.load_extensions()
@@ -39,16 +41,17 @@ class MyBot(commands.Bot):
             self.unload_extension(ext)
             print(f"✅ 已卸載擴展：{ext}")
 
-    async def auto_shutdown_at_midnight(self):
-        now = datetime.now()
-        # 算到下個 0 點還有幾秒
-        tomorrow = datetime.combine(date.today() + timedelta(days=1), time.min)
-        seconds_to_midnight = (tomorrow - now).seconds
-        print(f"將於 {seconds_to_midnight + 3600*6:,} 秒後自動關機")
-        await asyncio.sleep(seconds_to_midnight + 3600*6)  # 加上 6 小時的偏移
-        print('每日 12 點自動關機')
-        self.__unload_extensions()
-        await self.close()
+    async def auto_update_log_at_midnight(self):
+        while True:
+            now = datetime.now()
+            # 算到下個 0 點還有幾秒
+            tomorrow = datetime.combine(date.today() + timedelta(days=1), time.min)
+            seconds_to_midnight = (tomorrow - now).seconds
+            print(f"將於 {seconds_to_midnight + 5} 秒後更新日誌")
+            await asyncio.sleep(seconds_to_midnight + 5)  # 加上 5 秒的偏移
+            print('每日 12 點已到，正在更新日誌...')
+            setup_daily_logger()  # 更新日誌設定
+            
 
 
 def setup_daily_logger():
