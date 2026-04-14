@@ -27,7 +27,7 @@ class AutoReply(commands.Cog):
             ("%s 被 高麗菜的女裝 可愛死了", 1, True, False, ["高麗菜女裝", "懷勳女裝"]),
             ("要支持阿農台灣一輩子喔 👊", 1, False, False, ["一輩子"]),
             ("%s 你是湊企鵝 你是湊企鵝 你是湊企鵝 你是誰呀？", 1, True, False, ["湊企鵝"]),
-            ("1488052424164905050", 1, False, True, ["薯KI", "薯ki", "薯Ki", "薯kI", "薯 KI", "薯 Ki", "薯 kI", "薯 kI"]),
+            ("1493560382046867546", 1, False, True, ["薯KI", "薯ki", "薯Ki", "薯kI", "薯 KI", "薯 Ki", "薯 kI", "薯 kI"]),
         ]
         self.special_care = [  # (USER ID, reply, probability)
             (870191937913774091, "# 羊 駝 病 毒", 0.003),  # llama
