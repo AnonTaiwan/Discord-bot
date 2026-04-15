@@ -25,7 +25,6 @@ GSAT_day = datetime(year=2026, month=1, day=17, hour=0, minute=0, second=0, micr
 AST_day = datetime(year=2026, month=7, day=11, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
 
 GSAT_AST_candidates = [
-    741308613993300058,
     844613477485772822
 ]
 
@@ -49,8 +48,8 @@ class RoutineMessage(commands.Cog):
         # if not self.retouch_picture_remind.is_running():
         #     self.retouch_picture_remind.start()
 
-        # if not self.GSAT_AST_remind.is_running():
-        #     self.GSAT_AST_remind.start()
+        if not self.GSAT_AST_remind.is_running():
+            self.GSAT_AST_remind.start()
         
         if not self.fall_remind.is_running():
             self.fall_remind.start()
