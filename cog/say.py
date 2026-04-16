@@ -51,7 +51,7 @@ class Say(commands.Cog):
                 if msg.channel != ctx.channel:
                     await ctx.respond(f"✅ 已成功回覆訊息。", ephemeral=True)
                 else:
-                    await ctx.defer()
+                    await ctx.defer(ephemeral = True)
                     await ctx.delete()
                 return
 
@@ -62,7 +62,7 @@ class Say(commands.Cog):
             if channel != ctx.channel:
                 await ctx.respond(f"✅ 已成功在 {channel.mention} 傳送訊息。", ephemeral=True)
             else:
-                await ctx.defer()
+                await ctx.defer(ephemeral = True)
                 await ctx.delete()
         except Exception as e:
             self.logger.error(f"在頻道 {channel.id} 傳送訊息時發生錯誤：{e}")
