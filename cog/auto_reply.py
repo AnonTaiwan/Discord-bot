@@ -55,6 +55,8 @@ class AutoReply(commands.Cog):
                     await ref_msg.reply(stickers=[sticker])
                 else:
                     await ref_msg.reply(reply_msg)
+
+                return
             except Exception as e:
                 self.logger.error(f"無法取得引用訊息：{e}")
 
