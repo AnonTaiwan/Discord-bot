@@ -3,7 +3,7 @@ from discord.ext import commands
 from datetime import datetime, timedelta
 import utils
 import random
-from pypinyin import pinyin, lazy_pinyin, Style
+from pypinyin import lazy_pinyin, Style
 
 LLAMA_ID = 870191937913774091
 
@@ -33,9 +33,10 @@ class AutoReply(commands.Cog):
         self.sticker_reply = [  # (sticker_id, probability, [match substrings])
             ("1493560382046867546", 1, ["薯KI", "薯ki", "薯Ki", "薯kI", "薯\\ KI", "薯\\ Ki", "薯\\ kI", "薯\\ kI"]),
         ]
-        self.special_care = [  # (USER ID, reply, probability)
-            (870191937913774091, "# 羊 駝 病 毒", 0.003),  # llama
-            (271297517432340480, "漢堡煎完沒，沒有還不趕快去煎", 0.003)  # memelord
+        self.special_care = [  # (USER ID, reply, is_media, probability)
+            (870191937913774091, "# 羊 駝 病 毒", False, 0.003),  # llama
+            (271297517432340480, "漢堡煎完沒，沒有還不趕快去煎", False, 0.003),  # memelord
+            (417680398211088384, "static/xiaoan_spam.png", True, 0.003),  # 小安
         ]
 
     def __ignore_message(self, message: discord.Message) -> bool:
@@ -68,10 +69,13 @@ class AutoReply(commands.Cog):
             self.logger.error(f"無法發送訊息：{e}")
     
     async def __special_care(self, message: discord.Message):
-        for (user_id, reply, probability) in self.special_care:
+        for (user_id, reply, is_media, probability) in self.special_care:
             if message.author.id == user_id and random.random() <= probability:
                 try:
-                    await message.channel.send(reply)
+                    if is_media:
+                        await message.channel.send(file=discord.File(reply))
+                    else:
+                        await message.channel.send(reply)
                 except Exception as e:
                     self.logger.error(f"無法發送特殊關懷訊息：{e}")
 
