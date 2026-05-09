@@ -163,7 +163,7 @@ def read_json(logger: logging.Logger, file: Path, default_content: dict = {}) ->
     with open(file, 'r', encoding='utf-8') as f:
         try:
             content = json.load(f)
-            logger.info(f"已成功讀取 {file}")
+            # logger.info(f"已成功讀取 {file}")
         except json.JSONDecodeError as e:
             logger.error(f"讀取 {file} 時發生錯誤：{e}")
             content = default_content

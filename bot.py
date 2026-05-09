@@ -25,9 +25,6 @@ class MyBot(commands.Bot):
         if not hasattr(self, 'midnight_log_task'):
             self.midnight_log_task = self.loop.create_task(self.auto_update_log_at_midnight())
 
-    async def setup_hook(self):
-        self.load_extensions()
-
     def load_extensions(self):
         for ext in self.initial_extensions:
             try:

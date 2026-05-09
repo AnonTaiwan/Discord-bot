@@ -1,6 +1,7 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import utils
+from datetime import datetime
 
 # 預設訊息選項
 QUICK_MESSAGE_OPTIONS = ["屌你老母", "# 羊 駝 病 毒", "對了！說到機...", "咪咪洛德 幹他", "掐囉～(∠·ω< )⌒★", "要支持阿農台灣一輩子喔 👊"]
@@ -10,10 +11,14 @@ class Say(commands.Cog):
         self.bot = bot
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/say.py: 日誌系統初始化完成")
+        scheduled_messages_path = utils.JSON_DIR / "scheduled_messages.json"
+        utils.check_exist_or_create_json(self.logger, scheduled_messages_path)
 
     @commands.Cog.listener()
     async def on_ready(self):
-        pass
+        if not self.check_scheduled_messages.is_running():
+            self.check_scheduled_messages.start()
+            self.logger.info("已啟動排程訊息檢查任務")
 
     @discord.slash_command(name="say", description="使用彩奈傳送訊息")
     async def say(self, ctx: discord.ApplicationContext,
@@ -67,6 +72,55 @@ class Say(commands.Cog):
         except Exception as e:
             self.logger.error(f"在頻道 {channel.id} 傳送訊息時發生錯誤：{e}")
             await ctx.respond("❌ 發生錯誤，無法傳送訊息。", ephemeral=True)
+
+    @discord.slash_command(name="schedule", description="使用彩奈排程傳送訊息")
+    async def schedule(self, ctx: discord.ApplicationContext, message: discord.Option(str, description="輸入訊息", required=True), time: discord.Option(str, description="輸入時間（格式：YYYY-MM-DD HH:MM）", required=True), channel: discord.Option(discord.TextChannel, description="選擇頻道", required=False)): # type: ignore
+        if not utils.is_developer(ctx.author):
+            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
+            return
+        
+        if channel and channel.guild.id != utils.CRYCHIC_GUILD_ID:
+            await ctx.respond("❌ 只能在 CRYCHIC 伺服器使用此指令。", ephemeral=True)
+            return
+
+        if message and len(message) > 2000:
+            await ctx.respond("❌ 訊息長度不能超過 2000 個字元。", ephemeral=True)
+            return
+        
+        t = datetime.strptime(time, "%Y-%m-%d %H:%M")
+        if t < datetime.now():
+            await ctx.respond("❌ 輸入的時間必須在未來。", ephemeral=True)
+            return
+        
+        if channel is None:
+            channel = ctx.channel
+        
+        scheduled_messages = utils.read_json(self.logger, utils.JSON_DIR / "scheduled_messages.json")
+        scheduled_messages.setdefault(time, []).append([message, channel.id])
+        if utils.write_json(self.logger, utils.JSON_DIR / "scheduled_messages.json", scheduled_messages):
+            await ctx.respond(f"✅ 已成功排程訊息將於 {time} 在 {channel.mention} 傳送。", ephemeral=True)
+        else:
+            await ctx.respond("❌ 發生錯誤，無法排程訊息。", ephemeral=True)
+        
+    @tasks.loop(minutes=1)
+    async def check_scheduled_messages(self):
+        scheduled_messages = utils.read_json(self.logger, utils.JSON_DIR / "scheduled_messages.json")
+        now = datetime.now()
+        for time_str, messages in list(scheduled_messages.items()):
+            time = datetime.strptime(time_str, "%Y-%m-%d %H:%M")
+            if time <= now:
+                for message, channel_id in messages:
+                    channel = self.bot.get_channel(channel_id)
+                    if channel:
+                        try:
+                            await channel.send(message)
+                            self.logger.info(f"已成功傳送排程訊息：{message}")
+                        except Exception as e:
+                            self.logger.error(f"在頻道 {channel.id} 傳送排程訊息時發生錯誤：{e}")
+                    else:
+                        self.logger.error(f"無法找到頻道 ID {channel_id} 傳送排程訊息")
+                del scheduled_messages[time_str]
+        utils.write_json(self.logger, utils.JSON_DIR / "scheduled_messages.json", scheduled_messages)
 
 def setup(bot: commands.Bot):
     bot.add_cog(Say(bot))
