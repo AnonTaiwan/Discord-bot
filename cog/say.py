@@ -120,7 +120,7 @@ class Say(commands.Cog):
                     else:
                         self.logger.error(f"無法找到頻道 ID {channel_id} 傳送排程訊息")
                 del scheduled_messages[time_str]
-        utils.write_json(self.logger, utils.JSON_DIR / "scheduled_messages.json", scheduled_messages)
+                utils.write_json(self.logger, utils.JSON_DIR / "scheduled_messages.json", scheduled_messages)
 
 def setup(bot: commands.Bot):
     bot.add_cog(Say(bot))
