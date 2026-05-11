@@ -74,7 +74,10 @@ class Say(commands.Cog):
             await ctx.respond("❌ 發生錯誤，無法傳送訊息。", ephemeral=True)
 
     @discord.slash_command(name="schedule", description="使用彩奈排程傳送訊息")
-    async def schedule(self, ctx: discord.ApplicationContext, message: discord.Option(str, description="輸入訊息", required=True), time: discord.Option(str, description="輸入時間（格式：YYYY-MM-DD HH:MM）", required=True), channel: discord.Option(discord.TextChannel, description="選擇頻道", required=False)): # type: ignore
+    async def schedule(self, ctx: discord.ApplicationContext,
+                                message: discord.Option(str, description="輸入訊息", required=True),
+                                time: discord.Option(str, description="輸入時間（格式：YYYY-MM-DD HH:MM）",
+                                required=True), channel: discord.Option(discord.TextChannel, description="選擇頻道", required=False)): # type: ignore
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             return
