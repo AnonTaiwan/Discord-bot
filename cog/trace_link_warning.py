@@ -24,7 +24,7 @@ class TraceLinkWarning(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return
-        
+
         if "instagram.com" in message.content and "igsh=" in message.content:
             await self.__send_warning(message, mode = "ig")
 
@@ -35,7 +35,7 @@ class TraceLinkWarning(commands.Cog):
         if 'mode' not in kwargs:
             self.logger.error("Mode not specified for warning.")
             return
-        
+
         descriptions = {
             "ig": "此連結帶有追蹤參數 \"igsh\"，可能會洩漏您的個人帳號資料",
             "fb": """此連結帶有 Facebook 追蹤參數，可能會洩漏您的個人帳號資料\n請先使用瀏覽器訪問連結後，再複製轉換過的連結\n轉換後的連結不會是 `https://www.facebook.com/share/p/xxx/` 的格式"""
@@ -46,9 +46,9 @@ class TraceLinkWarning(commands.Cog):
             description=descriptions.get(kwargs['mode'], "此連結可能會洩漏您的個人帳號資料"),
             color=discord.Color.orange()
         )
-    
+
         delete_message_button = Button(label="刪除訊息", style=discord.ButtonStyle.red)
-        
+
         async def delete_message_callback(interaction: discord.Interaction):
             if interaction.user == message.author:
                 await message.delete()
@@ -59,11 +59,11 @@ class TraceLinkWarning(commands.Cog):
                 elif kwargs['mode'] == "fb":
                     link = re.search(self.FB_PATTERN, message.content).group(0)
                     link = link.replace("/p/", "/")
-                
+
                 if link[-1] == "/":
                     link = link[:-1]
                 link = link.replace("www.", "")
-                
+
                 async for msg in message.channel.history(limit=100):
                     if msg.author == self.FIX_TWEET_USER and link in msg.content:
                         await msg.delete()
@@ -81,23 +81,23 @@ class TraceLinkWarning(commands.Cog):
                 await interaction.message.delete()
             else:
                 await interaction.response.send_message("❌ 僅訊息發送者可以刪除該訊息。", ephemeral=True)
-        
+
         delete_message_button.callback = delete_message_callback
-        
+
         ignore_button = Button(label="忽略警告", style=discord.ButtonStyle.success)
-        
+
         async def ignore_button_callback(interaction: discord.Interaction):
             if interaction.user == message.author:
                 await interaction.message.delete()
             else:
                 await interaction.response.send_message("❌ 僅訊息發送者可以忽略該警告。", ephemeral=True)
-        
+
         ignore_button.callback = ignore_button_callback
-        
+
         view = View()
         view.add_item(delete_message_button)
         view.add_item(ignore_button)
-        
+
         await message.channel.send(embed=embed, view=view)
 
 def setup(bot):

@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 import utils
-import asyncio
 import random
 class Love(commands.Cog):
     def __init__(self, bot):

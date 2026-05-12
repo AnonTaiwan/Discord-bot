@@ -1,8 +1,6 @@
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
-import json
 from pathlib import Path
-from datetime import datetime
 from googleapiclient.discovery import build, MediaFileUpload
 
 current_dir = Path(__file__).parent
@@ -24,42 +22,24 @@ def get_detailed_token_info(client_id, client_secret, refresh_token):
         if creds.expired and creds.refresh_token:
             print("正在刷新 Token...")
             creds.refresh(Request())
-    
-    # 3. 取得所有欄位資訊
-    # 這些屬性會在 refresh() 執行後自動更新
-    details = {
-        "access_token": creds.token,
-        # 使用 .isoformat() 將 datetime 轉為 "2023-10-27T10:00:00..." 的字串
-        "expiry": creds.expiry.isoformat() if creds.expiry else None,
-        "scopes": creds.scopes,
-        "client_id": creds.client_id,
-        "client_secret": creds.client_secret,
-    }
 
-    # with open(current_dir / "detailed_token_info.json", "w") as f:
-    #     json.dump(details, f, indent=4)
-
-    # print("--- 刷新後的詳細資訊 ---")
-    # for key, value in details.items():
-    #     print(f"{key}: {value}")
-        
     return creds
 
 def get_or_create_folder(folder_name, creds):
     service = build('drive', 'v3', credentials=creds)
-    
+
     # 1. 搜尋是否有同名的資料夾
     # q 參數說明：
     # name = '...' 指定名稱
     # mimeType = 'application/vnd.google-apps.folder' 限制只搜尋資料夾
     # trashed = false 排除垃圾桶內的檔案
     query = f"name = '{folder_name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
-    
+
     results = service.files().list(
-        q=query, 
+        q=query,
         fields="files(id, name)"
     ).execute()
-    
+
     items = results.get('files', [])
 
     if items:
@@ -74,12 +54,12 @@ def get_or_create_folder(folder_name, creds):
             'name': folder_name,
             'mimeType': 'application/vnd.google-apps.folder'
         }
-        
+
         new_folder = service.files().create(
-            body=folder_metadata, 
+            body=folder_metadata,
             fields='id'
         ).execute()
-        
+
         folder_id = new_folder.get('id')
         print(f"成功建立資料夾！(ID: {folder_id})")
         return folder_id
@@ -91,14 +71,14 @@ def check_folder_path(creds, folder_path):
 
     for folder_name in folder_names:
         query = f"name = '{folder_name}' and mimeType = 'application/vnd.google-apps.folder' and '{parent_id}' in parents and trashed = false"
-        
+
         results = service.files().list(
             q=query,
             fields="files(id, name)"
         ).execute()
-        
+
         items = results.get('files', [])
-        
+
         if items:
             # 找到資料夾，更新 parent_id
             parent_id = items[0]['id']
@@ -170,11 +150,11 @@ def list_folder_files(creds, folder_id):
 
 def list_shared_drives(creds):
     service = build('drive', 'v3', credentials=creds)
-    
+
     # 列出所有你有權限存取的 Shared Drive
     results = service.drives().list(pageSize=50).execute()
     shared_drives = results.get('drives', [])
-    
+
     if not shared_drives:
         print('找不到任何共用雲端硬碟。')
     else:
@@ -190,12 +170,12 @@ def list_files_in_shared_drive(shared_drive_id, creds):
     # 2. supportsAllDrives=True (必須)
     # 3. includeItemsFromAllDrives=True (必須)
     # 4. corpora='drive' 並且指定 driveId (推薦，這會縮小搜尋範圍到該硬碟)
-    
+
     query = f"'{shared_drive_id}' in parents and trashed = false"
 
     results = service.files().list(
         q=query,
-        supportsAllDrives=True, 
+        supportsAllDrives=True,
         includeItemsFromAllDrives=True,
         corpora='drive',
         driveId=shared_drive_id,
@@ -206,23 +186,23 @@ def list_files_in_shared_drive(shared_drive_id, creds):
 
     for item in items:
         print(f"{item['name']} ({item['id']})")
-        
+
 def upload_to_drive(file_path, folder_id, creds, name=None):
     service = build('drive', 'v3', credentials=creds)
-    
+
     if name is None:
         name, ext = Path(file_path).stem, "".join(Path(file_path).suffixes)
     else:
         ext = "".join(Path(file_path).suffixes)
-    
+
     file_metadata = {
         'name': f"{name}{ext}",
         'parents': [folder_id] # 這裡放 Shared Drive 裡的資料夾 ID
     }
-    
+
     # ... 設定 media ...
     media = MediaFileUpload(
-        file_path, 
+        file_path,
         resumable=True         # 開啟續傳功能 (強烈建議，大檔案必備)
     )
 
@@ -232,7 +212,7 @@ def upload_to_drive(file_path, folder_id, creds, name=None):
         supportsAllDrives=True, # 必須加入此參數
         fields='id, webViewLink'
     ).execute()
-    
+
     return file
 
 # --- 使用方式 ---

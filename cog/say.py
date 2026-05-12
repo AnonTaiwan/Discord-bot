@@ -29,7 +29,7 @@ class Say(commands.Cog):
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             return
-        
+
         if channel and channel.guild.id != utils.CRYCHIC_GUILD_ID:
             await ctx.respond("❌ 只能在 CRYCHIC 伺服器使用此指令。", ephemeral=True)
             return
@@ -37,16 +37,16 @@ class Say(commands.Cog):
         if message and len(message) > 2000:
             await ctx.respond("❌ 訊息長度不能超過 2000 個字元。", ephemeral=True)
             return
-        
+
         if not (quick_message or message):
             await ctx.respond("❌ 請至少選擇預設訊息或自訂訊息其中一個。", ephemeral=True)
             return
-        
+
         try:
             if quick_message and message:
                 await ctx.respond("❌ 只能選擇預設訊息或自訂訊息其中一個。", ephemeral=True)
                 return
-            
+
             if reply is not None:
                 if channel:
                     msg = await channel.fetch_message(int(reply))
@@ -54,7 +54,7 @@ class Say(commands.Cog):
                     msg = await ctx.channel.fetch_message(int(reply))
                 await msg.reply(message if message else quick_message)
                 if msg.channel != ctx.channel:
-                    await ctx.respond(f"✅ 已成功回覆訊息。", ephemeral=True)
+                    await ctx.respond("✅ 已成功回覆訊息。", ephemeral=True)
                 else:
                     await ctx.defer(ephemeral = True)
                     await ctx.delete()
@@ -81,7 +81,7 @@ class Say(commands.Cog):
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             return
-        
+
         if channel and channel.guild.id != utils.CRYCHIC_GUILD_ID:
             await ctx.respond("❌ 只能在 CRYCHIC 伺服器使用此指令。", ephemeral=True)
             return
@@ -89,22 +89,22 @@ class Say(commands.Cog):
         if message and len(message) > 2000:
             await ctx.respond("❌ 訊息長度不能超過 2000 個字元。", ephemeral=True)
             return
-        
+
         t = datetime.strptime(time, "%Y-%m-%d %H:%M")
         if t < datetime.now():
             await ctx.respond("❌ 輸入的時間必須在未來。", ephemeral=True)
             return
-        
+
         if channel is None:
             channel = ctx.channel
-        
+
         scheduled_messages = utils.read_json(self.logger, utils.JSON_DIR / "scheduled_messages.json")
         scheduled_messages.setdefault(time, []).append([message, channel.id])
         if utils.write_json(self.logger, utils.JSON_DIR / "scheduled_messages.json", scheduled_messages):
             await ctx.respond(f"✅ 已成功排程訊息將於 {time} 在 {channel.mention} 傳送。", ephemeral=True)
         else:
             await ctx.respond("❌ 發生錯誤，無法排程訊息。", ephemeral=True)
-        
+
     @tasks.loop(minutes=1)
     async def check_scheduled_messages(self):
         scheduled_messages = utils.read_json(self.logger, utils.JSON_DIR / "scheduled_messages.json")

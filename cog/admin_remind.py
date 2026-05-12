@@ -3,7 +3,6 @@ from discord.ext import commands
 from datetime import datetime, timedelta
 import utils
 import json
-import asyncio
 
 class AdminRemind(commands.Cog):
     def __init__(self, bot):
@@ -24,7 +23,7 @@ class AdminRemind(commands.Cog):
         for webhook in webhooks_to_delete:
             try:
                 await webhook.delete(reason="超過 Discord 限制，自動清除")
-            except Exception as e:   
+            except Exception:
                 continue
 
     async def create_webhook(self,channel: discord.TextChannel, user: discord.Member):
@@ -88,7 +87,7 @@ class AdminRemind(commands.Cog):
                 json.dump(data, f, ensure_ascii=False, indent=4)
         except Exception as e:
                 self.logger.error(f"寫入 admin_remind.json 失敗：{e}")
-                
+
     @discord.slash_command(description="啟用/停用管理員提醒")
     async def toggle_admin_remind(self, ctx: discord.ApplicationContext):
         with open('JSON/admin_remind.json', 'r', encoding='utf-8') as f:

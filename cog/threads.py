@@ -4,7 +4,7 @@ from discord.ext import commands, tasks
 import json
 import utils
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 from io import BytesIO
 import os
 import re
@@ -105,13 +105,12 @@ class Threads(commands.Cog):
         post_type = post_info['type']
         post_id = post_info['post_id']
         post_link = post_info.get('link', '無連結')
-        post_tag = post_info.get('tag', '無標籤')
-        
+
         if post_type == "TEXT":
             post_data = await self.__text_post(post_id, message_id)
             await self.__after_post(post_data, post_id, message_id)
             return
-        
+
         data = await self.get_post_details(post_id)
         data = data.get('data', [])
         if data:
@@ -134,12 +133,12 @@ class Threads(commands.Cog):
                 await self.__get_video_audio(post_id, post_link)
                 dc_url = await self.__media_to_Discord(media_url, "VIDEO", post_id)
                 post_data = await self.__video_post(post_id, message_id, dc_url)
-                
+
             await self.__after_post(post_data, post_id, message_id)
 
     async def __after_post(self, data, post_id, message_id):
         success = await self.__check_post_status(data, post_id, message_id)
-        
+
         if success:
             with open('JSON/threads.json', 'r', encoding='utf-8') as f:
                 threads_data = json.load(f)
@@ -263,7 +262,7 @@ class Threads(commands.Cog):
         if not data.get('id'):
             self.logger.error(f"__video_post publish 失敗 post_id={post_id}, status={response.status_code}, response={response.text}")
         return data
-        
+
     async def __multi_post(self, post_id, message_id, media_urls):
         ID = utils.THREADS_ID
         API = utils.THREADS_TOKEN
@@ -317,7 +316,7 @@ class Threads(commands.Cog):
         if not data.get('id'):
             self.logger.error(f"__multi_post publish 失敗 post_id={post_id}, status={response.status_code}, response={response.text}")
         return data
-        
+
     async def __check_post_status(self, data, post_id, message_id):
         data_id = data.get("id")
         self.channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
@@ -342,11 +341,11 @@ class Threads(commands.Cog):
             return False
         else:
             threads_data = self.read_json_file('JSON/threads.json')
-            
+
             embed = discord.Embed(title="貼文已發布", description=f"貼文 ID: {post_id} 已成功發布到 Threads。\n Threads ID: {data_id}", color=0x00ff00)
-            embed.add_field(name="引流連結", value=f"發布中..." if threads_data[str(message_id)].get('reply_enabled', True) else "未啟用", inline=False)
+            embed.add_field(name="引流連結", value="發布中..." if threads_data[str(message_id)].get('reply_enabled', True) else "未啟用", inline=False)
             message = await self.channel.send(embed=embed)
-            
+
             if threads_data[str(message_id)].get('reply_enabled', True):
                 await self.__reply_post(data_id, message)
             return True
@@ -358,7 +357,7 @@ Anon Taiwan x 女團哭迷因（GIRLS BAND CRY Memes）
 https://www.anontaiwan.meme/'''
         ID = utils.THREADS_ID
         API = utils.THREADS_TOKEN
-        API_URL = f"https://graph.threads.net/v1.0/{ID}/threads" 
+        API_URL = f"https://graph.threads.net/v1.0/{ID}/threads"
         payload = {
             "media_type": "TEXT",
             "text": text,
@@ -385,12 +384,12 @@ https://www.anontaiwan.meme/'''
                 publish_response.raise_for_status()
 
                 embed = message.embeds[0]
-                embed.set_field_at(0, name="引流連結", value=f"已成功發布", inline=False)
+                embed.set_field_at(0, name="引流連結", value="已成功發布", inline=False)
                 await message.edit(embed=embed)
             else:
                 self.logger.error(f"__reply_post 建立 reply container 失敗 threads_id={threads_id}, status={response.status_code}, response={response.text}")
                 embed = message.embeds[0]
-                embed.set_field_at(0, name="引流連結", value=f"發布回覆失敗", inline=False)
+                embed.set_field_at(0, name="引流連結", value="發布回覆失敗", inline=False)
                 embed.color = 0xff0000
                 await message.edit(embed=embed)
 
@@ -438,12 +437,12 @@ https://www.anontaiwan.meme/'''
             if str(message_id) not in threads_data:
                 await interaction.response.send_message("找不到對應的貼文資料。", ephemeral=True)
                 return
-            
+
             post_info = threads_data[str(message_id)]
             view = Threads.TagButton(self.cog, str(message_id), post_info=post_info)
             embed = discord.Embed(title="請選擇標籤", description="請選擇以下標籤之一：", color=0x80009a)
             await interaction.response.send_message(embed=embed, view=view)
-        
+
         @discord.ui.button(label="不發布貼文", style=discord.ButtonStyle.danger, custom_id="delete_button")
         async def delete(self, button: discord.ui.Button, interaction: discord.Interaction):
             with open('JSON/threads.json', 'r', encoding='utf-8') as f:
@@ -455,7 +454,7 @@ https://www.anontaiwan.meme/'''
                     json.dump(threads_data, f, ensure_ascii=False, indent=4)
             await interaction.response.send_message("已取消發布貼文。", ephemeral=True)
             await interaction.message.delete()
-            
+
     class CustomTagModal(discord.ui.Modal):
         def __init__(self, cog, message_id, post_info=None):
             super().__init__(title="自訂標籤")
@@ -463,7 +462,7 @@ https://www.anontaiwan.meme/'''
             self.message_id = message_id
             self.post_info = post_info
             self.add_item(discord.ui.InputText(label="請輸入自訂標籤", style=discord.InputTextStyle.short))
-            
+
         async def callback(self, interaction: discord.Interaction):
             custom_tag = self.children[0].value
             view = Threads.ConfirmButton(self.cog, self.message_id, post_info=self.post_info)
@@ -471,8 +470,8 @@ https://www.anontaiwan.meme/'''
             embed = await self.cog.generate_post_embed(self.post_info)
             await interaction.message.delete()
             await interaction.response.send_message(f"已設定自訂標籤：{custom_tag}", embed=embed, view=view)
-            
-    class TagButton(discord.ui.View):   
+
+    class TagButton(discord.ui.View):
         def __init__(self, cog, message_id=None, post_info=None):
             super().__init__(timeout=None)
             self.cog: "Threads" = cog
@@ -486,7 +485,7 @@ https://www.anontaiwan.meme/'''
             embed = await self.cog.generate_post_embed(self.post_info)
             await interaction.message.delete()
             await interaction.response.send_message("已選擇標籤:MyGO", embed=embed, view=view)
-        
+
         @discord.ui.button(label="Ave Mujica", style=discord.ButtonStyle.primary)
         async def Ave_Mujica_tag(self, button: discord.ui.Button, interaction: discord.Interaction):
             self.post_info['tag'] = "Ave Mujica"
@@ -494,7 +493,7 @@ https://www.anontaiwan.meme/'''
             embed = await self.cog.generate_post_embed(self.post_info)
             await interaction.message.delete()
             await interaction.response.send_message("已選擇標籤:Ave Mujica", embed=embed, view=view)
-        
+
         @discord.ui.button(label="GBC", style=discord.ButtonStyle.green)
         async def GBC_tag(self, button: discord.ui.Button, interaction: discord.Interaction):
             self.post_info['tag'] = "Girls Band Cry"
@@ -502,21 +501,21 @@ https://www.anontaiwan.meme/'''
             embed = await self.cog.generate_post_embed(self.post_info)
             await interaction.message.delete()
             await interaction.response.send_message("已選擇標籤:Girls Band Cry", embed=embed, view=view)
-            
+
         @discord.ui.button(label="自行輸入", style=discord.ButtonStyle.gray)
         async def custom_tag(self, button: discord.ui.Button, interaction: discord.Interaction):
             modal = Threads.CustomTagModal(self.cog, self.message_id, post_info=self.post_info)
             await interaction.message.delete()
             await interaction.response.send_modal(modal)
-            
+
         @discord.ui.button(label="無標籤", style=discord.ButtonStyle.danger)
         async def no_tag(self, button: discord.ui.Button, interaction: discord.Interaction):
             view = Threads.ConfirmButton(self.cog, self.message_id, post_info=self.post_info)
             embed = await self.cog.generate_post_embed(self.post_info)
             await interaction.message.delete()
             await interaction.response.send_message("已選擇無標籤", embed=embed, view=view)
-            
-            
+
+
     class ConfirmButton(discord.ui.View):
         def __init__(self, cog, mes_id, post_info=None):
             super().__init__(timeout=None)
@@ -528,24 +527,24 @@ https://www.anontaiwan.meme/'''
         async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
             await interaction.response.send_message("貼文已確認，正在發布...", ephemeral=True)
             await interaction.message.delete()
-            
+
             data = self.cog.read_json_file('JSON/threads.json')
             data[str(self.mes_id)] = self.post_info
             self.cog.write_json_file('JSON/threads.json', data)
-            
+
             await self.cog._handle_posting(int(self.mes_id))
-            
+
         @discord.ui.button(label="修改內容", style=discord.ButtonStyle.danger)
         async def edit_text(self, button: discord.ui.Button, interaction: discord.Interaction):
             modal = Threads.EditPost(self.cog, self.post_info, self.mes_id)
             await interaction.message.delete()
             await interaction.response.send_modal(modal)
-            
+
         @discord.ui.button(label="關閉引流留言", style=discord.ButtonStyle.gray)
         async def close_reply(self, button: discord.ui.Button, interaction: discord.Interaction):
             self.post_info['reply_enabled'] = False
             await interaction.response.send_message("引流留言已關閉。", ephemeral=True)
-            
+
     class EditPost(discord.ui.Modal):
         def __init__(self, cog, post_info, mes_id):
             super().__init__(title="編輯貼文內容")
@@ -554,7 +553,7 @@ https://www.anontaiwan.meme/'''
             self.mes_id = mes_id
             self.add_item(discord.ui.InputText(label="標籤", style=discord.InputTextStyle.short, value=post_info.get('tag', '無標籤')))
             self.add_item(discord.ui.InputText(label="新的貼文文字", style=discord.InputTextStyle.long, value=post_info['text']))
-            
+
         async def callback(self, interaction: discord.Interaction):
             self.post_info['tag'] = self.children[0].value
             self.post_info['text'] = self.children[1].value
@@ -629,7 +628,7 @@ https://www.anontaiwan.meme/'''
         now = datetime.now(utils.TIME_ZONE)
         if now.day != 1 or now.hour != 6:
             return
-            
+
         url = f"https://graph.threads.net/refresh_access_token?grant_type=th_refresh_token&access_token={utils.THREADS_TOKEN}"
         response = await asyncio.to_thread(requests.get, url, timeout=30)
         if response.status_code == 200:

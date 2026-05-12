@@ -1,11 +1,10 @@
 import discord
-from discord.ext import commands, bridge, tasks
+from discord.ext import commands
 from curl_cffi import requests
 import re
 import json
 from bs4 import BeautifulSoup
 import os
-import shutil
 import random
 import asyncio
 import time
@@ -25,7 +24,7 @@ class Facebook(commands.Cog):
         try:
             with open('JSON/Cookies.json','r',encoding='utf-8')as f:
                 self.cookies = json.load(f)
-        except:
+        except Exception:
             self.cookies = {
                 'datr': 'y_9haN3HQZQEBj4W0XfaaCnK',
                 'sb': 'y_9haIwH6HDvW_SGJlsn2aaU',
@@ -65,20 +64,20 @@ class Facebook(commands.Cog):
         finally:
             # 無論如何只啟動一次
             asyncio.create_task(self.check_data())
-    
+
     def setup_logging(self):
         """設置日誌系統"""
         # 創建 logs 目錄（如果不存在）
         if not os.path.exists('logs'):
             os.makedirs('logs')
-        
+
         # 設置日誌文件名（包含日期）
         log_filename = f'logs/fb_bot_{datetime.now().strftime("%Y%m%d")}.log'
-        
+
         # 配置日誌格式
         log_format = '%(asctime)s - %(levelname)s - %(message)s'
         date_format = '%Y-%m-%d %H:%M:%S'
-        
+
         # 配置日誌
         logging.basicConfig(
             level=logging.INFO,
@@ -89,7 +88,7 @@ class Facebook(commands.Cog):
                 logging.StreamHandler()  # 同時輸出到控制台
             ]
         )
-        
+
         self.logger = logging.getLogger(__name__)
         self.logger.info("cog/fb.py: 日誌系統初始化完成")
 
@@ -118,11 +117,11 @@ class Facebook(commands.Cog):
                         embed = discord.Embed(title='Anon Taiwan 更新了新貼文！', url = url, color=0x00ff00)
                         embed.add_field(name='貼文連結', value=url, inline=False)
                         embed.add_field(name='貼文內容', value=content or "（無內容）", inline=False)
-                        
+
                         # 檢查檔案是否存在
                         if os.path.exists("1.jpg"):
-                            file = discord.File(f"1.jpg", filename=f"1.jpg")
-                            embed.set_image(url=f"attachment://1.jpg")
+                            file = discord.File("1.jpg", filename="1.jpg")
+                            embed.set_image(url="attachment://1.jpg")
                             if channel and hasattr(channel, "send"):
                                 msg = await channel.send(content = '<@&1357315095235137636>', embed=embed, file=file) #type:ignore
                                 await msg.publish()
@@ -141,20 +140,20 @@ class Facebook(commands.Cog):
                         self.image = uri
                         self.save_latest_post()
                         self.logger.info("新貼文已成功發送到 Discord")
-                        
-            except Exception as e:
+
+            except Exception:
                 pass
-            
+
     def get_data(self):
         try:
             response = requests.get('https://www.facebook.com/profile.php?id=61566516636930', headers=self.headers,cookies=self.cookies,impersonate='chrome110')
-            response.encoding = 'utf-8' 
-            
+            response.encoding = 'utf-8'
+
             # 檢查回應狀態
             if response.status_code != 200:
                 self.logger.warning(f"Facebook 返回狀態碼 {response.status_code}")
                 return None
-                
+
             pattern = r"\"attachments\":\[{\"media\"(.*?)}}}"  # 抓取 styles 到 attachments 結尾附近
             match = re.search(pattern, response.text, re.DOTALL)
             if match:
@@ -178,7 +177,7 @@ class Facebook(commands.Cog):
         except Exception as e:
             self.logger.error(f"get_data 中發生錯誤：{e}")
             return None
-    
+
     def filte_data(self,data):
         if 'media' in data['styles']['attachment']:
             if '__typename' in data['styles']['attachment']['media'].keys() and data['styles']['attachment']['media']['__typename'] == 'Video':

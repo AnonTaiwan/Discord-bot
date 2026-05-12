@@ -48,14 +48,14 @@ class MyBot(commands.Bot):
             await asyncio.sleep(seconds_to_midnight + 5)  # 加上 5 秒的偏移
             print('每日 12 點已到，正在更新日誌...')
             setup_daily_logger()  # 更新日誌設定
-            
+
 
 
 def setup_daily_logger():
     """設定每日日誌"""
     # 清除現有的 handlers
     logging.getLogger().handlers.clear()
-    
+
     # 創建日誌目錄
     if not os.path.exists('logs'):
         os.makedirs('logs')
@@ -63,10 +63,10 @@ def setup_daily_logger():
     log_dir = Path('logs')
     if not log_dir.is_dir():
         log_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # 設定日誌檔案名稱
     log_file = log_dir / f'bot_{datetime.now():%Y%m%d}.log'
-    
+
     # 重新配置日誌
     logging.basicConfig(
         level=logging.INFO,
@@ -78,7 +78,7 @@ def setup_daily_logger():
         ],
         force=True  # 強制重新設定
     )
-    
+
     return logging.getLogger()
 
 def setup_tmp_dir():
@@ -93,7 +93,7 @@ async def main():
     while True:
         now = datetime.now()
         today = now.strftime("%Y%m%d")
-        
+
         # 檢查是否需要更新日誌檔案
         if current_date != today:
             logger = setup_daily_logger()
@@ -101,7 +101,7 @@ async def main():
             logger.info(f"日誌系統已更新至 {today}")
 
         setup_tmp_dir()
-        
+
         async with MyBot() as bot:
             try:
                 if os.environ.get("CI_RUNNING") == "true":

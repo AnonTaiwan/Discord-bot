@@ -20,7 +20,7 @@ class ConfirmButton(discord.ui.View):
         self.link = link
         self.type = type
         self.original_msg = original_msg
-        
+
 
     async def __send_comments(self):
         url = f"https://graph.facebook.com/v23.0/{self.post_id}/comments"
@@ -54,7 +54,7 @@ class CommentLink(discord.ui.Modal):
         self.type = type
         self.original_msg = original_msg
         self.add_item(discord.ui.InputText(label="請輸入來源連結", placeholder="https://example.com", required=True, style=discord.InputTextStyle.short))
-        
+
     def create_embed(self):
         embed = discord.Embed(title=f"補上來源 - {self.type}", url=self.post_url, color=discord.Color.blue())
         embed.add_field(name="來源連結", value=self.link or "無連結", inline=False)
@@ -65,7 +65,7 @@ class CommentLink(discord.ui.Modal):
         embed = self.create_embed()
         view = ConfirmButton(self.post_id, self.link, self.type, self.original_msg)
         await interaction.response.edit_message(embed=embed, view=view)
-        
+
 class CommentType(discord.ui.View):
     def __init__(self, post_id, url, original_msg):
         super().__init__(timeout=None)
@@ -73,7 +73,7 @@ class CommentType(discord.ui.View):
         self.url = url
         self.original_msg = original_msg
 
-    @discord.ui.select(placeholder="選擇留言類型", min_values=1, max_values=1, 
+    @discord.ui.select(placeholder="選擇留言類型", min_values=1, max_values=1,
         options = [
             discord.SelectOption(label="創作分享"),
             discord.SelectOption(label="圖文分享"),
@@ -129,7 +129,7 @@ class NewFB(commands.Cog):
         if len(self.posted_ids) > POSTED_IDS_MAX:
             self.posted_ids = self.posted_ids[-POSTED_IDS_MAX:]
         self.__save_facebook_record()
-    
+
     async def get_datas(self, page_id, limit=3):
         """Fetch Facebook posts with timeout and retry."""
         url = f'https://graph.facebook.com/v23.0/{page_id}/posts?fields=message,created_time,full_picture,permalink_url,shares&access_token={utils.FACEBOOK_TOKEN}&limit={limit}'
@@ -145,7 +145,7 @@ class NewFB(commands.Cog):
                     raise
                 await asyncio.sleep(2)
         return []
-            
+
     async def get_photo(self,data):
         headers = {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -206,10 +206,11 @@ class NewFB(commands.Cog):
             file = None
         await self.__send_update_message(data.get('id', None), embed, file)
         self.__mark_posted(data.get('id'))
-    
+
     async def __send_reel_update_message(self, reel):
         reel_data_id = reel['id']
-        url = f'https://www.facebook.com{reel['permalink_url'].replace('\\','')}'
+        permalink = reel['permalink_url'].replace('\\', '')
+        url = f"https://www.facebook.com{permalink}"
         message = reel.get('description', 'No description provided')
         message = bytes(message,'utf-8').decode(encoding="utf-8", errors="ignore")
         picture_url = reel.get('picture', {})
@@ -228,7 +229,7 @@ class NewFB(commands.Cog):
         embed.add_field(name='Reel 內容', value=message or "（無內容）", inline=False)
         await self.__send_update_message(reel_data_id, embed, file)
         self.__mark_posted(reel_data_id)
-        
+
     async def __check_comments(self, post_id, message, post_url):
         message = bytes(message, 'utf-8').decode(encoding="utf-8", errors="ignore")
         POST_KEYWORDS = ["【pixiv 分享】", "【推特圖文】"]
@@ -255,7 +256,7 @@ class NewFB(commands.Cog):
         view = CommentButton(post_id, post_url)
         await test_channel.send(embed=embed, view=view)
         self.logger.info(f"已發送留言提醒通知：{post_id}")
-    
+
     async def __if_post_updates(self, datas):
         # 以持久化的 posted_ids 過濾，避免「刪除最新貼文後次新貼文被誤推」
         return [i for i in datas if i.get('id') and i['id'] not in self.posted_ids]
@@ -299,7 +300,7 @@ class NewFB(commands.Cog):
             if self.posted_ids:
                 self.__save_facebook_record()
         # self.reel = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url&access_token={utils.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
-        
+
         if not self.check_comments_routine.is_running():
             self.check_comments_routine.start()
 
@@ -327,7 +328,7 @@ class NewFB(commands.Cog):
                 await self.__check_comments(data['id'], data.get('message', ''), data.get('permalink_url', '').replace('\\',''))
         except Exception as e:
             self.logger.error(f"Error checking comments: {e}")
-    
+
     @tasks.loop(minutes=1)
     async def check_post_updates(self):
         try:
@@ -358,7 +359,7 @@ class NewFB(commands.Cog):
         except ValueError as e:
             self.logger.error(f"時間格式錯誤：{e}")
             return None
-        
+
     async def __get_posts_and_reels_count(self, start_timestamp, end_timestamp):
         try:
             posts_url = f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/posts?fields=&access_token={utils.FACEBOOK_TOKEN}&since={start_timestamp}&until={end_timestamp}&limit=100'
@@ -375,7 +376,7 @@ class NewFB(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error fetching posts and reels count: {e}")
             return 0, 0
-        
+
     def __generate_picture_embed(self, posts_count, reels_count, background_picture_file):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         background_path = os.path.join(current_dir, background_picture_file)
@@ -391,10 +392,10 @@ class NewFB(commands.Cog):
 
     def __generate_daily_post_picture(self, posts_count, reels_count):
         self.__generate_picture_embed(posts_count, reels_count, "../static/background.png")
-        
+
     def __generate_query_picture(self, posts_count, reels_count):
         self.__generate_picture_embed(posts_count, reels_count, "../static/postquery.png")
-        
+
     @tasks.loop(time=daily_message_time)
     async def daily_message(self):
         try:
@@ -406,7 +407,7 @@ class NewFB(commands.Cog):
 
             posts_count, reels_count = await self.__get_posts_and_reels_count(yesterday_timestamp, today_timestamp)
 
-            embed = discord.Embed(title=f'{yesterday.strftime('%Y-%m-%d')} 統整', color=discord.Color.blue())
+            embed = discord.Embed(title=f"{yesterday.strftime('%Y-%m-%d')} 統整", color=discord.Color.blue())
             self.__generate_daily_post_picture(posts_count, reels_count)
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
@@ -417,7 +418,7 @@ class NewFB(commands.Cog):
             os.remove("output.png")
         except Exception as e:
             self.logger.error(f"Error sending daily message: {e}")
-        
+
     @fb_command_group.command(name="query-today", description="查看今日有幾篇貼文")
     async def today_query(self, ctx: discord.ApplicationContext):
         try:
@@ -433,11 +434,11 @@ class NewFB(commands.Cog):
             self.__generate_daily_post_picture(posts_count, reels_count)
             file = discord.File("output.png", filename="output.png")
             embed.set_image(url="attachment://output.png")
-            
+
             await ctx.respond(embed=embed, file=file)
             os.remove("output.png")
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤")
+            await ctx.respond("❌ 發生錯誤")
             self.logger.error(f"Error in query-today command: {e}")
 
     @fb_command_group.command(name="query", description="查看指定時間範圍內有幾篇貼文")
@@ -476,7 +477,7 @@ class NewFB(commands.Cog):
             await ctx.respond(embed=embed, file=file)
             os.remove("output.png")
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤")
+            await ctx.respond("❌ 發生錯誤")
             self.logger.error(f"Error in query command: {e}")
 
 def setup(bot: commands.Bot):

@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands, tasks
 from datetime import datetime, time
 import utils
@@ -50,10 +49,10 @@ class RoutineMessage(commands.Cog):
 
         if not self.GSAT_AST_remind.is_running():
             self.GSAT_AST_remind.start()
-        
+
         if not self.fall_remind.is_running():
             self.fall_remind.start()
-            
+
         if not self.CAP_remind.is_running():
             self.CAP_remind.start()
 
@@ -69,7 +68,7 @@ class RoutineMessage(commands.Cog):
             message = "每日監督椰子修圖 (1/2)"
         elif now.hour == 20:
             message = "每日監督椰子修圖 (2/2)"
-        
+
         try:
             await channel.send(message)
         except Exception as e:
@@ -84,7 +83,7 @@ class RoutineMessage(commands.Cog):
             message = "每日提醒琪涵雅女裝 (1/2)\n每日提醒優打女裝 (1/2)\n每日提醒高麗菜女裝 (1/2)"
         elif now.hour == 20:
             message = "每日提醒琪涵雅女裝 (2/2)\n每日提醒優打女裝 (2/2)\n每日提醒高麗菜女裝 (2/2)"
-        
+
         try:
             await channel.send(message)
         except Exception as e:
@@ -153,7 +152,7 @@ class RoutineMessage(commands.Cog):
         now = datetime.now(utils.TIME_ZONE)
         if now.year != 2026 or now.month != 2 or now.day != 17:
             return
-        
+
         try:
             await channel.send("終於度過除夕來到了大年初一！\n祝大家新年快樂！🎉🎉🎉\n今年也要開開心心的一起當邦豚喔！！！")
         except Exception as e:

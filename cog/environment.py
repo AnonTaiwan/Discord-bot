@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 import importlib
 import subprocess
 import sys
@@ -17,9 +17,9 @@ class Environment(commands.Cog):
 
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/enviroment.py: 日誌系統初始化完成")
-        
+
         self.date = datetime.now().strftime("%Y%m%d")
-        
+
     async def pip_install(self, package: str, import_name: str = ""):
         """安裝指定的 pip 套件（可選 import 名稱）"""
         try:

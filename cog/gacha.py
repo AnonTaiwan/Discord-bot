@@ -18,9 +18,9 @@ class Gacha(commands.Cog):
 
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/gacha.py: 日誌系統初始化完成")
-        
+
     gacha_command_group = discord.SlashCommandGroup("gacha", "蔚藍檔案抽卡模擬相關指令")
-        
+
     @commands.Cog.listener()
     async def on_ready(self):
         pass
@@ -37,7 +37,7 @@ class Gacha(commands.Cog):
                 return gacha_result[1]  # R
             else:
                 return gacha_result[2]  # SR
-            
+
         # Normal gacha
         if rand <= gacha_rate[0]:
             return gacha_result[0]  # N
@@ -45,10 +45,10 @@ class Gacha(commands.Cog):
             return gacha_result[1]  # R
         else:
             return gacha_result[2]  # SR
-        
+
     def __is_valid_request(self, ctx: discord.ApplicationContext):
         return utils.is_developer(ctx.author) or utils.is_in_bot_playground(ctx.channel)
-    
+
     async def __send_no_permission_message(self, ctx: discord.ApplicationContext):
         await ctx.respond("❌ 你沒有權限使用此指令", ephemeral=True)
         self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
@@ -58,13 +58,13 @@ class Gacha(commands.Cog):
         if not self.__is_valid_request(ctx):
             await self.__send_no_permission_message(ctx)
             return
-        
+
         result = self.__get_gacha_result()
-        
+
         try:
             await ctx.respond(result)
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤，請稍後再試")
+            await ctx.respond("❌ 發生錯誤，請稍後再試")
             self.logger.error(f"Error in gacha command: {e}")
 
     @gacha_command_group.command(name="normal10", description="抽十抽普通池")
@@ -72,7 +72,7 @@ class Gacha(commands.Cog):
         if not self.__is_valid_request(ctx):
             await self.__send_no_permission_message(ctx)
             return
-        
+
         result1 = [self.__get_gacha_result() for _ in range(5)]
         result2 = [self.__get_gacha_result() for _ in range(5)]
 
@@ -80,11 +80,11 @@ class Gacha(commands.Cog):
             result2[4] = gacha_result[1]  # 保底
 
         results = " ".join(result1) + "\n" + " ".join(result2)
-        
+
         try:
             await ctx.respond(results)
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤，請稍後再試")
+            await ctx.respond("❌ 發生錯誤，請稍後再試")
             self.logger.error(f"Error in gacha10 command: {e}")
 
     @gacha_command_group.command(name="fes", description="抽一抽 FES 池")
@@ -92,13 +92,13 @@ class Gacha(commands.Cog):
         if self.__is_valid_request(ctx) is False:
             await self.__send_no_permission_message(ctx)
             return
-        
+
         result = self.__get_gacha_result(is_fes=True)
-        
+
         try:
             await ctx.respond(result)
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤，請稍後再試")
+            await ctx.respond("❌ 發生錯誤，請稍後再試")
             self.logger.error(f"Error in fes_gacha command: {e}")
 
     @gacha_command_group.command(name="fes10", description="抽十抽 FES 池")
@@ -106,7 +106,7 @@ class Gacha(commands.Cog):
         if self.__is_valid_request(ctx) is False:
             await self.__send_no_permission_message(ctx)
             return
-        
+
         result1 = [self.__get_gacha_result(is_fes=True) for _ in range(5)]
         result2 = [self.__get_gacha_result(is_fes=True) for _ in range(5)]
 
@@ -114,11 +114,11 @@ class Gacha(commands.Cog):
             result2[4] = gacha_result[1]  # 保底
 
         results = " ".join(result1) + "\n" + " ".join(result2)
-        
+
         try:
             await ctx.respond(results)
         except Exception as e:
-            await ctx.respond(f"❌ 發生錯誤，請稍後再試")
+            await ctx.respond("❌ 發生錯誤，請稍後再試")
             self.logger.error(f"Error in fes_gacha10 command: {e}")
 
 def setup(bot: commands.Bot):

@@ -1,10 +1,8 @@
-from datetime import datetime
 import discord
 from datetime import timedelta, timezone
 import heapq
 import json
 import logging
-import os
 from pathlib import Path
 
 # 時區設定
@@ -51,7 +49,7 @@ def update_bot_config():
 # Facebook 相關配置
 
 FB_PAGE_ID = '465375250002911' #Anon Taiwan:465375250002911 女團哭:419295154604542
-GBC_FB_PAGE_ID = '419295154604542' 
+GBC_FB_PAGE_ID = '419295154604542'
 
 # Threads 相關配置
 THREADS_ID = '24030978623271968'  # Anon Taiwan Threads ID
@@ -178,7 +176,7 @@ def write_json(logger: logging.Logger, file: Path, data: dict) -> bool:
         except Exception as e:
             logger.error(f"寫入 {file} 時發生錯誤：{e}")
             return False
-        
+
 def get_tmp_file(filename: str) -> str:
     return str(TMP_DIR / filename)
 
@@ -203,7 +201,7 @@ class PriorityQueue():
 
     def top(self):
         return self.elements[0]
-    
+
     def pop(self):
         heapq.heappop(self.elements)
         self.__save()

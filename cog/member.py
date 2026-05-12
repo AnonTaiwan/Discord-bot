@@ -72,7 +72,7 @@ class NonMygoMemberPage(MemberPage):
         embed = discord.Embed(title="未領取「迷失之人」身分組的成員", color=discord.Color.blue())
         start = self.current_page * self.per_page
         end = start + self.per_page
-        
+
         embed.add_field(name="Member", value="\n".join(member.mention for member in self.members[start:end]) or "N/A", inline=True)
         embed.add_field(name="Join Time", value="\n".join(f"`{member.joined_at.strftime('%Y-%m-%d %H:%M:%S')}`"
                                                           for member in self.members[start:end]) or "N/A", inline=True)
@@ -105,12 +105,12 @@ class KickComfirmPage(MemberPage):
         embed.add_field(name="Member", value="\n".join(member.mention for member in self.members[start:end]) or "N/A", inline=True)
         embed.add_field(name="Join Time", value="\n".join(f"`{member.joined_at.strftime('%Y-%m-%d %H:%M:%S')}`"
                                                         for member in self.members[start:end]) or "N/A", inline=True)
-    
+
         embed.set_footer(text=f"共 {len(self.members)} 名成員")
 
         embed.set_footer(text=f"Page {self.current_page + 1}/{(len(self.members) - 1) // self.per_page + 1}")
         return embed
-    
+
     @discord.ui.button(label="❌ Confirm Kick", style=discord.ButtonStyle.danger)
     async def kick(self, button: discord.ui.Button, interaction: discord.Interaction):
         try:
@@ -144,7 +144,7 @@ class KickMemberPage(MemberPage):
         embed.add_field(name="Member", value="\n".join(member.mention for member in self.members[start:end]) or "N/A", inline=True)
         embed.add_field(name="Join Time", value="\n".join(f"`{member.joined_at.strftime('%Y-%m-%d %H:%M:%S')}`"
                                                         for member in self.members[start:end]) or "N/A", inline=True)
-    
+
         embed.set_footer(text=f"共踢出 {len(self.members)} 名成員")
 
         embed.set_footer(text=f"Page {self.current_page + 1}/{(len(self.members) - 1) // self.per_page + 1}")
@@ -162,7 +162,7 @@ class RemoveRolePage(MemberPage):
         end = start + self.per_page
 
         embed.add_field(name="Member", value="\n".join(member.mention for member in self.members[start:end]) or "N/A", inline=True)
-    
+
         embed.set_footer(text=f"共 {len(self.members)} 名成員")
 
         embed.set_footer(text=f"Page {self.current_page + 1}/{(len(self.members) - 1) // self.per_page + 1}")
@@ -196,16 +196,16 @@ class KickMenu(discord.ui.View):
         if not utils.is_developer(interaction.user):
             await interaction.response.send_message("❌ 你沒有權限使用此功能。", ephemeral=True)
             return
-        
+
         selected_days = int(interaction.data['values'][0]) # type: ignore
-        
+
         threshold_time = datetime.now(timezone.utc) - timedelta(days=selected_days)
         members_to_kick = [member for member in self.members if member.joined_at < threshold_time]
 
         if not members_to_kick:
             await interaction.response.send_message("沒有成員符合踢出的條件。")
             return
-        
+
         try:
             view = KickComfirmPage(self.logger, selected_days, members_to_kick)
 
@@ -253,7 +253,7 @@ class Member(commands.Cog):
                             for role in member.roles)]
         non_mygo_members.sort(key=lambda m: m.joined_at or discord.utils.snowflake_time(m.id))
         return non_mygo_members
-    
+
     async def __get_mygo_members(self, guild: discord.Guild) -> List[discord.Member]:
         members = guild.members
         mygo_members = [member for member in members if
@@ -261,19 +261,19 @@ class Member(commands.Cog):
                         for role in member.roles)]
         mygo_members.sort(key=lambda m: m.joined_at or discord.utils.snowflake_time(m.id))
         return mygo_members
-    
+
     async def __get_notify_members(self, guild: discord.Guild) -> List[discord.Member]:
         members = guild.members
         notify_members = [member for member in members if NOTIFY_ROLE in member.roles]
         notify_members.sort(key=lambda m: m.joined_at or discord.utils.snowflake_time(m.id))
         return notify_members
-    
+
     async def __get_no_mygo_members(self, guild: discord.Guild) -> List[discord.Member]:
         members = guild.members
         no_mygo_members = [member for member in members if NO_MYGO_ROLE in member.roles]
         no_mygo_members.sort(key=lambda m: m.joined_at or discord.utils.snowflake_time(m.id))
         return no_mygo_members
-    
+
     @tasks.loop(minutes=1)
     async def auto_detect_non_mygo_members(self):
         if not self.auto_detect:
@@ -282,7 +282,7 @@ class Member(commands.Cog):
         if self.guild is None:
             self.logger.warning("Guild is not set. Cannot auto-detect non-mygo members.")
             return
-        
+
         try:
             non_mygo_members = await self.__get_non_mygo_members(self.guild)
 
@@ -323,7 +323,7 @@ class Member(commands.Cog):
             if not non_mygo_members:
                 await ctx.respond("所有成員都已領取「迷失之人」身分組。")
                 return
-            
+
             view = NonMygoMemberPage(self.bot, self.logger, ctx, non_mygo_members)
             await ctx.respond(embed=view.get_page_embed(), view=view)
         except Exception as e:

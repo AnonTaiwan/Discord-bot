@@ -8,7 +8,7 @@ RECORD_FILE = utils.JSON_DIR / 'lotto.json'
 class Lotto(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        
+
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/lotto.py: 日誌系統初始化完成")
 
@@ -44,11 +44,11 @@ class Lotto(commands.Cog):
         if user is None:
             await ctx.respond("❌ 請指定欲加入抽選池的成員")
             return
-        
+
         if user.id in self.lotto_pool:
             await ctx.respond(f"❌ <@{user.id}> 已在抽選池中")
             return
-        
+
         self.lotto_pool.append(user.id)
         self.lotto_pool.sort()
         await self.__save_lotto()
@@ -65,11 +65,11 @@ class Lotto(commands.Cog):
         if user is None:
             await ctx.respond("❌ 請指定欲從抽選池移除的成員")
             return
-        
+
         if user.id not in self.lotto_pool:
             await ctx.respond(f"❌ <@{user.id}> 不在抽選池中")
             return
-        
+
         self.lotto_pool.remove(user.id)
         self.lotto_pool.sort()
         await self.__save_lotto()
@@ -85,7 +85,7 @@ class Lotto(commands.Cog):
         if not self.lotto_pool:
             await ctx.respond("抽選池目前沒有成員")
             return
-        
+
         embed = discord.Embed(title="抽選池成員列表", color=discord.Color.blue())
 
         embed.description = "\n".join(f"<@{user_id}>" for user_id in self.lotto_pool)

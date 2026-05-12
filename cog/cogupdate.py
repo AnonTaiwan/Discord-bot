@@ -1,5 +1,4 @@
-from discord.ext import commands, tasks
-from discord import Option, File
+from discord.ext import commands
 import discord
 from datetime import datetime
 import utils
@@ -7,12 +6,12 @@ import utils
 class CogManager(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        
+
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/cogupdate.py: 日誌系統初始化完成")
 
         self.date = datetime.now().strftime("%Y%m%d")
-    
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.author.bot:

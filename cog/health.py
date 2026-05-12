@@ -22,14 +22,14 @@ class Health(commands.Cog):
 
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/health.py: 日誌系統初始化完成")
-        
+
     @commands.Cog.listener()
     async def on_ready(self):
         self.channel = self.bot.get_channel(utils.TEST_CHANNEL_ID)
 
         if not self.health_message.is_running():
             self.health_message.start()
-        
+
     @tasks.loop(time=health_message_time)
     async def health_message(self):
         try:
@@ -46,7 +46,7 @@ class Health(commands.Cog):
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
             return
-        
+
         message = await ctx.respond("正在確認服務運作狀態...")
         await self.__health_check(message)
 
@@ -71,7 +71,7 @@ class Health(commands.Cog):
                 except Exception as e:
                     content += f'\n- ❌ <{endpoint}> (Error: {str(e)[:50]})'
                     self.logger.error(f"Health check error for {endpoint}: {e}")
-                
+
                 await message.edit(content=content)
         except Exception as e:
             self.logger.error(f"Health check failed: {e}")

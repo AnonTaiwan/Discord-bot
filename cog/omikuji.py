@@ -13,10 +13,10 @@ import utils
 #"大凶" Daikyo
 omikuji_results = [
     "Daikichi",
-    "Kichi", 
-    "Chukichi", 
-    "Shokichi", 
-    "Suekichi", 
+    "Kichi",
+    "Chukichi",
+    "Shokichi",
+    "Suekichi",
     "Kyo",
     "Daikyo"
 ]
@@ -46,7 +46,7 @@ class Omikuji(commands.Cog):
 
     def __is_valid_request(self, ctx: discord.ApplicationContext):
         return utils.is_developer(ctx.author) or utils.is_in_bot_playground(ctx.channel)
-    
+
     async def __send_no_permission_message(self, ctx: discord.ApplicationContext):
         await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
         self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限。")
@@ -60,7 +60,7 @@ class Omikuji(commands.Cog):
             female_suit = [838291392047743016, 1083753847220076574, 741308613993300058, 776808814455685120, 654273506921414656]
             if ctx.author.id not in female_suit:
                 return False
-            
+
             PIC_PATH = OMIKUJI_STATIC_DIR / 'female_suit.png'
             if PIC_PATH.exists():
                 pic = discord.File(str(PIC_PATH), filename=PIC_PATH.name)
@@ -71,12 +71,12 @@ class Omikuji(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error sending sticker: {e}")
             return True
-        
+
     def __is_exam_days(self) -> bool:
         now = datetime.now(utils.TIME_ZONE)
         gsat_month_days = [(1, 17), (1, 18), (1, 19), (5, 16), (5, 17)]
         return (now.month, now.day) in gsat_month_days
-    
+
     @commands.Cog.listener()
     async def on_ready(self):
         if not self.daily_message.is_running():
@@ -97,7 +97,7 @@ class Omikuji(commands.Cog):
                 await ctx.respond("你今天已經抽過籤了！請明天再來。")
                 return
 
-            weights = [0.05, 0.1, 0.2, 0.3, 0.2, 0.1, 0.05]  
+            weights = [0.05, 0.1, 0.2, 0.3, 0.2, 0.1, 0.05]
             result = random.choices(omikuji_results, weights=weights)[0]
 
             if self.__is_exam_days():
@@ -131,15 +131,15 @@ class Omikuji(commands.Cog):
             if not utils.is_developer(ctx.author):
                 await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
                 return
-            
+
             if user is None:
                 await ctx.respond("請指定一個使用者來重置抽籤名單。", ephemeral=True)
                 return
-            
+
             if user.id in self.omikuji:
                 self.omikuji.remove(user.id)
                 self.save_omikuji()
-        
+
             await ctx.respond(f"<@{user.id}> 已被重置。")
         except Exception as e:
             self.logger.error(f"Error responding to reset-omikuji command: {e}")
@@ -150,10 +150,10 @@ class Omikuji(commands.Cog):
             if not utils.is_developer(ctx.author):
                 await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
                 return
-            
+
             self.omikuji = []
             self.save_omikuji()
-        
+
             await ctx.respond("所有使用者的抽籤已被重置。")
         except Exception as e:
             self.logger.error(f"Error responding to reset-omikuji-all command: {e}")
@@ -163,8 +163,8 @@ class Omikuji(commands.Cog):
         self.omikuji = []
         self.save_omikuji()
 
-        try: 
-            channel = self.bot.get_channel(utils.BOT_PLAYGROUND_CHANNEL_ID) 
+        try:
+            channel = self.bot.get_channel(utils.BOT_PLAYGROUND_CHANNEL_ID)
             if channel:
                 await channel.send("每日運勢抽籤已重置！")
             else:

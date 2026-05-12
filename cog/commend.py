@@ -8,7 +8,7 @@ RECORD_FILE = utils.JSON_DIR / 'commend.json'
 class Commend(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        
+
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/commend.py: 日誌系統初始化完成")
 
@@ -82,7 +82,7 @@ class Commend(commands.Cog):
         if user is None:
             await ctx.respond("請指定一個使用者來表揚。", ephemeral=True)
             return
-        
+
         if user.id not in self.commendation:
             self.commendation[user.id] = 0
 
@@ -124,7 +124,7 @@ class Commend(commands.Cog):
             return
 
         embed = discord.Embed(title="所有表揚次數", color=discord.Color.purple())
-        
+
         commend_times = [[] for _ in range(3)]
         try:
             if not self.commendation:

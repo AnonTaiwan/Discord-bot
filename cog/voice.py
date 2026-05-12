@@ -77,11 +77,11 @@ class Voice(commands.Cog):
             await ctx.respond("❌ 你沒有權限使用此指令", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限")
             return
-        
+
         if (not minutes and not until) or (minutes and until):
             await ctx.respond("❌ 請提供其中一個參數：minutes 或 until", ephemeral=True)
             return
-        
+
         if minutes:
             try:
                 if minutes <= 0 or minutes > 1440:
@@ -107,7 +107,7 @@ class Voice(commands.Cog):
             except ValueError:
                 await ctx.respond("❌ 時間格式錯誤，請使用 HH:MM 格式 (24 小時制)", ephemeral=True)
                 return
-            
+
         self.kick_reservation.push(reservation_time, {
             "user_id": ctx.author.id,
             "reservation_time": reservation_time.strftime("%Y-%m-%dT%H:%M:%S%z")
@@ -124,14 +124,14 @@ class Voice(commands.Cog):
             await ctx.respond("❌ 你沒有權限使用此指令", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限")
             return
-        
+
         all_reservation = self.kick_reservation.get_raw_elements()
 
         reservation = []
         for item in all_reservation:
             if 'user_id' in item and item['user_id'] == ctx.author.id:
                 reservation.append(item)
-        
+
         try:
             embed = discord.Embed(title="我的語音頻道踢出預約列表", color=discord.Color.blue())
             if not reservation:
@@ -141,7 +141,7 @@ class Voice(commands.Cog):
             for data in reservation:
                 reservation_time = datetime.strptime(data['reservation_time'], "%Y-%m-%dT%H:%M:%S%z")
                 embed.add_field(name="時間", value=f"<t:{int(reservation_time.timestamp())}>", inline=False)
-            
+
             await ctx.respond(embed=embed, ephemeral=True)
         except Exception as e:
             ctx.respond("❌ 發生錯誤", ephemeral=True)
@@ -153,7 +153,7 @@ class Voice(commands.Cog):
             await ctx.respond("❌ 你沒有權限使用此指令", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限")
             return
-        
+
         all_reservation = self.kick_reservation.get_raw_elements()
 
         new_reservation = []
@@ -163,11 +163,11 @@ class Voice(commands.Cog):
                 removed_count += 1
                 continue
             new_reservation.append(item)
-        
+
         if removed_count == 0:
             await ctx.respond("❌ 你沒有任何預約可以移除", ephemeral=True)
             return
-        
+
         self.__make_reservation_empty()
         for item in new_reservation:
             reservation_time = datetime.strptime(item['reservation_time'], "%Y-%m-%dT%H:%M:%S%z")

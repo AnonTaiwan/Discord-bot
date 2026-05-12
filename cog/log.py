@@ -5,8 +5,6 @@ import asyncio
 import sys
 from datetime import datetime
 import utils
-import chat_exporter
-import io
 
 class Log(commands.Cog):
 
@@ -14,8 +12,8 @@ class Log(commands.Cog):
         self.bot = bot
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/log.py: 日誌系統初始化完成")
-        
-        
+
+
     @discord.slash_command(name="record_channel", description="記錄指定頻道的訊息")
     async def record_channel(self, ctx: discord.ApplicationContext, channel: discord.Option(discord.TextChannel, "選擇要記錄的頻道", default=None)): # type: ignore
         if not utils.is_operator(ctx.author):
@@ -30,7 +28,7 @@ class Log(commands.Cog):
             await self.record_channel_message(channel)
             self.logger.info(f"✅ {ctx.author.name} 使用指令記錄頻道 {channel.name} 的訊息。")
             await ctx.followup.send(f"✅ 頻道 {channel.mention} 的訊息已記錄完成。", ephemeral=True)
-        
+
     @discord.slash_command(name="log", description="查看日誌")
     async def log(self, ctx: discord.ApplicationContext, date: str = discord.Option(default=None, description="你想查詢的日期，例如 20250627")): # type: ignore
         if ctx.author.id not in utils.DEVELOPER:
@@ -59,7 +57,7 @@ class Log(commands.Cog):
             self.logger.info(f"日誌文件 {log_filename} 已發送給 {ctx.author.name}")
 
     @discord.slash_command(name="restart", description="重啟機器人")
-    async def restart(self, ctx: discord.ApplicationContext):  
+    async def restart(self, ctx: discord.ApplicationContext):
         if ctx.author.id in utils.DEVELOPER:
             await ctx.respond("🔄 機器人正在重啟...", ephemeral=True)
             self.logger.info(f"🔄 {ctx.author.name} 使用指令重啟機器人")
