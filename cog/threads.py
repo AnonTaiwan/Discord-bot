@@ -36,19 +36,29 @@ class Threads(commands.Cog):
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
         }
 
-        response = requests.get(url = link, headers=headers)
-        pattern = r"all_video_dash_prefetch_representations\":\[(.*?)\"nextgendash\":true}"
-        matches = re.findall(pattern, response.text, re.DOTALL)
-        file = json.loads(matches[0]+ '"nextgendash": true}')
+        try:
+            response = await asyncio.to_thread(requests.get, link, headers=headers, timeout=30)
+            pattern = r"all_video_dash_prefetch_representations\":\[(.*?)\"nextgendash\":true}"
+            matches = re.findall(pattern, response.text, re.DOTALL)
+            if not matches:
+                self.logger.error(f"__get_video_audio: 無法從 {link} 找到影片 manifest（pattern 不 match，可能 FB 改版）")
+                return
+            file = json.loads(matches[0] + '"nextgendash": true}')
 
-        for item in file['representations']:
-            if item.get("mime_type") == "audio/mp4":
-                url = item.get("base_url").replace("\\/", "/")
+            audio_url = None
+            for item in file['representations']:
+                if item.get("mime_type") == "audio/mp4":
+                    audio_url = item.get("base_url").replace("\\/", "/")
+            if not audio_url:
+                self.logger.error(f"__get_video_audio: post_id={post_id} 找不到 audio/mp4 representation")
+                return
 
-        response = requests.get(url, headers=headers)
-        route = utils.get_tmp_file(f"{post_id}.m4a")
-        with open(route, 'wb') as f:
-            f.write(response.content)
+            response = await asyncio.to_thread(requests.get, audio_url, headers=headers, timeout=30)
+            route = utils.get_tmp_file(f"{post_id}.m4a")
+            with open(route, 'wb') as f:
+                f.write(response.content)
+        except Exception as e:
+            self.logger.error(f"__get_video_audio 失敗 post_id={post_id}: {e}")
 
     async def __media_to_Discord(self, media_url, media_type, post_id=None):
         channel = self.bot.get_channel(utils.THREADS_MEDIA_CHANNEL_ID)
@@ -157,16 +167,21 @@ class Threads(commands.Cog):
         if post_tag != "無標籤":
             payload["topic_tag"] = f"{post_tag}"
 
-        response = requests.post(post_url, data=payload)
+        response = await asyncio.to_thread(requests.post, post_url, data=payload, timeout=30)
         data = response.json()
+        if not data.get('id'):
+            self.logger.error(f"__text_post 建立 container 失敗 post_id={post_id}, status={response.status_code}, response={response.text}")
+            return data
         await asyncio.sleep(5)  # 避免過快請求導致失敗
         post_media_url = f"https://graph.threads.net/v1.0/{ID}/threads_publish"
         payload = {
             "access_token": API,
             "creation_id" : data.get('id'),
         }
-        response = requests.post(post_media_url, data=payload)
+        response = await asyncio.to_thread(requests.post, post_media_url, data=payload, timeout=30)
         data = response.json()
+        if not data.get('id'):
+            self.logger.error(f"__text_post publish 失敗 post_id={post_id}, status={response.status_code}, response={response.text}")
         return data
 
     async def __single_post(self, post_id, message_id, media_url):
@@ -176,7 +191,7 @@ class Threads(commands.Cog):
         post_info = threads_data[str(message_id)]
         text = post_info['text']
         post_tag = post_info.get('tag', '無標籤')
-        
+
         create_media_url = f"https://graph.threads.net/v1.0/{ID}/threads"
         payload = {
             "access_token": API,
@@ -186,29 +201,35 @@ class Threads(commands.Cog):
         }
         if post_tag != "無標籤":
             payload["topic_tag"] = f"{post_tag}"
-        
-        response = requests.post(create_media_url, data=payload)
+
+        self.logger.info(f"__single_post 建立 container post_id={post_id}, image_url={media_url}")
+        response = await asyncio.to_thread(requests.post, create_media_url, data=payload, timeout=30)
         data = response.json()
         Media_ID = data.get('id')
+        if not Media_ID:
+            self.logger.error(f"__single_post 建立 container 失敗 post_id={post_id}, status={response.status_code}, response={response.text}")
+            return data
         await asyncio.sleep(5)  # 避免過快請求導致失敗
         post_media_url = f"https://graph.threads.net/v1.0/{ID}/threads_publish"
         payload = {
             "access_token": API,
             "creation_id" : Media_ID,
         }
-        response = requests.post(post_media_url, data=payload)
+        response = await asyncio.to_thread(requests.post, post_media_url, data=payload, timeout=30)
         data = response.json()
+        if not data.get('id'):
+            self.logger.error(f"__single_post publish 失敗 post_id={post_id}, status={response.status_code}, response={response.text}")
         return data
 
     async def __video_post(self, post_id, message_id, media_url):
         ID = utils.THREADS_ID
         API = utils.THREADS_TOKEN
-        
+
         threads_data = self.read_json_file('JSON/threads.json')
         post_info = threads_data[str(message_id)]
         text = post_info['text']
         post_tag = post_info.get('tag', '無標籤')
-        
+
         create_media_url = f"https://graph.threads.net/v1.0/{ID}/threads"
         payload = {
             "access_token": API,
@@ -218,24 +239,29 @@ class Threads(commands.Cog):
         }
         if post_tag != "無標籤":
             payload["topic_tag"] = f"{post_tag}"
-        
-        response = requests.post(create_media_url, data=payload)
-        
+
+        self.logger.info(f"__video_post 建立 container post_id={post_id}, video_url={media_url}")
+        response = await asyncio.to_thread(requests.post, create_media_url, data=payload, timeout=30)
         data = response.json()
         Media_ID = data.get('id')
+        if not Media_ID:
+            self.logger.error(f"__video_post 建立 container 失敗 post_id={post_id}, status={response.status_code}, response={response.text}")
+            return data
         await asyncio.sleep(60)  # 避免過快請求導致失敗
         try:
             os.remove(utils.get_tmp_file(f"{post_id}.mp4"))
             os.remove(utils.get_tmp_file(f"{post_id}.m4a"))
         except Exception as e:
-            print("Error removing temporary files:", e)
+            self.logger.warning(f"無法移除暫存檔 post_id={post_id}: {e}")
         post_media_url = f"https://graph.threads.net/v1.0/{ID}/threads_publish"
         payload = {
             "access_token": API,
             "creation_id" : Media_ID,
         }
-        response = requests.post(post_media_url, data=payload)
+        response = await asyncio.to_thread(requests.post, post_media_url, data=payload, timeout=30)
         data = response.json()
+        if not data.get('id'):
+            self.logger.error(f"__video_post publish 失敗 post_id={post_id}, status={response.status_code}, response={response.text}")
         return data
         
     async def __multi_post(self, post_id, message_id, media_urls):
@@ -247,7 +273,7 @@ class Threads(commands.Cog):
         post_tag = post_info.get('tag', '無標籤')
         media_ids = []
 
-        for i in media_urls:
+        for idx, i in enumerate(media_urls):
             create_media_url = f"https://graph.threads.net/v1.0/{ID}/threads"
 
             payload = {
@@ -256,8 +282,12 @@ class Threads(commands.Cog):
                 "image_url": i,
                 "is_carousel_item": "true"
             }
-            response = requests.post(create_media_url, data=payload)
+            self.logger.info(f"__multi_post 建立 carousel item [{idx+1}/{len(media_urls)}] post_id={post_id}, image_url={i}")
+            response = await asyncio.to_thread(requests.post, create_media_url, data=payload, timeout=30)
             data = response.json()
+            if not data.get("id"):
+                self.logger.error(f"__multi_post carousel item 建立失敗 post_id={post_id}, idx={idx}, status={response.status_code}, response={response.text}")
+                return data
             media_ids.append(data.get("id"))
             await asyncio.sleep(2)  # 避免過快請求導致失敗
         carousel_url = f"https://graph.threads.net/v1.0/{ID}/threads"
@@ -269,26 +299,45 @@ class Threads(commands.Cog):
         }
         if post_tag != "無標籤":
             payload["topic_tag"] = f"{post_tag}"
-        
-        response = requests.post(carousel_url, data=payload)
+
+        response = await asyncio.to_thread(requests.post, carousel_url, data=payload, timeout=30)
         data = response.json()
         carousel_id = data.get("id")
+        if not carousel_id:
+            self.logger.error(f"__multi_post carousel 建立失敗 post_id={post_id}, status={response.status_code}, response={response.text}")
+            return data
         await asyncio.sleep(5)  # 避免過快請求導致失敗
         post_carousel_url = f"https://graph.threads.net/v1.0/{ID}/threads_publish"
         payload = {
             "access_token": API,
             "creation_id" : carousel_id,
         }
-        response = requests.post(post_carousel_url, data=payload)
+        response = await asyncio.to_thread(requests.post, post_carousel_url, data=payload, timeout=30)
         data = response.json()
+        if not data.get('id'):
+            self.logger.error(f"__multi_post publish 失敗 post_id={post_id}, status={response.status_code}, response={response.text}")
         return data
         
     async def __check_post_status(self, data, post_id, message_id):
         data_id = data.get("id")
         self.channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
-        print("Posted thread with media ID:", data_id)
+        self.logger.info(f"Threads 發布結果 post_id={post_id}, response_id={data_id}")
         if data_id is None:
-            embed = discord.Embed(title="貼文發布失敗", description=f"貼文 ID: {post_id} 發布到 Threads 失敗。", color=0xff0000)
+            err = data.get("error", {}) if isinstance(data, dict) else {}
+            err_msg = err.get("message", "未知錯誤")
+            err_type = err.get("type", "")
+            err_code = err.get("code", "")
+            err_subcode = err.get("error_subcode", "")
+            err_fbtrace = err.get("fbtrace_id", "")
+            self.logger.error(f"Threads 發布失敗完整回應 post_id={post_id}: {data}")
+            desc = (
+                f"貼文 ID: {post_id} 發布到 Threads 失敗。\n"
+                f"**錯誤訊息**：{err_msg}\n"
+                f"**類型 / 代碼**：{err_type} / {err_code}"
+                + (f" ({err_subcode})" if err_subcode else "")
+                + (f"\n**fbtrace_id**：`{err_fbtrace}`" if err_fbtrace else "")
+            )
+            embed = discord.Embed(title="貼文發布失敗", description=desc, color=0xff0000)
             await self.channel.send(embed=embed)
             return False
         else:
@@ -318,41 +367,41 @@ https://www.anontaiwan.meme/'''
         }
 
         try:
-            response = requests.post(API_URL, data=payload)
+            response = await asyncio.to_thread(requests.post, API_URL, data=payload, timeout=30)
 
             response_data = response.json()
             creation_id = response_data.get("id")
-            
+
             if creation_id:
                 await asyncio.sleep(5)
-                
+
                 publish_url = f"https://graph.threads.net/v1.0/{ID}/threads_publish"
                 publish_payload = {
                     "creation_id": creation_id,
                     "access_token": API
                 }
-                
-                publish_response = requests.post(publish_url, data=publish_payload)
+
+                publish_response = await asyncio.to_thread(requests.post, publish_url, data=publish_payload, timeout=30)
                 publish_response.raise_for_status()
-                
+
                 embed = message.embeds[0]
                 embed.set_field_at(0, name="引流連結", value=f"已成功發布", inline=False)
                 await message.edit(embed=embed)
             else:
+                self.logger.error(f"__reply_post 建立 reply container 失敗 threads_id={threads_id}, status={response.status_code}, response={response.text}")
                 embed = message.embeds[0]
                 embed.set_field_at(0, name="引流連結", value=f"發布回覆失敗", inline=False)
                 embed.color = 0xff0000
                 await message.edit(embed=embed)
 
         except requests.exceptions.HTTPError as errh:
-            print(f"❌ HTTP 錯誤發生 (請檢查 Access Token, Threads ID 和權限): {errh}")
-            # 打印詳細的響應內容
+            self.logger.error(f"__reply_post HTTP 錯誤 (請檢查 Access Token, Threads ID 和權限): {errh}")
             try:
                 self.logger.error(f"HTTP 錯誤詳細資訊：{response.text}")
-            except:
+            except Exception:
                 self.logger.error("無法獲取響應內容")
         except requests.exceptions.RequestException as err:
-            print(f"❌ 連接或超時錯誤：{err}")
+            self.logger.error(f"__reply_post 連接或超時錯誤：{err}")
 
     def read_json_file(self, file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -524,11 +573,15 @@ https://www.anontaiwan.meme/'''
     async def get_post_details(self, post_id) -> dict:
         access_token = utils.FACEBOOK_TOKEN if utils.FB_PAGE_ID in post_id else utils.GBC_TOKEN
         url = f"https://graph.facebook.com/{post_id}/attachments?access_token={access_token}"
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            self.logger.error(f"無法取得貼文 {post_id} 的詳細資訊，狀態碼：{response.status_code}")
+        try:
+            response = await asyncio.to_thread(requests.get, url, timeout=30)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                self.logger.error(f"無法取得貼文 {post_id} 的詳細資訊，狀態碼：{response.status_code}, response={response.text}")
+                return {}
+        except Exception as e:
+            self.logger.error(f"get_post_details 例外 post_id={post_id}: {e}")
             return {}
 
     async def new_post_detected(self, post, page_id):
@@ -536,6 +589,16 @@ https://www.anontaiwan.meme/'''
         if channel is None:
             self.logger.error("無法找到 Facebook Thread 頻道")
             return
+        # 雙保險：避免上游重複觸發導致建出多份待處理草稿
+        try:
+            with open('JSON/threads.json', 'r', encoding='utf-8') as f:
+                existing = json.load(f)
+            if any(entry.get('post_id') == post['id'] for entry in existing.values()):
+                self.logger.info(f"貼文 {post['id']} 已存在 threads.json 草稿池，跳過重複建立")
+                return
+        except (FileNotFoundError, json.JSONDecodeError):
+            pass
+
         data = await self.get_post_details(post['id'])
         text = post.get('message', '無內容')
 
@@ -568,7 +631,7 @@ https://www.anontaiwan.meme/'''
             return
             
         url = f"https://graph.threads.net/refresh_access_token?grant_type=th_refresh_token&access_token={utils.THREADS_TOKEN}"
-        response = requests.get(url)
+        response = await asyncio.to_thread(requests.get, url, timeout=30)
         if response.status_code == 200:
             data = response.json()
             access_token = data.get('access_token')
@@ -577,10 +640,11 @@ https://www.anontaiwan.meme/'''
             config['THREADS_TOKEN'] = access_token
             with open(utils.BOT_CONFIG_FILE, 'w', encoding='utf-8') as f:
                 json.dump(config, f, ensure_ascii=False, indent=4)
-            utils.update_bot_config('THREADS_TOKEN', access_token)
+            # 重新讀整個 bot.json 把 THREADS_TOKEN 全域變數更新（utils.update_bot_config 不接參數）
+            utils.update_bot_config()
             self.logger.info(f"成功更新 Threads 存取權杖：{data}")
         else:
-            self.logger.error(f"更新 Threads 存取權杖失敗，狀態碼：{response.status_code}")
+            self.logger.error(f"更新 Threads 存取權杖失敗，狀態碼：{response.status_code}, response={response.text}")
             channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
             await channel.send(f"<@&{utils.DEVELOPER_ROLE_ID}>更新 Threads 存取權杖失敗，請檢查日誌以獲取更多資訊")
 
