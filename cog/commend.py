@@ -1,9 +1,10 @@
 import discord
 from discord.ext import commands
 from datetime import timedelta
+from sqlmodel import select
 import utils
-
-RECORD_FILE = utils.JSON_DIR / 'commend.json'
+from internal import db
+from model import Commendation
 
 class Commend(commands.Cog):
     def __init__(self, bot):
@@ -12,15 +13,7 @@ class Commend(commands.Cog):
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/commend.py: 日誌系統初始化完成")
 
-        utils.check_exist_or_create_json(self.logger, RECORD_FILE, default_content={"commendation": {}})
-
-        commendation = utils.read_json(self.logger, RECORD_FILE, default_content={"commendation": {}}).get("commendation", {})
-        self.commendation = {int(k): v for k, v in commendation.items()}
-
     commend_command_group = discord.SlashCommandGroup(name="commend", description="表揚相關指令")
-
-    async def __save_commend(self):
-        utils.write_json(self.logger, RECORD_FILE, {"commendation": self.commendation})
 
     async def __timeout_user(self, ctx: discord.ApplicationContext, user: discord.Member, duration: timedelta, reason: str) -> bool:
         try:
@@ -83,11 +76,16 @@ class Commend(commands.Cog):
             await ctx.respond("請指定一個使用者來表揚。", ephemeral=True)
             return
 
-        if user.id not in self.commendation:
-            self.commendation[user.id] = 0
+        with db.get_session() as session:
+            sql = select(Commendation).where(Commendation.user_id == user.id)
+            commendation = session.exec(sql).first()
 
-        if record:
-            self.commendation[user.id] += 1
+            if commendation is None:
+                commendation = Commendation(user_id=user.id, amount=1)
+            else:
+                commendation.amount += 1
+
+            session.add(commendation)
 
         embed = discord.Embed(title="已表揚成員", color=discord.Color.green())
 
@@ -97,9 +95,11 @@ class Commend(commands.Cog):
         try:
             await ctx.respond(embed=embed)
 
-            if self.commendation[user.id] >= 3:
-                self.commendation[user.id] = 0
-                await self.__save_commend()
+            if commendation.amount >= 3:
+                commendation.amount = 0
+
+                with db.get_session() as session:
+                    session.add(commendation)
 
                 if not await self.__timeout_user(ctx, user, timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵"):
                     return
@@ -125,15 +125,19 @@ class Commend(commands.Cog):
 
         embed = discord.Embed(title="所有表揚次數", color=discord.Color.purple())
 
+        with db.get_session() as session:
+            sql = select(Commendation)
+            commendations = session.exec(sql).all()
+
         commend_times = [[] for _ in range(3)]
         try:
-            if not self.commendation:
+            if not commendations:
                 embed.add_field(name="目前沒有任何表揚紀錄。", value="\u200b", inline=False) # 使用零寬空格避免 Discord 不顯示欄位
             else:
-                for user_id, count in self.commendation.items():
-                    member = ctx.guild.get_member(user_id)
+                for commendation in commendations:
+                    member = ctx.guild.get_member(commendation.user_id)
                     if member:
-                        commend_times[count].append(member.mention)
+                        commend_times[commendation.amount].append(member.mention)
 
                 for i in range(1, 3):
                     if commend_times[i]:
