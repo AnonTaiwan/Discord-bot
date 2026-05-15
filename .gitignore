@@ -12,3 +12,5 @@ Anon Taiwan.code-workspace
 
 JSON/
 !JSON/bot.json.sample
+
+*.db

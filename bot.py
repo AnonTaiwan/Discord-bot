@@ -6,6 +6,7 @@ import logging
 from datetime import datetime, timedelta, date, time
 from pathlib import Path
 import utils
+from internal import db
 
 class MyBot(commands.Bot):
     def __init__(self):
@@ -88,6 +89,8 @@ def setup_tmp_dir():
         tmp_dir.mkdir(parents=True, exist_ok=True)
 
 async def main():
+    db.run_migrations()
+
     logger = None
     current_date = None
     while True:
