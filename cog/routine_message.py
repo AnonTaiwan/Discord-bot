@@ -123,10 +123,18 @@ class RoutineMessage(commands.Cog):
 
         days = (CAP_day - today).days
 
+        message = ""
+        if days > 0:
+            message = f"距離 2026 國中教育會考還有 {days} 天，考生加油！"
+        elif -1 <= days <= 0:
+            message = f"今天是 2026 國中教育會考 Day {1 - days}，考生加油！"
+        else:
+            return
+
         try:
             candidates_mentions = "\n".join([f"<@{candidate_id}>" for candidate_id in CAP_candidates])
 
-            await channel.send(f"距離 2026 國中教育會考還有 {days} 天，考生加油！\n\n{candidates_mentions}")
+            await channel.send(f"{message}\n\n{candidates_mentions}")
         except Exception as e:
             self.logger.error(f"Error reminding CAP candidates: {e}")
 
