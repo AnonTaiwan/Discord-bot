@@ -190,29 +190,3 @@ def write_json(logger: logging.Logger, file: Path, data: dict) -> bool:
 
 def get_tmp_file(filename: str) -> str:
     return str(TMP_DIR / filename)
-
-class PriorityQueue():
-    def __init__(self, save_callback):
-        self.elements = []
-        self.save_callback = save_callback
-
-    def get_raw_elements(self):
-        return [item for _, item in self.elements]
-
-    def __save(self):
-        if self.save_callback:
-            self.save_callback()
-
-    def empty(self):
-        return not self.elements
-
-    def push(self, priority, item):
-        heapq.heappush(self.elements, (priority, item))
-        self.__save()
-
-    def top(self):
-        return self.elements[0]
-
-    def pop(self):
-        heapq.heappop(self.elements)
-        self.__save()

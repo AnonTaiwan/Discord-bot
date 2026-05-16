@@ -7,11 +7,9 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 import utils
 import asyncio
+from model import facebook
 
 daily_message_time = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  # 每日訊息時間設定
-
-RECORD_FILE = utils.JSON_DIR / 'facebook.json'
-POSTED_IDS_MAX = 200  # 已推播 id 記憶上限（FIFO）
 
 class ConfirmButton(discord.ui.View):
     def __init__(self, post_id, link, type, original_msg):
@@ -99,36 +97,16 @@ class CommentButton(discord.ui.View):
 class NewFB(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.comment_unchecked_posts = utils.PriorityQueue(self.__save_facebook_record)
         self.logger = utils.get_logger(__name__)
-        # 已推播過的貼文 id（FIFO，上限 POSTED_IDS_MAX）；Anon Taiwan 與 GBC 共用，因為 FB post id 全域唯一
-        self.posted_ids: list[str] = []
         self.logger.info("cog/facebook.py: 日誌系統初始化完成")
-
-        default_record = {"comment_unchecked_posts": [], "posted_ids": []}
-        utils.check_exist_or_create_json(self.logger, RECORD_FILE, default_record)
-        record = utils.read_json(self.logger, RECORD_FILE, default_record)
-        for item in record.get("comment_unchecked_posts", []):
-            created_time = datetime.strptime(item['created_time'], "%Y-%m-%dT%H:%M:%S%z")
-            self.comment_unchecked_posts.push(created_time, item)
-        self.posted_ids = list(record.get("posted_ids", []))
 
     fb_command_group = discord.SlashCommandGroup(name="fb", description="Facebook 相關指令")
 
-    def __save_facebook_record(self):
-        utils.write_json(self.logger, RECORD_FILE, {
-            "comment_unchecked_posts": self.comment_unchecked_posts.get_raw_elements(),
-            "posted_ids": self.posted_ids,
-        })
-
     def __mark_posted(self, post_id: str | None):
-        """將貼文 id 加入已推播紀錄並持久化；FIFO，超過上限會丟掉最舊的。"""
-        if not post_id or post_id in self.posted_ids:
+        """將貼文 id 加入已推播紀錄並持久化。"""
+        if not post_id or facebook.check_posted_id_exists(post_id):
             return
-        self.posted_ids.append(post_id)
-        if len(self.posted_ids) > POSTED_IDS_MAX:
-            self.posted_ids = self.posted_ids[-POSTED_IDS_MAX:]
-        self.__save_facebook_record()
+        facebook.add_posted_id(post_id)
 
     async def get_datas(self, page_id, limit=3):
         """Fetch Facebook posts with timeout and retry."""
@@ -190,7 +168,7 @@ class NewFB(commands.Cog):
         message = bytes(message, 'utf-8').decode(encoding="utf-8", errors="ignore")
         if len(message) > 1024:
             message = message[:1021] + "..."
-        if data.get('id') is not None and data.get('id') in self.posted_ids:
+        if data.get('id') is not None and facebook.check_posted_id_exists(data.get('id')):
             self.logger.info(f"貼文 {data['id']} 已經發送過通知，跳過。")
             return
 
@@ -258,8 +236,8 @@ class NewFB(commands.Cog):
         self.logger.info(f"已發送留言提醒通知：{post_id}")
 
     async def __if_post_updates(self, datas):
-        # 以持久化的 posted_ids 過濾，避免「刪除最新貼文後次新貼文被誤推」
-        return [i for i in datas if i.get('id') and i['id'] not in self.posted_ids]
+        # 使用持久化的 posted_ids 過濾，避免「刪除最新貼文後次新貼文被誤推」
+        return [i for i in datas if i.get('id') and not facebook.check_posted_id_exists(i['id'])]
 
     async def __handle_new_post(self, datas, page_id):
         new_posts = await self.__if_post_updates(datas)
@@ -276,7 +254,8 @@ class NewFB(commands.Cog):
                 else:
                     create_time = datetime.strptime(create_time_str, "%Y-%m-%dT%H:%M:%S%z").replace(tzinfo=utils.TIME_ZONE)
 
-                self.comment_unchecked_posts.push(create_time, post)
+                post_json = json.dumps(post)
+                facebook.add_comment_check_queue(post['id'], post_json, create_time)
                 self.logger.info(f"已將貼文 {post['id']} 加入待檢查留言列表。")
             try:
                 threads = self.bot.get_cog('Threads')
@@ -290,15 +269,13 @@ class NewFB(commands.Cog):
         if not os.path.exists("tmp"):
             os.makedirs("tmp")
         # 首次部署（posted_ids 為空）時用當下最新貼文當基準，避免把當下看到的全部當新貼文推
-        if not self.posted_ids:
+        if not facebook.list_all_posted_ids():
             self.logger.info("posted_ids 為空，使用當下最新貼文初始化基準（不推播）")
             anon_datas = await self.get_datas(page_id=utils.FB_PAGE_ID)
             gbc_datas = await self.get_datas(page_id=utils.GBC_FB_PAGE_ID)
             for post in anon_datas + gbc_datas:
                 if post.get('id'):
-                    self.posted_ids.append(post['id'])
-            if self.posted_ids:
-                self.__save_facebook_record()
+                    facebook.add_posted_id(post['id'])
         # self.reel = requests.get(f'https://graph.facebook.com/v23.0/{utils.FB_PAGE_ID}/video_reels?fields=description,created_time,permalink_url&access_token={utils.FACEBOOK_TOKEN}&limit=3').json()['data'][0]['id']
 
         if not self.check_comments_routine.is_running():
@@ -319,13 +296,12 @@ class NewFB(commands.Cog):
     async def check_comments_routine(self):
         try:
             now = datetime.now(utils.TIME_ZONE)
-            while not self.comment_unchecked_posts.empty():
-                created_time, data = self.comment_unchecked_posts.top()
-                if now - created_time < timedelta(minutes=10):
-                    break
-
-                self.comment_unchecked_posts.pop()
-                await self.__check_comments(data['id'], data.get('message', ''), data.get('permalink_url', '').replace('\\',''))
+            ten_minutes_ago = now - timedelta(minutes=10)
+            queue_items = facebook.get_due_comment_checks(ten_minutes_ago)
+            for item in queue_items:
+                post_data = json.loads(item.post_data)
+                await self.__check_comments(post_data['id'], post_data.get('message', ''), post_data.get('permalink_url', '').replace('\\',''))
+                facebook.remove_comment_check_by_id(item.id)
         except Exception as e:
             self.logger.error(f"Error checking comments: {e}")
 
