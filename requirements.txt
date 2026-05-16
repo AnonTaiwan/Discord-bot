@@ -16,6 +16,7 @@ sqlmodel>=0.0.38
 alembic>=1.18.4
 PyYAML>=6.0.3
 audioop-lts>=0.2.2
+dacite>=1.9.2
 # 可選套件 (提升性能)
 lxml>=4.9.0
 html5lib>=1.1

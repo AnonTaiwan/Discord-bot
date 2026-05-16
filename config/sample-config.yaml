@@ -1,0 +1,17 @@
+discord:
+  token: Put your discord bot token here
+  developer_ids:
+    - discord_id_1
+    - discord_id_2
+    - discord_id_3
+database:
+  filename: sqlite.db
+meta:
+  facebook_token: Put your facebook access token here
+  gbc_token: Put your second facebook access token here
+  threads_token: Put your threads access token here
+google:
+  gemini_token: Put your Gemini access token here
+  google_client_id: Put your google clientID here
+  google_client_secret: Put your client secret here
+  google_refresh_token: Put your refresh token here

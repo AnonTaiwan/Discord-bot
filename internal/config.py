@@ -1,58 +1,68 @@
-from dataclasses import dataclass
-from typing import Any, Dict
+from dataclasses import dataclass, field, asdict
+from pathlib import Path
+from typing import Any, List
+import yaml
+from dacite import from_dict
 
-import utils
+@dataclass
+class DiscordConfig:
+    token: str = ""
+    developer_ids: List[int] = field(default_factory=list)
 
 @dataclass
 class DatabaseConfig:
-    filename: str = "sqlite.db"
+    filename: str = ""
+
+@dataclass
+class MetaConfig:
+    facebook_token: str = ""
+    gbc_token: str = ""
+    threads_token: str = ""
+
+@dataclass
+class GoogleConfig:
+    gemini_token: str = ""
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    google_refresh_token: str = ""
 
 @dataclass
 class Config:
-    database: DatabaseConfig
+    discord: DiscordConfig = field(default_factory=DiscordConfig)
+    database: DatabaseConfig = field(default_factory=DatabaseConfig)
+    meta: MetaConfig = field(default_factory=MetaConfig)
+    google: GoogleConfig = field(default_factory=GoogleConfig)
 
-def _load_yaml_cfg(path: str) -> Dict[str, Any]:
-    try:
-        import yaml
-
-        with open(path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
-    except Exception:
-        # Fallback simple parser for tiny YAML subset used in this project
-        data: Dict[str, Any] = {}
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                current = data
-                for raw in f.readlines():
-                    line = raw.strip()
-                    if not line or line.startswith("#"):
-                        continue
-                    if ":" in line:
-                        key, val = line.split(":", 1)
-                        key = key.strip()
-                        val = val.strip()
-                        if val == "":
-                            # start of mapping
-                            current[key] = {}
-                            parent = current
-                            current = current[key]
-                        else:
-                            # scalar value
-                            # remove surrounding quotes if present
-                            if (val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")):
-                                val = val[1:-1]
-                            current[key] = val
-            return data
-        except Exception:
-            return {}
-
+def _load_yaml_config(path: str) -> dict[str, Any]:
+    with open(path, 'r') as file:
+        raw_cfg = yaml.safe_load(file) or {}
+    return raw_cfg
 
 def load_config() -> Config:
-    cfg_path = utils.ROOT_DIR / "config" / "config.yaml"
-    data = _load_yaml_cfg(str(cfg_path)) if cfg_path.exists() else {}
-    db_section = data.get("database", {}) or {}
-    filename = db_section.get("filename") or "sqlite.db"
-    return Config(database=DatabaseConfig(filename=filename))
+    cfg_path = Path(__file__).resolve().parent.parent / "config" / "config.yaml"
+    raw_cfg = _load_yaml_config(str(cfg_path))
 
+    return from_dict(data_class=Config, data=raw_cfg)
+
+def _save_yaml_config(path: str, data: dict[str, Any]) -> None:
+    with open(path, 'w', encoding='utf-8') as file:
+        yaml.safe_dump(data, file, sort_keys=False, allow_unicode=True)
+
+def save_config(cfg: Config) -> None:
+    path = Path(__file__).resolve().parent.parent / "config" / "config.yaml"
+
+    data = asdict(cfg)
+
+    out = {
+        "discord": data.get("discord", {}),
+        "database": data.get("database", {}),
+        "meta": data.get("meta", {}),
+        "google": data.get("google", {}),
+    }
+
+    _save_yaml_config(str(path), out)
+
+    global CONFIG
+    CONFIG = cfg
 
 CONFIG = load_config()

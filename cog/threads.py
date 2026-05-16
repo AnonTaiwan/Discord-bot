@@ -634,13 +634,7 @@ https://www.anontaiwan.meme/'''
         if response.status_code == 200:
             data = response.json()
             access_token = data.get('access_token')
-            with open(utils.BOT_CONFIG_FILE, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-            config['THREADS_TOKEN'] = access_token
-            with open(utils.BOT_CONFIG_FILE, 'w', encoding='utf-8') as f:
-                json.dump(config, f, ensure_ascii=False, indent=4)
-            # 重新讀整個 bot.json 把 THREADS_TOKEN 全域變數更新（utils.update_bot_config 不接參數）
-            utils.update_bot_config()
+            utils.update_token(threads = access_token)
             self.logger.info(f"成功更新 Threads 存取權杖：{data}")
         else:
             self.logger.error(f"更新 Threads 存取權杖失敗，狀態碼：{response.status_code}, response={response.text}")

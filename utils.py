@@ -4,6 +4,7 @@ import heapq
 import json
 import logging
 from pathlib import Path
+from internal import config
 
 # 時區設定
 
@@ -19,32 +20,42 @@ TMP_DIR = ROOT_DIR / 'tmp'
 
 # Bot 相關配置
 
-BOT_CONFIG_FILE = JSON_DIR / 'bot.json'
-try:
-    with open(JSON_DIR / 'bot.json', 'r', encoding='utf-8') as f:
-        config = json.load(f)
-    DEVELOPER = config.get("DEVELOPER", [])
-    BOT_TOKEN = config.get("DISCORD_BOT_TOKEN", "")
-    FACEBOOK_TOKEN = config.get("FACEBOOK_TOKEN", "")
-    GBC_TOKEN = config.get("GBC_TOKEN", "")
-    THREADS_TOKEN = config.get("THREADS_TOKEN", "")
-    GOOGLE_CLIENT_ID = config.get("GOOGLE_CLIENT_ID", "")
-    GOOGLE_CLIENT_SECRET = config.get("GOOGLE_CLIENT_SECRET", "")
-    GOOGLE_REFRESH_TOKEN = config.get("GOOGLE_REFRESH_TOKEN", "")
-except Exception as e:
-    print(f"Error reading {BOT_CONFIG_FILE}: {e}")
+def load_config():
+    global DEVELOPER, BOT_TOKEN, FACEBOOK_TOKEN, GBC_TOKEN, THREADS_TOKEN
+    global GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN
 
-def update_bot_config():
-    try:
-        with open(BOT_CONFIG_FILE, 'r', encoding='utf-8') as f:
-            config = json.load(f)
-        global DEVELOPER, BOT_TOKEN, FACEBOOK_TOKEN, THREADS_TOKEN
-        DEVELOPER = config.get("DEVELOPER", [])
-        BOT_TOKEN = config.get("DISCORD_BOT_TOKEN", "")
-        FACEBOOK_TOKEN = config.get("FACEBOOK_TOKEN", "")
-        THREADS_TOKEN = config.get("THREADS_TOKEN", "")
-    except Exception as e:
-        print(f"Error updating {BOT_CONFIG_FILE}: {e}")
+    cfg = config.CONFIG
+
+    DEVELOPER = cfg.discord.developer_ids
+    BOT_TOKEN = cfg.discord.token
+    FACEBOOK_TOKEN = cfg.meta.facebook_token
+    GBC_TOKEN = cfg.meta.gbc_token
+    THREADS_TOKEN = cfg.meta.threads_token
+    GOOGLE_CLIENT_ID = cfg.google.google_client_id
+    GOOGLE_CLIENT_SECRET = cfg.google.google_client_secret
+    GOOGLE_REFRESH_TOKEN = cfg.google.google_refresh_token
+
+def update_token(**kwargs):
+    new_cfg = config.CONFIG
+
+    if 'threads' in kwargs:
+        new_cfg.meta.threads_token = kwargs['threads']
+    
+    config.save_config(new_cfg)
+    load_config()
+
+cfg = None
+
+DEVELOPER = []
+BOT_TOKEN = ""
+FACEBOOK_TOKEN = ""
+GBC_TOKEN = ""
+THREADS_TOKEN = ""
+GOOGLE_CLIENT_ID = ""
+GOOGLE_CLIENT_SECRET = ""
+GOOGLE_REFRESH_TOKEN = ""
+
+load_config()
 
 # Facebook 相關配置
 
