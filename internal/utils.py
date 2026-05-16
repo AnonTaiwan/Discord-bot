@@ -1,6 +1,5 @@
 import discord
 from datetime import timedelta, timezone
-import heapq
 import json
 import logging
 from pathlib import Path
@@ -12,7 +11,8 @@ TIME_ZONE = timezone(timedelta(hours=8))
 
 # 專案路徑
 
-ROOT_DIR = Path(__file__).resolve().parent
+# When placed under internal/, ROOT_DIR should be repository root
+ROOT_DIR = Path(__file__).resolve().parents[1]
 LOGS_DIR = ROOT_DIR / 'logs'
 JSON_DIR = ROOT_DIR / 'JSON'
 STATIC_DIR = ROOT_DIR / 'static'

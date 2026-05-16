@@ -5,8 +5,7 @@ import os
 import logging
 from datetime import datetime, timedelta, date, time
 from pathlib import Path
-import utils
-from internal import db
+from internal import db, utils
 
 class MyBot(commands.Bot):
     def __init__(self):

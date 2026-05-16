@@ -1,6 +1,6 @@
 from discord.ext import commands, tasks
 from datetime import datetime, time
-import utils
+from internal import utils
 
 retouch_picture_remind_time = [
     time(hour=14, minute=0, second=0, tzinfo=utils.TIME_ZONE),

@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import utils
+from internal import utils
 import random
 from pypinyin import lazy_pinyin, Style
 

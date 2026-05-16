@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 from datetime import datetime, timedelta
-import utils
+from internal import utils
 from model import voice
 
 class Voice(commands.Cog):

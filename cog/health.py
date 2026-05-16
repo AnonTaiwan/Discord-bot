@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 from curl_cffi import requests
 from datetime import time
 import asyncio
-import utils
+from internal import utils
 
 health_message_time = [
     time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE),

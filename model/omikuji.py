@@ -1,8 +1,7 @@
 from typing import List, Optional
 from datetime import date, datetime
 from sqlmodel import Field, SQLModel, select
-from internal import db
-import utils
+from internal import db, utils
 
 class OmikujiDraw(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)

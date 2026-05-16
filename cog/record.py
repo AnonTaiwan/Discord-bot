@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from discord import sinks
 from datetime import datetime
-import utils
+from internal import utils
 import os
 import shutil
 from pydub import AudioSegment

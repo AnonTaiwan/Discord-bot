@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord
 from datetime import datetime
-import utils
+from internal import utils
 
 class CogManager(commands.Cog):
     def __init__(self, bot):

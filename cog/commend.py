@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from datetime import timedelta
-import utils
+from internal import utils
 from model import commend
 
 class Commend(commands.Cog):

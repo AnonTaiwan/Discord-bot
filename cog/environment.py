@@ -6,7 +6,7 @@ import sys
 import asyncio
 import os
 from datetime import datetime
-import utils
+from internal import utils
 
 class Environment(commands.Cog):
     """自動檢查並安裝缺少的 Python 套件"""

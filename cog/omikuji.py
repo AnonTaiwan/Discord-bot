@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from datetime import datetime, time
 import random
-import utils
+from internal import utils
 from model import omikuji
 
 #"大吉" Daikichi

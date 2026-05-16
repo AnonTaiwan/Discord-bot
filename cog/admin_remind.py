@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from datetime import datetime, timedelta
-import utils
+from internal import utils
 import json
 
 class AdminRemind(commands.Cog):

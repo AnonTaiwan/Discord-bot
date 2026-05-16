@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import random
-import utils
+from internal import utils
 from model import lotto
 
 class Lotto(commands.Cog):

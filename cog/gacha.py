@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import random
-import utils
+from internal import utils
 
 gacha_rate = [785, 185, 30] # 各稀有度的抽中機率 N, R, SR
 gacha_rate_fes = [755, 185, 60] # FES 模式下的抽中機率 N, R, SR

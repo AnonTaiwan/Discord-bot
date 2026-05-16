@@ -2,7 +2,7 @@ import requests
 import discord
 from discord.ext import commands, tasks
 import json
-import utils
+from internal import utils
 import asyncio
 from datetime import datetime
 from io import BytesIO

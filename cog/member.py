@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from typing import List
 from datetime import datetime, timedelta, timezone
-import utils
+from internal import utils
 
 RECORD_FILE = utils.JSON_DIR / 'member.json'
 

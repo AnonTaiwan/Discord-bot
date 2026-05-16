@@ -5,7 +5,7 @@ import json
 from datetime import datetime, timedelta, time
 import os
 from PIL import Image, ImageDraw, ImageFont
-import utils
+from internal import utils
 import asyncio
 from model import facebook
 

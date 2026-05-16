@@ -7,7 +7,7 @@ from alembic.config import Config
 from alembic import command
 
 from internal.config import CONFIG
-import utils
+from internal import utils
 
 DB_FILENAME = CONFIG.database.filename
 DATABASE_PATH = utils.ROOT_DIR / DB_FILENAME

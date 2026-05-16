@@ -4,7 +4,7 @@ import os
 import asyncio
 import sys
 from datetime import datetime
-import utils
+from internal import utils
 
 class Log(commands.Cog):
 

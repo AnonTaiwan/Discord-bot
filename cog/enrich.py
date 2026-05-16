@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import utils
+from internal import utils
 import random
 import json
 import base64

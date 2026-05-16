@@ -3,7 +3,7 @@ from discord.ext import commands
 from discord.ui import Button, View
 import asyncio
 import re
-import utils
+from internal import utils
 
 class TraceLinkWarning(commands.Cog):
     def __init__(self, bot):
