@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 import utils
 from datetime import datetime
+from model import say
 
 # 預設訊息選項
 QUICK_MESSAGE_OPTIONS = ["屌你老母", "# 羊 駝 病 毒", "對了！說到機...", "咪咪洛德 幹他", "掐囉～(∠·ω< )⌒★", "要支持阿農台灣一輩子喔 👊"]
@@ -11,8 +12,6 @@ class Say(commands.Cog):
         self.bot = bot
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/say.py: 日誌系統初始化完成")
-        scheduled_messages_path = utils.JSON_DIR / "scheduled_messages.json"
-        utils.check_exist_or_create_json(self.logger, scheduled_messages_path)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -90,40 +89,40 @@ class Say(commands.Cog):
             await ctx.respond("❌ 訊息長度不能超過 2000 個字元。", ephemeral=True)
             return
 
-        t = datetime.strptime(time, "%Y-%m-%d %H:%M")
-        if t < datetime.now():
+        scheduled_time = datetime.strptime(time, "%Y-%m-%d %H:%M")
+        if scheduled_time < datetime.now():
             await ctx.respond("❌ 輸入的時間必須在未來。", ephemeral=True)
             return
 
         if channel is None:
             channel = ctx.channel
 
-        scheduled_messages = utils.read_json(self.logger, utils.JSON_DIR / "scheduled_messages.json")
-        scheduled_messages.setdefault(time, []).append([message, channel.id])
-        if utils.write_json(self.logger, utils.JSON_DIR / "scheduled_messages.json", scheduled_messages):
-            await ctx.respond(f"✅ 已成功排程訊息將於 {time} 在 {channel.mention} 傳送。", ephemeral=True)
-        else:
-            await ctx.respond("❌ 發生錯誤，無法排程訊息。", ephemeral=True)
+        say.add_schedule(message=message, channel_id=channel.id, scheduled_at=scheduled_time)
+        await ctx.respond(f"✅ 已成功排程訊息將於 {time} 在 {channel.mention} 傳送。", ephemeral=True)
 
     @tasks.loop(minutes=1)
     async def check_scheduled_messages(self):
-        scheduled_messages = utils.read_json(self.logger, utils.JSON_DIR / "scheduled_messages.json")
         now = datetime.now()
-        for time_str, messages in list(scheduled_messages.items()):
-            time = datetime.strptime(time_str, "%Y-%m-%d %H:%M")
-            if time <= now:
-                for message, channel_id in messages:
-                    channel = self.bot.get_channel(channel_id)
-                    if channel:
-                        try:
-                            await channel.send(message)
-                            self.logger.info(f"已成功傳送排程訊息：{message}")
-                        except Exception as e:
-                            self.logger.error(f"在頻道 {channel.id} 傳送排程訊息時發生錯誤：{e}")
-                    else:
-                        self.logger.error(f"無法找到頻道 ID {channel_id} 傳送排程訊息")
-                del scheduled_messages[time_str]
-                utils.write_json(self.logger, utils.JSON_DIR / "scheduled_messages.json", scheduled_messages)
+        due = say.get_due_scheduled(now)
+
+        if not due:
+            return
+
+        ids_to_remove = []
+        for item in due:
+            channel = self.bot.get_channel(item.channel_id)
+            if channel:
+                try:
+                    await channel.send(item.message)
+                    self.logger.info(f"已成功傳送排程訊息：{item.message}")
+                except Exception as e:
+                    self.logger.error(f"在頻道 {channel.id} 傳送排程訊息時發生錯誤：{e}")
+            else:
+                self.logger.error(f"無法找到頻道 ID {item.channel_id} 傳送排程訊息")
+
+            ids_to_remove.append(item.id)
+
+        say.remove_schedule_by_ids(ids_to_remove)
 
 def setup(bot: commands.Bot):
     bot.add_cog(Say(bot))
