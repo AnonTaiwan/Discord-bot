@@ -5,7 +5,14 @@ from datetime import datetime
 from model import say
 
 # 預設訊息選項
-QUICK_MESSAGE_OPTIONS = ["屌你老母", "# 羊 駝 病 毒", "對了！說到機...", "咪咪洛德 幹他", "掐囉～(∠·ω< )⌒★", "要支持阿農台灣一輩子喔 👊"]
+QUICK_MESSAGE_OPTIONS = [
+    "屌你老母",
+    "# 羊 駝 病 毒",
+    "對了！說到機...",
+    "咪咪洛德 幹他",
+    "掐囉～(∠·ω< )⌒★",
+    "要支持阿農台灣一輩子喔 👊"
+]
 
 class Say(commands.Cog):
     def __init__(self, bot):
