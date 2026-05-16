@@ -2,32 +2,15 @@ import discord
 from discord.ext import commands, tasks
 from datetime import datetime, timedelta
 import utils
-
-RECORD_FILE = utils.JSON_DIR / "voice.json"
+from model import voice
 
 class Voice(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.kick_reservation = utils.PriorityQueue(self.__save_kick_reservation)
-
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/voice.py: 日誌系統初始化完成")
 
-        utils.check_exist_or_create_json(self.logger, RECORD_FILE, {"kick_reservation": []})
-        record = utils.read_json(self.logger, RECORD_FILE, {"kick_reservation": []}).get("kick_reservation", [])
-        for item in record:
-            reservation_time = datetime.strptime(item['reservation_time'], "%Y-%m-%dT%H:%M:%S%z")
-            self.kick_reservation.push(reservation_time, item)
-
     voice_kick_command_group = discord.SlashCommandGroup(name="voice-kick", description="語音頻道踢出預約相關指令")
-
-    def __save_kick_reservation(self):
-        utils.write_json(self.logger, RECORD_FILE, {
-            "kick_reservation": self.kick_reservation.get_raw_elements()
-        })
-
-    def __make_reservation_empty(self):
-        self.kick_reservation = utils.PriorityQueue(self.__save_kick_reservation)
 
     def __is_valid_request(self, ctx: discord.ApplicationContext):
         return utils.is_developer(ctx.author) or utils.is_in_bot_playground(ctx.channel)
@@ -55,19 +38,15 @@ class Voice(commands.Cog):
 
     @tasks.loop(minutes=1)
     async def check_kick_reservation(self):
-        try:
-            now = datetime.now(utils.TIME_ZONE)
-            while not self.kick_reservation.empty():
-                reservation_time, data = self.kick_reservation.top()
-                if now < reservation_time:
-                    break
+        now = datetime.now(utils.TIME_ZONE)
+        due = voice.get_due_kick_reservations(now)
+        for r in due:
+            try:
+                await self.__kick_from_voice_channel(r.user_id)
+            except Exception:
+                self.logger.exception("Failed to kick user from voice channel")
 
-                self.kick_reservation.pop()
-                self.__save_kick_reservation()
-
-                await self.__kick_from_voice_channel(data['user_id'])
-        except Exception as e:
-            self.logger.error(f"Error checking kick reservation: {e}")
+            voice.remove_kick_reservation_by_id(r.id)
 
     @voice_kick_command_group.command(name="reserve", description="新增語音頻道踢出預約 (minutes 或 until 只能擇一)")
     async def add_reservation(self, ctx: discord.ApplicationContext,
@@ -108,10 +87,7 @@ class Voice(commands.Cog):
                 await ctx.respond("❌ 時間格式錯誤，請使用 HH:MM 格式 (24 小時制)", ephemeral=True)
                 return
 
-        self.kick_reservation.push(reservation_time, {
-            "user_id": ctx.author.id,
-            "reservation_time": reservation_time.strftime("%Y-%m-%dT%H:%M:%S%z")
-        })
+        voice.add_kick_reservation(ctx.author.id, reservation_time)
 
         try:
             await ctx.respond(f"✅ 已預約在 <t:{int(reservation_time.timestamp())}> 將你從語音頻道中踢出", ephemeral=True)
@@ -125,22 +101,16 @@ class Voice(commands.Cog):
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限")
             return
 
-        all_reservation = self.kick_reservation.get_raw_elements()
-
-        reservation = []
-        for item in all_reservation:
-            if 'user_id' in item and item['user_id'] == ctx.author.id:
-                reservation.append(item)
+        reservations = voice.list_kick_reservations_by_user(ctx.author.id)
 
         try:
             embed = discord.Embed(title="我的語音頻道踢出預約列表", color=discord.Color.blue())
-            if not reservation:
+            if not reservations:
                 embed.description = "目前沒有任何預約"
                 await ctx.respond(embed=embed, ephemeral=True)
                 return
-            for data in reservation:
-                reservation_time = datetime.strptime(data['reservation_time'], "%Y-%m-%dT%H:%M:%S%z")
-                embed.add_field(name="時間", value=f"<t:{int(reservation_time.timestamp())}>", inline=False)
+            for reservation in reservations:
+                embed.add_field(name="時間", value=f"<t:{int(reservation.reservation_time.timestamp())}>", inline=False)
 
             await ctx.respond(embed=embed, ephemeral=True)
         except Exception as e:
@@ -154,25 +124,10 @@ class Voice(commands.Cog):
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限")
             return
 
-        all_reservation = self.kick_reservation.get_raw_elements()
-
-        new_reservation = []
-        removed_count = 0
-        for item in all_reservation:
-            if 'user_id' in item and item['user_id'] == ctx.author.id:
-                removed_count += 1
-                continue
-            new_reservation.append(item)
-
+        removed_count = voice.remove_kick_reservation_by_user(ctx.author.id)
         if removed_count == 0:
             await ctx.respond("❌ 你沒有任何預約可以移除", ephemeral=True)
             return
-
-        self.__make_reservation_empty()
-        for item in new_reservation:
-            reservation_time = datetime.strptime(item['reservation_time'], "%Y-%m-%dT%H:%M:%S%z")
-            self.kick_reservation.push(reservation_time, item)
-        self.__save_kick_reservation()
 
         try:
             await ctx.respond(f"✅ 已移除 {removed_count} 筆預約", ephemeral=True)
