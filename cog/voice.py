@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from internal import utils
 from model import voice
 
+
 class Voice(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -49,9 +50,12 @@ class Voice(commands.Cog):
             voice.remove_kick_reservation_by_id(r.id)
 
     @voice_kick_command_group.command(name="reserve", description="新增語音頻道踢出預約 (minutes 或 until 只能擇一)")
-    async def add_reservation(self, ctx: discord.ApplicationContext,
-                              minutes: discord.Option(int, "多少分鐘後踢出 (< 1440)", min_value=1, max_value=1440, required=False), # type: ignore
-                              until: discord.Option(str, "指定時間踢出，格式為 HH:MM (24 小時制)", required=False)): # type: ignore
+    async def add_reservation(
+        self,
+        ctx: discord.ApplicationContext,
+        minutes: discord.Option(int, "多少分鐘後踢出 (< 1440)", min_value=1, max_value=1440, required=False),  # type: ignore
+        until: discord.Option(str, "指定時間踢出，格式為 HH:MM (24 小時制)", required=False),
+    ):  # type: ignore
         if not self.__is_valid_request(ctx):
             await ctx.respond("❌ 你沒有權限使用此指令", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用指令，但沒有權限")
@@ -133,6 +137,7 @@ class Voice(commands.Cog):
             await ctx.respond(f"✅ 已移除 {removed_count} 筆預約", ephemeral=True)
         except Exception as e:
             self.logger.error(f"Error in remove-kick-from-voice-reservation command: {e}")
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Voice(bot))

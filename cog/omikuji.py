@@ -5,26 +5,19 @@ import random
 from internal import utils
 from model import omikuji
 
-#"大吉" Daikichi
-#"吉"   Kichi
-#"中吉" Chukichi
-#"小吉" Shokichi
-#"末吉" Suekichi
-#"凶"   Kyo
-#"大凶" Daikyo
-omikuji_results = [
-    "Daikichi",
-    "Kichi",
-    "Chukichi",
-    "Shokichi",
-    "Suekichi",
-    "Kyo",
-    "Daikyo"
-]
+# "大吉" Daikichi
+# "吉"   Kichi
+# "中吉" Chukichi
+# "小吉" Shokichi
+# "末吉" Suekichi
+# "凶"   Kyo
+# "大凶" Daikyo
+omikuji_results = ["Daikichi", "Kichi", "Chukichi", "Shokichi", "Suekichi", "Kyo", "Daikyo"]
 
 daily_reset = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  # 每日訊息時間設定
 
-OMIKUJI_STATIC_DIR = utils.STATIC_DIR / 'omikuji'
+OMIKUJI_STATIC_DIR = utils.STATIC_DIR / "omikuji"
+
 
 class Omikuji(commands.Cog):
     def __init__(self, bot):
@@ -54,7 +47,7 @@ class Omikuji(commands.Cog):
             if ctx.author.id not in female_suit:
                 return False
 
-            PIC_PATH = OMIKUJI_STATIC_DIR / 'female_suit.png'
+            PIC_PATH = OMIKUJI_STATIC_DIR / "female_suit.png"
             if PIC_PATH.exists():
                 pic = discord.File(str(PIC_PATH), filename=PIC_PATH.name)
                 await ctx.respond(file=pic, content="抽到的籤是：大吉\n祝長期素食生日快樂")
@@ -75,9 +68,9 @@ class Omikuji(commands.Cog):
         if not self.daily_message.is_running():
             self.daily_message.start()
 
-        self.commend_cog = self.bot.get_cog('Commend')
+        self.commend_cog = self.bot.get_cog("Commend")
         if not self.commend_cog:
-            print('CommendCog not found!')
+            print("CommendCog not found!")
 
     @omikuji_command_group.command(name="draw", description="每日運勢抽籤 (此功能由 Kevin 提供)")
     async def draw_omikuji(self, ctx: discord.ApplicationContext):
@@ -99,7 +92,7 @@ class Omikuji(commands.Cog):
             if await self.__fun_event(ctx):
                 return
 
-            PIC_PATH = OMIKUJI_STATIC_DIR / f'{result}.jpg'
+            PIC_PATH = OMIKUJI_STATIC_DIR / f"{result}.jpg"
             if PIC_PATH.exists():
                 pic = discord.File(str(PIC_PATH), filename=PIC_PATH.name)
                 if self.__is_exam_days():
@@ -117,8 +110,7 @@ class Omikuji(commands.Cog):
             await ctx.respond("抽籤失敗，請稍後再試。")
 
     @omikuji_admin_command_group.command(name="reset", description="重置指定使用者抽籤")
-    async def reset_omikuji(self, ctx: discord.ApplicationContext,
-                            user: discord.Member):
+    async def reset_omikuji(self, ctx: discord.ApplicationContext, user: discord.Member):
         try:
             if not utils.is_developer(ctx.author):
                 await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
@@ -160,6 +152,7 @@ class Omikuji(commands.Cog):
                 self.logger.error("無法找到指定的頻道。")
         except Exception as e:
             self.logger.error(f"Error sending daily reset message: {e}")
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Omikuji(bot))

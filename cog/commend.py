@@ -4,6 +4,7 @@ from datetime import timedelta
 from internal import utils
 from model import commend
 
+
 class Commend(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -60,10 +61,13 @@ class Commend(commands.Cog):
             await self.playground_channel.send("❌ 發生錯誤，無法完成表揚。")
 
     @commend_command_group.command(name="new", description="表揚成員")
-    async def commend(self, ctx: discord.ApplicationContext,
-                      user: discord.Option(discord.Member, description="要表揚的成員", required=True, default=None), # type: ignore
-                      reason: discord.Option(description="表揚理由", required=False, default=""), # type: ignore
-                      record: discord.Option(bool, description="是否紀錄", required=False, default=True)): # type: ignore
+    async def commend(
+        self,
+        ctx: discord.ApplicationContext,
+        user: discord.Option(discord.Member, description="要表揚的成員", required=True, default=None),  # type: ignore
+        reason: discord.Option(description="表揚理由", required=False, default=""),  # type: ignore
+        record: discord.Option(bool, description="是否紀錄", required=False, default=True),
+    ):  # type: ignore
         if not utils.is_admin(ctx.author):
             await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
             return
@@ -99,7 +103,7 @@ class Commend(commands.Cog):
             await ctx.respond("❌ 發生錯誤，無法完成表揚。")
 
     @commend_command_group.command(name="list", description="查看成員的表揚次數")
-    async def show_commendations(self, ctx: discord.ApplicationContext): # type: ignore
+    async def show_commendations(self, ctx: discord.ApplicationContext):  # type: ignore
         try:
             await ctx.defer(ephemeral=True)
         except Exception as e:
@@ -114,7 +118,7 @@ class Commend(commands.Cog):
         commend_times = [[] for _ in range(3)]
         try:
             if not commendations:
-                embed.add_field(name="目前沒有任何表揚紀錄。", value="\u200b", inline=False) # 使用零寬空格避免 Discord 不顯示欄位
+                embed.add_field(name="目前沒有任何表揚紀錄。", value="\u200b", inline=False)  # 使用零寬空格避免 Discord 不顯示欄位
             else:
                 for commendation in commendations:
                     member = ctx.guild.get_member(commendation.user_id)
@@ -131,6 +135,7 @@ class Commend(commands.Cog):
         except Exception as e:
             self.logger.error(f"查看表揚次數時發生錯誤：{e}")
             await ctx.respond("❌ 發生錯誤", ephemeral=True)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Commend(bot))

@@ -4,6 +4,7 @@ import random
 from internal import utils
 from model import lotto
 
+
 class Lotto(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -18,7 +19,7 @@ class Lotto(commands.Cog):
         pass
 
     @lotto_command_group.command(name="draw", description="隨機抽選成員")
-    async def draw(self, ctx: discord.ApplicationContext): # type: ignore
+    async def draw(self, ctx: discord.ApplicationContext):  # type: ignore
         try:
             pool = lotto.list_pool()
             if not pool:
@@ -34,8 +35,11 @@ class Lotto(commands.Cog):
             await ctx.respond("❌ 發生錯誤，無法完成抽選", ephemeral=True)
 
     @lotto_command_group.command(name="add-user", description="新增成員至抽選池")
-    async def add_user(self, ctx: discord.ApplicationContext,
-                                 user: discord.Option(discord.Member, description="欲加入抽選池的成員", required=True, default=None)): # type: ignore
+    async def add_user(
+        self,
+        ctx: discord.ApplicationContext,
+        user: discord.Option(discord.Member, description="欲加入抽選池的成員", required=True, default=None),
+    ):  # type: ignore
         if user is None:
             await ctx.respond("❌ 請指定欲加入抽選池的成員")
             return
@@ -53,8 +57,11 @@ class Lotto(commands.Cog):
             await ctx.respond("❌ 發生錯誤，請稍後再試", ephemeral=True)
 
     @lotto_command_group.command(name="remove-user", description="從抽選池移除成員")
-    async def remove_user(self, ctx: discord.ApplicationContext,
-                                    user: discord.Option(discord.Member, description="欲從抽選池移除的成員", required=True, default=None)): # type: ignore
+    async def remove_user(
+        self,
+        ctx: discord.ApplicationContext,
+        user: discord.Option(discord.Member, description="欲從抽選池移除的成員", required=True, default=None),
+    ):  # type: ignore
         if user is None:
             await ctx.respond("❌ 請指定欲從抽選池移除的成員")
             return
@@ -72,7 +79,7 @@ class Lotto(commands.Cog):
             await ctx.respond("❌ 發生錯誤，請稍後再試", ephemeral=True)
 
     @lotto_command_group.command(name="list-users", description="列出抽選池中的成員")
-    async def list_users(self, ctx: discord.ApplicationContext): # type: ignore
+    async def list_users(self, ctx: discord.ApplicationContext):  # type: ignore
         pool = lotto.list_pool()
         if not pool:
             await ctx.respond("抽選池目前沒有成員")
@@ -87,6 +94,7 @@ class Lotto(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error responding to lotto list-users command: {e}")
             await ctx.respond("❌ 發生錯誤，請稍後再試", ephemeral=True)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Lotto(bot))

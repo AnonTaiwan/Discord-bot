@@ -12,28 +12,21 @@ fall_remind_time = [
     time(hour=20, minute=0, second=0, tzinfo=utils.TIME_ZONE),
 ]
 
-GSAT_AST_CAP_remind_time = [
-    time(hour=8, minute=0, second=0, tzinfo=utils.TIME_ZONE)
-]
+GSAT_AST_CAP_remind_time = [time(hour=8, minute=0, second=0, tzinfo=utils.TIME_ZONE)]
 
-midnight = [
-    time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)
-]
+midnight = [time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)]
 
 GSAT_day = datetime(year=2026, month=1, day=17, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
 AST_day = datetime(year=2026, month=7, day=11, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
 
-GSAT_AST_candidates = [
-    844613477485772822
-]
+GSAT_AST_candidates = [844613477485772822]
 
 CAP_day = datetime(year=2026, month=5, day=16, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
 
-CAP_candidates = [
-    854559172522409994
-]
+CAP_candidates = [854559172522409994]
 
 anon_taiwan_creation_day = datetime(year=2025, month=1, day=3, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
+
 
 class RoutineMessage(commands.Cog):
     def __init__(self, bot):
@@ -165,6 +158,7 @@ class RoutineMessage(commands.Cog):
             await channel.send("終於度過除夕來到了大年初一！\n祝大家新年快樂！🎉🎉🎉\n今年也要開開心心的一起當邦豚喔！！！")
         except Exception as e:
             self.logger.error(f"Error sending lunar new year message: {e}")
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(RoutineMessage(bot))

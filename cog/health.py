@@ -12,9 +12,10 @@ health_message_time = [
 ]  # 每日訊息時間設定
 
 health_check_endpoints = [
-    'https://anontaiwan.meme',
+    "https://anontaiwan.meme",
     # 'https://urls.anontaiwan.meme'
 ]  # 網頁服務檢查端點
+
 
 class Health(commands.Cog):
     def __init__(self, bot):
@@ -41,7 +42,7 @@ class Health(commands.Cog):
 
         self.logger.info("Health check completed and message sent.")
 
-    @discord.slash_command(name='healthcheck', description='確認服務運作狀態')
+    @discord.slash_command(name="healthcheck", description="確認服務運作狀態")
     async def health_check_command(self, ctx: discord.ApplicationContext):
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
@@ -52,30 +53,28 @@ class Health(commands.Cog):
 
     async def __health_check(self, message: discord.Message | discord.Interaction):
         try:
-            content = '### Health Check:'
+            content = "### Health Check:"
 
             for endpoint in health_check_endpoints:
                 # 使用 asyncio.to_thread 避免阻塞事件循環，並添加 5 秒超時
                 try:
-                    response = await asyncio.wait_for(
-                        asyncio.to_thread(requests.get, endpoint, timeout=5),
-                        timeout=10
-                    )
+                    response = await asyncio.wait_for(asyncio.to_thread(requests.get, endpoint, timeout=5), timeout=10)
                     if response.status_code == 200:
-                        content += f'\n- ✅ <{endpoint}>'
+                        content += f"\n- ✅ <{endpoint}>"
                     else:
-                        content += f'\n- ❌ <{endpoint}> (Status: {response.status_code})'
+                        content += f"\n- ❌ <{endpoint}> (Status: {response.status_code})"
                 except asyncio.TimeoutError:
-                    content += f'\n- ⏱️ <{endpoint}> (Timeout)'
+                    content += f"\n- ⏱️ <{endpoint}> (Timeout)"
                     self.logger.warning(f"Health check timeout for {endpoint}")
                 except Exception as e:
-                    content += f'\n- ❌ <{endpoint}> (Error: {str(e)[:50]})'
+                    content += f"\n- ❌ <{endpoint}> (Error: {str(e)[:50]})"
                     self.logger.error(f"Health check error for {endpoint}: {e}")
 
                 await message.edit(content=content)
         except Exception as e:
             self.logger.error(f"Health check failed: {e}")
             return False
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Health(bot))

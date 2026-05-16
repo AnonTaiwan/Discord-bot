@@ -1,6 +1,7 @@
 from discord.ext import commands
 from internal import utils
 
+
 class FBPost(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -10,6 +11,7 @@ class FBPost(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         self.logger.info("cog/fb_post.py: 機器人已準備就緒")
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(FBPost(bot))

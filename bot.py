@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, date, time
 from pathlib import Path
 from internal import db, utils
 
+
 class MyBot(commands.Bot):
     def __init__(self):
         super().__init__(intents=discord.Intents.all())
@@ -22,7 +23,7 @@ class MyBot(commands.Bot):
         await self.change_presence(status=discord.Status.online, activity=game)
         self.remove_command("help")
         # 防止斷線重連時重複創建 task
-        if not hasattr(self, 'midnight_log_task'):
+        if not hasattr(self, "midnight_log_task"):
             self.midnight_log_task = self.loop.create_task(self.auto_update_log_at_midnight())
 
     def load_extensions(self):
@@ -46,9 +47,8 @@ class MyBot(commands.Bot):
             seconds_to_midnight = (tomorrow - now).seconds
             print(f"將於 {seconds_to_midnight + 5} 秒後更新日誌")
             await asyncio.sleep(seconds_to_midnight + 5)  # 加上 5 秒的偏移
-            print('每日 12 點已到，正在更新日誌...')
+            print("每日 12 點已到，正在更新日誌...")
             setup_daily_logger()  # 更新日誌設定
-
 
 
 def setup_daily_logger():
@@ -57,35 +57,34 @@ def setup_daily_logger():
     logging.getLogger().handlers.clear()
 
     # 創建日誌目錄
-    if not os.path.exists('logs'):
-        os.makedirs('logs')
+    if not os.path.exists("logs"):
+        os.makedirs("logs")
 
-    log_dir = Path('logs')
+    log_dir = Path("logs")
     if not log_dir.is_dir():
         log_dir.mkdir(parents=True, exist_ok=True)
 
     # 設定日誌檔案名稱
-    log_file = log_dir / f'bot_{datetime.now():%Y%m%d}.log'
+    log_file = log_dir / f"bot_{datetime.now():%Y%m%d}.log"
 
     # 重新配置日誌
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
-        handlers=[
-            logging.FileHandler(log_file, encoding='utf-8'),
-            logging.StreamHandler()
-        ],
-        force=True  # 強制重新設定
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[logging.FileHandler(log_file, encoding="utf-8"), logging.StreamHandler()],
+        force=True,  # 強制重新設定
     )
 
     return logging.getLogger()
 
+
 def setup_tmp_dir():
     """確保 tmp 目錄存在"""
-    tmp_dir = Path('tmp')
+    tmp_dir = Path("tmp")
     if not tmp_dir.is_dir():
         tmp_dir.mkdir(parents=True, exist_ok=True)
+
 
 async def main():
     db.run_migrations()
@@ -119,6 +118,7 @@ async def main():
                 if not bot.is_closed():
                     await bot.close()
         await asyncio.sleep(10)  # 確保在重啟前有短暫的延遲
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -10,6 +10,7 @@ import time
 import asyncio
 import internal.GoogleDrive as gdrive
 
+
 class TimedWaveSink(sinks.WaveSink):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -20,7 +21,6 @@ class TimedWaveSink(sinks.WaveSink):
         self._write_lock = asyncio.Lock()
         self.record_guild = None
         self.record_channel = None
-
 
     def write(self, data, user_id):
         """
@@ -38,14 +38,15 @@ class TimedWaveSink(sinks.WaveSink):
             # 捕捉可能發生的寫入錯誤，避免整個錄音中斷
             print(f"寫入音訊包時發生錯誤 (User: {user_id}): {e}")
 
+
 class Record(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.logger = utils.get_logger('record')
+        self.logger = utils.get_logger("record")
         self.connections = {}
         self.recording_data = {}
         # 確保錄音目錄存在
-        self.recordings_dir = utils.TMP_DIR/"recordings"
+        self.recordings_dir = utils.TMP_DIR / "recordings"
         os.makedirs(self.recordings_dir, exist_ok=True)
         # 追蹤各 guild 的錄音時間戳和目錄
         self.recording_timestamps = {}  # {guild_id: timestamp}
@@ -103,9 +104,7 @@ class Record(commands.Cog):
                     audio.file.seek(0)
 
                     # 讀取 Raw 數據 (48kHz, 16-bit, Stereo)
-                    audio_segment = AudioSegment.from_raw(
-                        audio.file, sample_width=2, frame_rate=48000, channels=2
-                    )
+                    audio_segment = AudioSegment.from_raw(audio.file, sample_width=2, frame_rate=48000, channels=2)
 
                     # 取得時間偏移量
                     offset_ms = int(sink.user_offsets.get(user_id, 0) * 1000)
@@ -115,9 +114,7 @@ class Record(commands.Cog):
                     filepath = session_dir / filename
 
                     # ✅ 使用 asyncio.to_thread 進行非同步匯出個人音軌
-                    await asyncio.to_thread(
-                        export_audio_sync, audio_segment, filepath, "mp3", "128k"
-                    )
+                    await asyncio.to_thread(export_audio_sync, audio_segment, filepath, "mp3", "128k")
 
                     users_with_audio.append(user.name)
 
@@ -152,20 +149,18 @@ class Record(commands.Cog):
             combined_path = session_dir / combined_filename
 
             # ✅ 使用 asyncio.to_thread 進行非同步匯出合成音軌
-            await asyncio.to_thread(
-                export_audio_sync, combined, combined_path, "mp3", "192k"
-            )
+            await asyncio.to_thread(export_audio_sync, combined, combined_path, "mp3", "192k")
 
             # 打包發送 (這部分涉及磁碟 I/O，建議也放入線程處理或保持現狀)
-            zip_path = utils.TMP_DIR/f"recordings_{self.recording_timestamps.get(guild_id, timestamp)}"
-            await asyncio.to_thread(
-                shutil.make_archive, str(zip_path), 'zip', str(session_dir)
-            )
+            zip_path = utils.TMP_DIR / f"recordings_{self.recording_timestamps.get(guild_id, timestamp)}"
+            await asyncio.to_thread(shutil.make_archive, str(zip_path), "zip", str(session_dir))
 
             # 上傳至 Google Drive（使用線程以避免阻塞事件循環）
             def upload_and_send():
                 creds = gdrive.get_detailed_token_info(utils.GOOGLE_CLIENT_ID, utils.GOOGLE_CLIENT_SECRET, utils.GOOGLE_REFRESH_TOKEN)
-                result = gdrive.upload_to_drive(file_path=str(zip_path) + ".zip", folder_id=utils.CONFERENCE_FOLDER_ID, creds=creds, name=f"會議錄音_{timestamp}")
+                result = gdrive.upload_to_drive(
+                    file_path=str(zip_path) + ".zip", folder_id=utils.CONFERENCE_FOLDER_ID, creds=creds, name=f"會議錄音_{timestamp}"
+                )
                 return result
 
             result = await asyncio.to_thread(upload_and_send)
@@ -221,7 +216,7 @@ class Record(commands.Cog):
         if guild.voice_client:
             self.logger.info("檢測到殘留連接，執行強制中斷...")
             await guild.voice_client.disconnect(force=True)
-            await asyncio.sleep(2) # 給予足夠時間讓 Discord Gateway 更新狀態
+            await asyncio.sleep(2)  # 給予足夠時間讓 Discord Gateway 更新狀態
 
         # 檢查 bot 是否有足夠權限
         bot_member = ctx.guild.get_member(self.bot.user.id)
@@ -242,21 +237,17 @@ class Record(commands.Cog):
             self.logger.info(f"已連接到語音頻道：{voice_channel.name}")
             self.logger.info(f"頻道內成員：{[m.name for m in voice_channel.members if not m.bot]}")
 
-            for i in range(5): # 最多嘗試等待 5 秒
+            for i in range(5):  # 最多嘗試等待 5 秒
                 if vc.is_connected():
                     break
                 await asyncio.sleep(1)
-                self.logger.info(f"等待語音連線穩定中... ({i+1})")
+                self.logger.info(f"等待語音連線穩定中... ({i + 1})")
 
             if not vc.is_connected():
                 raise Exception("語音連線超時，無法啟動錄音。")
 
             # 開始錄音
-            vc.start_recording(
-                TimedWaveSink(),
-                self.finished_callback,
-                ctx.channel
-            )
+            vc.start_recording(TimedWaveSink(), self.finished_callback, ctx.channel)
 
             self.record_guild = ctx.guild
             self.record_channel = ctx.channel
@@ -265,7 +256,9 @@ class Record(commands.Cog):
                 self.restart_recording.start()
 
             self.logger.info("錄音已啟動")
-            await ctx.edit(content=f"🎙️ 開始錄製 {voice_channel.mention}！\n使用 `/stop` 停止錄製。\n\n⚠️ 注意：請確認頻道內的人有開啟麥克風並說話。")
+            await ctx.edit(
+                content=f"🎙️ 開始錄製 {voice_channel.mention}！\n使用 `/stop` 停止錄製。\n\n⚠️ 注意：請確認頻道內的人有開啟麥克風並說話。"
+            )
             self.logger.info(f"開始在 {voice_channel.name} 錄音，由 {ctx.author.name} 觸發")
 
         except Exception as e:
@@ -296,7 +289,6 @@ class Record(commands.Cog):
         await ctx.defer()
 
         try:
-
             if self.restart_recording.is_running():
                 self.restart_recording.cancel()
 
@@ -351,7 +343,7 @@ class Record(commands.Cog):
             self.logger.info("定時重啟錄音中...")
             try:
                 vc.stop_recording()
-                await asyncio.sleep(2) # 給予足夠時間讓錄音停止
+                await asyncio.sleep(2)  # 給予足夠時間讓錄音停止
 
                 # 重要：確保不會刪除會話目錄
                 # restart 時保持相同的時間戳和目錄，不建立新目錄
@@ -363,14 +355,11 @@ class Record(commands.Cog):
                 session_dir = self.recordings_dir / self.recording_timestamps[guild_id]
                 os.makedirs(session_dir, exist_ok=True)
 
-                vc.start_recording(
-                    TimedWaveSink(),
-                    self.finished_callback,
-                    self.record_channel
-                )
+                vc.start_recording(TimedWaveSink(), self.finished_callback, self.record_channel)
                 self.logger.info(f"錄音已成功重啟，使用同一會話目錄：{session_dir}")
             except Exception as e:
                 self.logger.error(f"定時重啟錄音時發生錯誤：{e}")
+
 
 def setup(bot):
     bot.add_cog(Record(bot))

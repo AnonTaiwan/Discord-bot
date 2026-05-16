@@ -8,10 +8,11 @@ import aiohttp
 import io
 from discord import Webhook
 
+
 class EnrichCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.logger = utils.get_logger('enrich')
+        self.logger = utils.get_logger("enrich")
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -26,9 +27,27 @@ class EnrichCog(commands.Cog):
 
     def __get_messages(self, webhook_user, gender):
         if gender == "Female":
-                choice = ["我完全同意老婆的看法","既然老婆都這麼說了，那一定沒錯！","(抱緊緊) 雖然我不懂，但我知道老婆說的一定是對的～","無條件附議老婆！", "(點頭如搗蒜) 老婆說什麼就是什麼","(蹭蹭) 我覺得老婆說得很對呀～","(親一口) 蓋章確認！同意老婆的看法！","老婆說得是！"]
+            choice = [
+                "我完全同意老婆的看法",
+                "既然老婆都這麼說了，那一定沒錯！",
+                "(抱緊緊) 雖然我不懂，但我知道老婆說的一定是對的～",
+                "無條件附議老婆！",
+                "(點頭如搗蒜) 老婆說什麼就是什麼",
+                "(蹭蹭) 我覺得老婆說得很對呀～",
+                "(親一口) 蓋章確認！同意老婆的看法！",
+                "老婆說得是！",
+            ]
         else:
-            choice = ["我完全同意老公的看法","既然老公都這麼說了，那一定沒錯！","(抱緊緊) 雖然我不懂，但我知道老公說的一定是對的～","無條件附議老公！", "(點頭如搗蒜) 老公說什麼就是什麼","(蹭蹭) 我覺得老公說得很對呀～","(親一口) 蓋章確認！同意老公的看法！","老公說得是！"]
+            choice = [
+                "我完全同意老公的看法",
+                "既然老公都這麼說了，那一定沒錯！",
+                "(抱緊緊) 雖然我不懂，但我知道老公說的一定是對的～",
+                "無條件附議老公！",
+                "(點頭如搗蒜) 老公說什麼就是什麼",
+                "(蹭蹭) 我覺得老公說得很對呀～",
+                "(親一口) 蓋章確認！同意老公的看法！",
+                "老公說得是！",
+            ]
 
         if "custom_messages" in webhook_user:
             for msg in webhook_user["custom_messages"]:
@@ -37,9 +56,17 @@ class EnrichCog(commands.Cog):
 
     def __online_remind_message(self, gender, user: discord.Member):
         if gender == "Female":
-            choice = [f"哇！是 {user.mention} 老婆上線啦！",f"{user.mention} 老婆回來了！歡迎回家～",f"{user.mention} 老婆上線啦！有什麼需要幫忙的嗎？"]
+            choice = [
+                f"哇！是 {user.mention} 老婆上線啦！",
+                f"{user.mention} 老婆回來了！歡迎回家～",
+                f"{user.mention} 老婆上線啦！有什麼需要幫忙的嗎？",
+            ]
         else:
-            choice = [f"哇！是 {user.mention} 老公上線啦！",f"{user.mention} 老公回來了！歡迎回家～",f"{user.mention} 老公上線啦！有什麼需要幫忙的嗎？"]
+            choice = [
+                f"哇！是 {user.mention} 老公上線啦！",
+                f"{user.mention} 老公回來了！歡迎回家～",
+                f"{user.mention} 老公上線啦！有什麼需要幫忙的嗎？",
+            ]
         return choice
 
     def __get_webhook_data(self, user_id, name, channel_id, webhook_datas):
@@ -51,7 +78,7 @@ class EnrichCog(commands.Cog):
 
     def __load_json(self, file_path):
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             return data
         except FileNotFoundError:
@@ -62,22 +89,22 @@ class EnrichCog(commands.Cog):
             return {}
 
     def __write_json(self, file_path, data):
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
-    async def __send_webhook(self, channel: discord.TextChannel, user_id: str, webhook_user: dict, mes: str, files = None):
+    async def __send_webhook(self, channel: discord.TextChannel, user_id: str, webhook_user: dict, mes: str, files=None):
         data = self.__load_json("JSON/webhook.json")
 
         webhook_id, webhook_token = self.__get_webhook_data(user_id, webhook_user["name"], str(channel.id), data)
         if webhook_id and webhook_token:
             async with aiohttp.ClientSession() as session:
-                    webhook = Webhook.partial(webhook_id, webhook_token, session=session)
-                    try:
-                        await webhook.fetch()
-                        await webhook.send(content=mes, files=files)
-                        return
-                    except Exception:
-                        pass
+                webhook = Webhook.partial(webhook_id, webhook_token, session=session)
+                try:
+                    await webhook.fetch()
+                    await webhook.send(content=mes, files=files)
+                    return
+                except Exception:
+                    pass
 
         webhook = await self.create_webhook(channel, user_id, webhook_user, data)
         await webhook.send(content=mes, files=files)
@@ -106,7 +133,7 @@ class EnrichCog(commands.Cog):
         self.__write_json("JSON/webhook.json", webhook_datas)
         return webhook
 
-    async def clean_webhook(self,channel):
+    async def clean_webhook(self, channel):
         webhooks = await channel.webhooks()
         if len(webhooks) <= 9:
             return
@@ -132,7 +159,6 @@ class EnrichCog(commands.Cog):
         user_id = str(message.author.id)
 
         if user_id in enrich_data and message.content is not None:
-
             if not enrich_data[user_id].get("status", True):
                 return
 
@@ -140,7 +166,9 @@ class EnrichCog(commands.Cog):
             if not webhook_users or len(webhook_users) == 0:
                 return
 
-            webhook_user = self.__choose_webhook_user(webhook_users) # 選擇一個 webhook 用戶，返回 name, avatar_base64, custom_messages 的 dict
+            webhook_user = self.__choose_webhook_user(
+                webhook_users
+            )  # 選擇一個 webhook 用戶，返回 name, avatar_base64, custom_messages 的 dict
 
             gender = enrich_data[user_id].get("gender", "Male")
             choice = self.__get_messages(webhook_user, gender)
@@ -168,7 +196,9 @@ class EnrichCog(commands.Cog):
                 if not webhook_users or len(webhook_users) == 0:
                     return None
 
-                webhook_user = self.__choose_webhook_user(webhook_users) # 選擇一個 webhook 用戶，返回 name, avatar_base64, custom_messages 的 dict
+                webhook_user = self.__choose_webhook_user(
+                    webhook_users
+                )  # 選擇一個 webhook 用戶，返回 name, avatar_base64, custom_messages 的 dict
 
                 gender = enrich_data[user_id].get("gender", "Male")
                 choice = self.__online_remind_message(gender, after)
@@ -178,18 +208,20 @@ class EnrichCog(commands.Cog):
 
                 await self.__send_webhook(channel, user_id, webhook_user, mes)
 
-
     command_group = discord.SlashCommandGroup("enrich", "Enrich 相關指令")
 
     @command_group.command(name="send", description="透過 Enrich Webhook 發送訊息")
-    async def enrich_send(self, ctx: discord.ApplicationContext,
-                        content: discord.Option(str, "輸入要發送的訊息", default=None), # type: ignore
-                        channel: discord.Option(discord.TextChannel, "選擇要發送的頻道", default=None), # type: ignore
-                        file1 : discord.Option(discord.Attachment, "選擇要發送的檔案", default=None), # type: ignore
-                        file2 : discord.Option(discord.Attachment, "選擇要發送的檔案", default=None), # type: ignore
-                        file3 : discord.Option(discord.Attachment, "選擇要發送的檔案", default=None), # type: ignore
-                        user : discord.Option(discord.Member, "選擇用戶", default=None), # type: ignore
-                        webhook_user : discord.Option(str, "選擇 webhook 用戶", default=None)): # type: ignore
+    async def enrich_send(
+        self,
+        ctx: discord.ApplicationContext,
+        content: discord.Option(str, "輸入要發送的訊息", default=None),  # type: ignore
+        channel: discord.Option(discord.TextChannel, "選擇要發送的頻道", default=None),  # type: ignore
+        file1: discord.Option(discord.Attachment, "選擇要發送的檔案", default=None),  # type: ignore
+        file2: discord.Option(discord.Attachment, "選擇要發送的檔案", default=None),  # type: ignore
+        file3: discord.Option(discord.Attachment, "選擇要發送的檔案", default=None),  # type: ignore
+        user: discord.Option(discord.Member, "選擇用戶", default=None),  # type: ignore
+        webhook_user: discord.Option(str, "選擇 webhook 用戶", default=None),
+    ):  # type: ignore
         if not utils.is_worker(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name}嘗試使用 Enrich 發送訊息指令，但沒有權限。")
@@ -238,7 +270,9 @@ class EnrichCog(commands.Cog):
                     return
                 webhook_user = selected_user
             else:
-                webhook_user = self.__choose_webhook_user(webhook_users) # 選擇一個 webhook 用戶，返回 name, avatar_base64, custom_messages 的 dict
+                webhook_user = self.__choose_webhook_user(
+                    webhook_users
+                )  # 選擇一個 webhook 用戶，返回 name, avatar_base64, custom_messages 的 dict
 
             # 初始化變數
             files = None
@@ -304,7 +338,6 @@ class EnrichCog(commands.Cog):
         enrich_data = self.__load_json("JSON/enrich.json")
         user_id = str(member.id)
         if user_id in enrich_data:
-
             if enrich_data[user_id].get("status", True):
                 enrich_data[user_id]["status"] = False
                 self.__write_json("JSON/enrich.json", enrich_data)
@@ -329,7 +362,6 @@ class EnrichCog(commands.Cog):
         enrich_data = self.__load_json("JSON/enrich.json")
         user_id = str(member.id)
         if user_id in enrich_data:
-
             if enrich_data[user_id].get("online_remind", False):
                 enrich_data[user_id]["online_remind"] = False
                 self.__write_json("JSON/enrich.json", enrich_data)
@@ -341,7 +373,6 @@ class EnrichCog(commands.Cog):
                 await ctx.respond(f"✅ 已開啟 <@{member.id}> 的 Enrich 上線提醒。", ephemeral=True)
         else:
             await ctx.respond(f"❌ <@{member.id}> 的 Enrich 功能尚未啟用。", ephemeral=True)
-
 
     # async def invoke_jerry_webhook(self, content: str, user_id: str):
     #     with open('JSON/enrich.json', 'r', encoding='utf-8') as f:
@@ -365,6 +396,7 @@ class EnrichCog(commands.Cog):
     #         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
     #         webhook = await self.create_webhook(channel, user_id)
     #         await webhook.send(content=mes)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(EnrichCog(bot))

@@ -1,7 +1,7 @@
 [tool.ruff]
 line-length = 140
 target-version = "py310"
-exclude = ["tmp", "logs", ".venv", "venv"]
+exclude = ["tmp", "logs", ".venv", "venv", "migration"]
 
 [tool.ruff.lint]
 # 預設只啟用 E4/E7/E9 + F，這裡加上完整 E 與 W
