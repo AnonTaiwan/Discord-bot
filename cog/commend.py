@@ -28,9 +28,7 @@ class Commend(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        pass
-
-        self.play_ground_channel = self.bot.get_channel(utils.BOT_PLAYGROUND_CHANNEL_ID)
+        self.playground_channel = self.bot.get_channel(utils.BOT_PLAYGROUND_CHANNEL_ID)
 
     async def send_commendation(self, user: discord.Member, reason: str):
         if user.id not in self.commendation:
@@ -42,7 +40,7 @@ class Commend(commands.Cog):
         embed.add_field(name="表揚理由", value=reason if reason else "N/A", inline=False)
 
         try:
-            await self.play_ground_channel.send(embed=embed)
+            await self.playground_channel.send(embed=embed)
 
             # if self.commendation[user.id] == 3:
             #     self.commendation[user.id] = 0
@@ -59,7 +57,7 @@ class Commend(commands.Cog):
             #     await ctx.send(embed=embed)
         except Exception as e:
             self.logger.error(f"表揚成員時發生錯誤：{e}")
-            await self.play_ground_channel.send("❌ 發生錯誤，無法完成表揚。")
+            await self.playground_channel.send("❌ 發生錯誤，無法完成表揚。")
 
     @commend_command_group.command(name="new", description="表揚成員")
     async def commend(self, ctx: discord.ApplicationContext,
