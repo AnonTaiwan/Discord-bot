@@ -39,4 +39,3 @@ def list_all() -> List["Commendation"]:
 	with db.get_session() as session:
 		sql = select(Commendation)
 		return list(session.exec(sql).all())
-

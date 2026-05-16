@@ -28,3 +28,4 @@ def remove_user(user_id: int) -> None:
         objs = session.exec(sql).all()
         for o in objs:
             session.delete(o)
+            
