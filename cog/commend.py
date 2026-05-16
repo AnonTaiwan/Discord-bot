@@ -1,10 +1,8 @@
 import discord
 from discord.ext import commands
 from datetime import timedelta
-from sqlmodel import select
 import utils
-from internal import db
-from model import Commendation
+from model import commend
 
 class Commend(commands.Cog):
     def __init__(self, bot):
@@ -76,16 +74,7 @@ class Commend(commands.Cog):
             await ctx.respond("請指定一個使用者來表揚。", ephemeral=True)
             return
 
-        with db.get_session() as session:
-            sql = select(Commendation).where(Commendation.user_id == user.id)
-            commendation = session.exec(sql).first()
-
-            if commendation is None:
-                commendation = Commendation(user_id=user.id, amount=1)
-            else:
-                commendation.amount += 1
-
-            session.add(commendation)
+        commendation = commend.create_or_update(user.id, increment=1)
 
         embed = discord.Embed(title="已表揚成員", color=discord.Color.green())
 
@@ -96,10 +85,7 @@ class Commend(commands.Cog):
             await ctx.respond(embed=embed)
 
             if commendation.amount >= 3:
-                commendation.amount = 0
-
-                with db.get_session() as session:
-                    session.add(commendation)
+                commendation = commend.create_or_update(user.id, set_amount=0)
 
                 if not await self.__timeout_user(ctx, user, timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵"):
                     return
@@ -125,9 +111,7 @@ class Commend(commands.Cog):
 
         embed = discord.Embed(title="所有表揚次數", color=discord.Color.purple())
 
-        with db.get_session() as session:
-            sql = select(Commendation)
-            commendations = session.exec(sql).all()
+        commendations = commend.list_all()
 
         commend_times = [[] for _ in range(3)]
         try:
