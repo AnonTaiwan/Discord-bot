@@ -28,6 +28,7 @@ def remove_schedule_by_ids(ids: List[int]) -> None:
             obj = session.get(ScheduledMessage, _id)
             if obj:
                 session.delete(obj)
+
 def list_all_scheduled() -> List[ScheduledMessage]:
     with db.get_session() as session:
         sql = select(ScheduledMessage)
