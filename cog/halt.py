@@ -9,8 +9,8 @@ class Halt(commands.Cog):
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/halt.py: 日誌系統初始化完成")
 
-    @commands.command(name="halt", description="停止機器人")
-    async def halt(self, ctx: commands.Context):
+    @discord.slash_command(name="halt", description="停止機器人")
+    async def halt(self, ctx: discord.ApplicationContext):
         if not utils.is_worker(ctx.author) and not utils.is_developer(ctx.author):
             embed = discord.Embed(title="權限不足", description="只有後援會人員或工程部可以執行此命令", color=discord.Color.red())
             await ctx.send(embed=embed)
