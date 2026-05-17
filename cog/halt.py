@@ -15,7 +15,7 @@ class Halt(commands.Cog):
             embed = discord.Embed(title="權限不足", description="只有後援會人員或工程部可以執行此命令", color=discord.Color.red())
             await ctx.send(embed=embed)
             return
-        
+
         await ctx.defer(ephemeral=True)
         await ctx.delete()
 
