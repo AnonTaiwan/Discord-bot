@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
 from datetime import timedelta
-import utils
+from internal import utils
+from model import commend
 
-RECORD_FILE = utils.JSON_DIR / 'commend.json'
 
 class Commend(commands.Cog):
     def __init__(self, bot):
@@ -12,15 +12,7 @@ class Commend(commands.Cog):
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/commend.py: 日誌系統初始化完成")
 
-        utils.check_exist_or_create_json(self.logger, RECORD_FILE, default_content={"commendation": {}})
-
-        commendation = utils.read_json(self.logger, RECORD_FILE, default_content={"commendation": {}}).get("commendation", {})
-        self.commendation = {int(k): v for k, v in commendation.items()}
-
     commend_command_group = discord.SlashCommandGroup(name="commend", description="表揚相關指令")
-
-    async def __save_commend(self):
-        utils.write_json(self.logger, RECORD_FILE, {"commendation": self.commendation})
 
     async def __timeout_user(self, ctx: discord.ApplicationContext, user: discord.Member, duration: timedelta, reason: str) -> bool:
         try:
@@ -37,9 +29,7 @@ class Commend(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        pass
-
-        self.play_ground_channel = self.bot.get_channel(utils.BOT_PLAYGROUND_CHANNEL_ID)
+        self.playground_channel = self.bot.get_channel(utils.BOT_PLAYGROUND_CHANNEL_ID)
 
     async def send_commendation(self, user: discord.Member, reason: str):
         if user.id not in self.commendation:
@@ -51,7 +41,7 @@ class Commend(commands.Cog):
         embed.add_field(name="表揚理由", value=reason if reason else "N/A", inline=False)
 
         try:
-            await self.play_ground_channel.send(embed=embed)
+            await self.playground_channel.send(embed=embed)
 
             # if self.commendation[user.id] == 3:
             #     self.commendation[user.id] = 0
@@ -68,13 +58,16 @@ class Commend(commands.Cog):
             #     await ctx.send(embed=embed)
         except Exception as e:
             self.logger.error(f"表揚成員時發生錯誤：{e}")
-            await self.play_ground_channel.send("❌ 發生錯誤，無法完成表揚。")
+            await self.playground_channel.send("❌ 發生錯誤，無法完成表揚。")
 
     @commend_command_group.command(name="new", description="表揚成員")
-    async def commend(self, ctx: discord.ApplicationContext,
-                      user: discord.Option(discord.Member, description="要表揚的成員", required=True, default=None), # type: ignore
-                      reason: discord.Option(description="表揚理由", required=False, default=""), # type: ignore
-                      record: discord.Option(bool, description="是否紀錄", required=False, default=True)): # type: ignore
+    async def commend(
+        self,
+        ctx: discord.ApplicationContext,
+        user: discord.Option(discord.Member, description="要表揚的成員", required=True, default=None),  # type: ignore
+        reason: discord.Option(description="表揚理由", required=False, default=""),  # type: ignore
+        record: discord.Option(bool, description="是否紀錄", required=False, default=True),
+    ):  # type: ignore
         if not utils.is_admin(ctx.author):
             await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
             return
@@ -83,11 +76,7 @@ class Commend(commands.Cog):
             await ctx.respond("請指定一個使用者來表揚。", ephemeral=True)
             return
 
-        if user.id not in self.commendation:
-            self.commendation[user.id] = 0
-
-        if record:
-            self.commendation[user.id] += 1
+        commendation = commend.create_or_update(user.id, increment=1)
 
         embed = discord.Embed(title="已表揚成員", color=discord.Color.green())
 
@@ -97,9 +86,8 @@ class Commend(commands.Cog):
         try:
             await ctx.respond(embed=embed)
 
-            if self.commendation[user.id] >= 3:
-                self.commendation[user.id] = 0
-                await self.__save_commend()
+            if commendation.amount >= 3:
+                commendation = commend.create_or_update(user.id, set_amount=0)
 
                 if not await self.__timeout_user(ctx, user, timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵"):
                     return
@@ -115,7 +103,7 @@ class Commend(commands.Cog):
             await ctx.respond("❌ 發生錯誤，無法完成表揚。")
 
     @commend_command_group.command(name="list", description="查看成員的表揚次數")
-    async def show_commendations(self, ctx: discord.ApplicationContext): # type: ignore
+    async def show_commendations(self, ctx: discord.ApplicationContext):  # type: ignore
         try:
             await ctx.defer(ephemeral=True)
         except Exception as e:
@@ -125,15 +113,17 @@ class Commend(commands.Cog):
 
         embed = discord.Embed(title="所有表揚次數", color=discord.Color.purple())
 
+        commendations = commend.list_all()
+
         commend_times = [[] for _ in range(3)]
         try:
-            if not self.commendation:
-                embed.add_field(name="目前沒有任何表揚紀錄。", value="\u200b", inline=False) # 使用零寬空格避免 Discord 不顯示欄位
+            if not commendations:
+                embed.add_field(name="目前沒有任何表揚紀錄。", value="\u200b", inline=False)  # 使用零寬空格避免 Discord 不顯示欄位
             else:
-                for user_id, count in self.commendation.items():
-                    member = ctx.guild.get_member(user_id)
+                for commendation in commendations:
+                    member = ctx.guild.get_member(commendation.user_id)
                     if member:
-                        commend_times[count].append(member.mention)
+                        commend_times[commendation.amount].append(member.mention)
 
                 for i in range(1, 3):
                     if commend_times[i]:
@@ -145,6 +135,7 @@ class Commend(commands.Cog):
         except Exception as e:
             self.logger.error(f"查看表揚次數時發生錯誤：{e}")
             await ctx.respond("❌ 發生錯誤", ephemeral=True)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Commend(bot))

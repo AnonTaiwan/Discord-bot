@@ -1,16 +1,13 @@
 import discord
 from discord.ext import commands
 import random
-import utils
+from internal import utils
 
-gacha_rate = [785, 185, 30] # 各稀有度的抽中機率 N, R, SR
-gacha_rate_fes = [755, 185, 60] # FES 模式下的抽中機率 N, R, SR
-gacha_result = [
-    "<:BA_gacha_N:1407235400346505226>",
-    "<:BA_gacha_R:1407235415446126663>",
-    "<:BA_gacha_SR:1407235426300858408>"
-]
-allowed_channels = [1407248459949543455] # 機器人遊樂場
+gacha_rate = [785, 185, 30]  # 各稀有度的抽中機率 N, R, SR
+gacha_rate_fes = [755, 185, 60]  # FES 模式下的抽中機率 N, R, SR
+gacha_result = ["<:BA_gacha_N:1407235400346505226>", "<:BA_gacha_R:1407235415446126663>", "<:BA_gacha_SR:1407235426300858408>"]
+allowed_channels = [1407248459949543455]  # 機器人遊樂場
+
 
 class Gacha(commands.Cog):
     def __init__(self, bot):
@@ -120,6 +117,7 @@ class Gacha(commands.Cog):
         except Exception as e:
             await ctx.respond("❌ 發生錯誤，請稍後再試")
             self.logger.error(f"Error in fes_gacha10 command: {e}")
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Gacha(bot))

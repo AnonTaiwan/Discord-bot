@@ -3,7 +3,8 @@ from discord.ext import commands
 from discord.ui import Button, View
 import asyncio
 import re
-import utils
+from internal import utils
+
 
 class TraceLinkWarning(commands.Cog):
     def __init__(self, bot):
@@ -26,25 +27,23 @@ class TraceLinkWarning(commands.Cog):
             return
 
         if "instagram.com" in message.content and "igsh=" in message.content:
-            await self.__send_warning(message, mode = "ig")
+            await self.__send_warning(message, mode="ig")
 
         if re.match(self.FB_PATTERN, message.content):
-            await self.__send_warning(message, mode = "fb")
+            await self.__send_warning(message, mode="fb")
 
     async def __send_warning(self, message, **kwargs):
-        if 'mode' not in kwargs:
+        if "mode" not in kwargs:
             self.logger.error("Mode not specified for warning.")
             return
 
         descriptions = {
-            "ig": "此連結帶有追蹤參數 \"igsh\"，可能會洩漏您的個人帳號資料",
-            "fb": """此連結帶有 Facebook 追蹤參數，可能會洩漏您的個人帳號資料\n請先使用瀏覽器訪問連結後，再複製轉換過的連結\n轉換後的連結不會是 `https://www.facebook.com/share/p/xxx/` 的格式"""
+            "ig": '此連結帶有追蹤參數 "igsh"，可能會洩漏您的個人帳號資料',
+            "fb": """此連結帶有 Facebook 追蹤參數，可能會洩漏您的個人帳號資料\n請先使用瀏覽器訪問連結後，再複製轉換過的連結\n轉換後的連結不會是 `https://www.facebook.com/share/p/xxx/` 的格式""",
         }
 
         embed = discord.Embed(
-            title="⚠️ 警告",
-            description=descriptions.get(kwargs['mode'], "此連結可能會洩漏您的個人帳號資料"),
-            color=discord.Color.orange()
+            title="⚠️ 警告", description=descriptions.get(kwargs["mode"], "此連結可能會洩漏您的個人帳號資料"), color=discord.Color.orange()
         )
 
         delete_message_button = Button(label="刪除訊息", style=discord.ButtonStyle.red)
@@ -54,9 +53,9 @@ class TraceLinkWarning(commands.Cog):
                 await message.delete()
 
                 link = ""
-                if kwargs['mode'] == "ig":
+                if kwargs["mode"] == "ig":
                     link = re.search(r"(https:\/\/www\.instagram\.com)\/[^\s\?]+", message.content).group(0)
-                elif kwargs['mode'] == "fb":
+                elif kwargs["mode"] == "fb":
                     link = re.search(self.FB_PATTERN, message.content).group(0)
                     link = link.replace("/p/", "/")
 
@@ -69,10 +68,7 @@ class TraceLinkWarning(commands.Cog):
                         await msg.delete()
                         break
 
-                new_embed = discord.Embed(
-                    title="✅ 訊息已刪除",
-                    color=discord.Color.green()
-                )
+                new_embed = discord.Embed(title="✅ 訊息已刪除", color=discord.Color.green())
 
                 new_embed.set_footer(text="此訊息將在 5 秒後自動刪除")
 
@@ -99,6 +95,7 @@ class TraceLinkWarning(commands.Cog):
         view.add_item(ignore_button)
 
         await message.channel.send(embed=embed, view=view)
+
 
 def setup(bot):
     bot.add_cog(TraceLinkWarning(bot))

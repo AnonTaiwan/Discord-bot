@@ -24,7 +24,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -52,9 +52,11 @@ jobs:
 
     - name: Set Discord Bot Config
       run: |
-        cp JSON/bot.json.sample JSON/bot.json
-        sed -i 's/"DISCORD_BOT_TOKEN": ".*"/"DISCORD_BOT_TOKEN": "MTQwNDAzMTIyOTY4NjMyMTIzMg.G-sHEH.Aryp0J4vUtw5vrRaCNtx3tt9DDnaz92fN4MRd4"/' JSON/bot.json
-        sed -i 's/"DEVELOPER": \[.*\]/"DEVELOPER": [123456789012345678]/' JSON/bot.json
+        cp config/sample-config.yaml config/config.yaml
+        sed -i 's/Put your discord bot token here/MTUwNTYxNzUxODQxMTM4NzA2Mg.G3gD08.F9HWhvzQXr4WRD14wjFeBiy_nH-3LHHzkcrN4o/' config/config.yaml
+        sed -i 's/discord_id_1/123456789012345678/' config/config.yaml
+        sed -i 's/discord_id_2/123456789012345678/' config/config.yaml
+        sed -i 's/discord_id_3/123456789012345678/' config/config.yaml
 
     - name: Start Bot
       id: start-bot

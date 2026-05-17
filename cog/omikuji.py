@@ -2,29 +2,22 @@ import discord
 from discord.ext import commands, tasks
 from datetime import datetime, time
 import random
-import utils
+from internal import utils
+from model import omikuji
 
-#"大吉" Daikichi
-#"吉"   Kichi
-#"中吉" Chukichi
-#"小吉" Shokichi
-#"末吉" Suekichi
-#"凶"   Kyo
-#"大凶" Daikyo
-omikuji_results = [
-    "Daikichi",
-    "Kichi",
-    "Chukichi",
-    "Shokichi",
-    "Suekichi",
-    "Kyo",
-    "Daikyo"
-]
+# "大吉" Daikichi
+# "吉"   Kichi
+# "中吉" Chukichi
+# "小吉" Shokichi
+# "末吉" Suekichi
+# "凶"   Kyo
+# "大凶" Daikyo
+omikuji_results = ["Daikichi", "Kichi", "Chukichi", "Shokichi", "Suekichi", "Kyo", "Daikyo"]
 
 daily_reset = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  # 每日訊息時間設定
 
-RECORD_FILE = utils.JSON_DIR / 'omikuji.json'
-OMIKUJI_STATIC_DIR = utils.STATIC_DIR / 'omikuji'
+OMIKUJI_STATIC_DIR = utils.STATIC_DIR / "omikuji"
+
 
 class Omikuji(commands.Cog):
     def __init__(self, bot):
@@ -33,16 +26,9 @@ class Omikuji(commands.Cog):
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/omikuji.py: 日誌系統初始化完成")
 
-        utils.check_exist_or_create_json(self.logger, RECORD_FILE, default_content={"omikuji": []})
-
-        self.omikuji = utils.read_json(self.logger, RECORD_FILE, default_content={"omikuji": []}).get("omikuji", [])
-
     omikuji_command_group = discord.SlashCommandGroup("omikuji", "每日運勢抽籤相關指令")
 
     omikuji_admin_command_group = discord.SlashCommandGroup("omikuji-admin", "每日運勢抽籤管理員指令")
-
-    def save_omikuji(self):
-        utils.write_json(self.logger, RECORD_FILE, {"omikuji": self.omikuji})
 
     def __is_valid_request(self, ctx: discord.ApplicationContext):
         return utils.is_developer(ctx.author) or utils.is_in_bot_playground(ctx.channel)
@@ -61,7 +47,7 @@ class Omikuji(commands.Cog):
             if ctx.author.id not in female_suit:
                 return False
 
-            PIC_PATH = OMIKUJI_STATIC_DIR / 'female_suit.png'
+            PIC_PATH = OMIKUJI_STATIC_DIR / "female_suit.png"
             if PIC_PATH.exists():
                 pic = discord.File(str(PIC_PATH), filename=PIC_PATH.name)
                 await ctx.respond(file=pic, content="抽到的籤是：大吉\n祝長期素食生日快樂")
@@ -82,9 +68,9 @@ class Omikuji(commands.Cog):
         if not self.daily_message.is_running():
             self.daily_message.start()
 
-        self.commend_cog = self.bot.get_cog('Commend')
+        self.commend_cog = self.bot.get_cog("Commend")
         if not self.commend_cog:
-            print('CommendCog not found!')
+            print("CommendCog not found!")
 
     @omikuji_command_group.command(name="draw", description="每日運勢抽籤 (此功能由 Kevin 提供)")
     async def draw_omikuji(self, ctx: discord.ApplicationContext):
@@ -93,7 +79,7 @@ class Omikuji(commands.Cog):
                 await self.__send_no_permission_message(ctx)
                 return
 
-            if ctx.author.id in self.omikuji:
+            if omikuji.has_drawn(ctx.author.id):
                 await ctx.respond("你今天已經抽過籤了！請明天再來。")
                 return
 
@@ -106,7 +92,7 @@ class Omikuji(commands.Cog):
             if await self.__fun_event(ctx):
                 return
 
-            PIC_PATH = OMIKUJI_STATIC_DIR / f'{result}.jpg'
+            PIC_PATH = OMIKUJI_STATIC_DIR / f"{result}.jpg"
             if PIC_PATH.exists():
                 pic = discord.File(str(PIC_PATH), filename=PIC_PATH.name)
                 if self.__is_exam_days():
@@ -115,8 +101,7 @@ class Omikuji(commands.Cog):
                     await ctx.respond(file=pic, content=f"抽到的籤是：{result}")
             else:
                 await ctx.respond(f"抽到的籤是：{result}")
-            self.omikuji.append(ctx.author.id)
-            self.save_omikuji()
+            omikuji.record_draw(ctx.author.id)
 
             if result == "Daikyo" and self.commend_cog:
                 await self.commend_cog.send_commendation(ctx.author, "抽到大凶，給予安慰表揚")
@@ -125,8 +110,7 @@ class Omikuji(commands.Cog):
             await ctx.respond("抽籤失敗，請稍後再試。")
 
     @omikuji_admin_command_group.command(name="reset", description="重置指定使用者抽籤")
-    async def reset_omikuji(self, ctx: discord.ApplicationContext,
-                            user: discord.Member):
+    async def reset_omikuji(self, ctx: discord.ApplicationContext, user: discord.Member):
         try:
             if not utils.is_developer(ctx.author):
                 await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
@@ -136,9 +120,8 @@ class Omikuji(commands.Cog):
                 await ctx.respond("請指定一個使用者來重置抽籤名單。", ephemeral=True)
                 return
 
-            if user.id in self.omikuji:
-                self.omikuji.remove(user.id)
-                self.save_omikuji()
+            if omikuji.has_drawn(user.id):
+                omikuji.reset_user(user.id)
 
             await ctx.respond(f"<@{user.id}> 已被重置。")
         except Exception as e:
@@ -151,8 +134,7 @@ class Omikuji(commands.Cog):
                 await ctx.respond("❌ 你沒有權限使用這個指令。", ephemeral=True)
                 return
 
-            self.omikuji = []
-            self.save_omikuji()
+            omikuji.reset_all()
 
             await ctx.respond("所有使用者的抽籤已被重置。")
         except Exception as e:
@@ -160,8 +142,7 @@ class Omikuji(commands.Cog):
 
     @tasks.loop(time=daily_reset)
     async def daily_message(self):
-        self.omikuji = []
-        self.save_omikuji()
+        omikuji.reset_all()
 
         try:
             channel = self.bot.get_channel(utils.BOT_PLAYGROUND_CHANNEL_ID)
@@ -171,6 +152,7 @@ class Omikuji(commands.Cog):
                 self.logger.error("無法找到指定的頻道。")
         except Exception as e:
             self.logger.error(f"Error sending daily reset message: {e}")
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Omikuji(bot))

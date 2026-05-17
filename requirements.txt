@@ -12,6 +12,11 @@ pydub>=0.25.1
 google-api-python-client>=2.100.0
 google-auth-httplib2>=0.1.0
 google-auth-oauthlib>=1.0.0
+sqlmodel>=0.0.38
+alembic>=1.18.4
+PyYAML>=6.0.3
+audioop-lts; python_version >= "3.13"
+dacite>=1.9.2
 # 可選套件 (提升性能)
 lxml>=4.9.0
 html5lib>=1.1

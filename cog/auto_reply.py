@@ -1,12 +1,13 @@
 import discord
 from discord.ext import commands
-import utils
+from internal import utils
 import random
 from pypinyin import lazy_pinyin, Style
 
 LLAMA_ID = 870191937913774091
 
 LLAMA_VIRUS_RATIO = 0.003
+
 
 class AutoReply(commands.Cog):
     def __init__(self, bot):
@@ -70,7 +71,7 @@ class AutoReply(commands.Cog):
             self.logger.error(f"無法發送訊息：{e}")
 
     async def __special_care(self, message: discord.Message):
-        for (user_id, reply, is_media, probability) in self.special_care:
+        for user_id, reply, is_media, probability in self.special_care:
             if message.author.id == user_id and random.random() <= probability:
                 try:
                     if is_media:
@@ -94,7 +95,7 @@ class AutoReply(commands.Cog):
         content_pinyin = "".join(lazy_pinyin(message.content, style=Style.TONE2, tone_sandhi=True, neutral_tone_with_five=True))
         replied = False
 
-        for (reply_msg, probability, match_strings) in self.reply:
+        for reply_msg, probability, match_strings in self.reply:
             for match_str in match_strings:
                 if (match_str in content_pinyin or match_str in message.content) and random.random() <= probability:
                     await self.__send_message(message, reply_msg, replied)
@@ -102,23 +103,28 @@ class AutoReply(commands.Cog):
 
                     break
 
-        for (reply_msg, probability, match_strings) in self.tagged_reply:
+        for reply_msg, probability, match_strings in self.tagged_reply:
             for match_str in match_strings:
                 if (match_str in content_pinyin or match_str in message.content) and random.random() <= probability:
-                    reply_msg = reply_msg % (message.author.mention if message.reference is None else (await message.channel.fetch_message(message.reference.message_id)).author.mention)
+                    reply_msg = reply_msg % (
+                        message.author.mention
+                        if message.reference is None
+                        else (await message.channel.fetch_message(message.reference.message_id)).author.mention
+                    )
 
                     await self.__send_message(message, reply_msg, replied)
                     replied = True
 
                     break
 
-        for (sticker_id, probability, match_strings) in self.sticker_reply:
+        for sticker_id, probability, match_strings in self.sticker_reply:
             for match_str in match_strings:
                 if (match_str in content_pinyin or match_str in message.content) and random.random() <= probability:
                     await self.__send_message(message, sticker_id, replied, is_sticker=True)
                     replied = True
 
                     break
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(AutoReply(bot))

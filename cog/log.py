@@ -4,18 +4,19 @@ import os
 import asyncio
 import sys
 from datetime import datetime
-import utils
+from internal import utils
+
 
 class Log(commands.Cog):
-
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/log.py: 日誌系統初始化完成")
 
-
     @discord.slash_command(name="record_channel", description="記錄指定頻道的訊息")
-    async def record_channel(self, ctx: discord.ApplicationContext, channel: discord.Option(discord.TextChannel, "選擇要記錄的頻道", default=None)): # type: ignore
+    async def record_channel(
+        self, ctx: discord.ApplicationContext, channel: discord.Option(discord.TextChannel, "選擇要記錄的頻道", default=None)
+    ):  # type: ignore
         if not utils.is_operator(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name}嘗試使用記錄頻道指令，但沒有權限。")
@@ -30,7 +31,9 @@ class Log(commands.Cog):
             await ctx.followup.send(f"✅ 頻道 {channel.mention} 的訊息已記錄完成。", ephemeral=True)
 
     @discord.slash_command(name="log", description="查看日誌")
-    async def log(self, ctx: discord.ApplicationContext, date: str = discord.Option(default=None, description="你想查詢的日期，例如 20250627")): # type: ignore
+    async def log(
+        self, ctx: discord.ApplicationContext, date: str = discord.Option(default=None, description="你想查詢的日期，例如 20250627")
+    ):  # type: ignore
         if ctx.author.id not in utils.DEVELOPER:
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name}嘗試使用日誌指令，但沒有權限。")
@@ -38,14 +41,14 @@ class Log(commands.Cog):
         else:
             """查看日誌"""
             # 確保 logs 目錄存在
-            if not os.path.exists('logs'):
+            if not os.path.exists("logs"):
                 await ctx.respond("日誌目錄不存在。")
                 return
             if date is None:
                 # 設置日誌文件名（包含日期）
-                log_filename = utils.LOGS_DIR / f'bot_{datetime.now().strftime("%Y%m%d")}.log'
+                log_filename = utils.LOGS_DIR / f"bot_{datetime.now().strftime('%Y%m%d')}.log"
             else:
-                log_filename = utils.LOGS_DIR / f'bot_{date}.log'
+                log_filename = utils.LOGS_DIR / f"bot_{date}.log"
 
             # 檢查日誌文件是否存在
             if not os.path.isfile(log_filename):

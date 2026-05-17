@@ -2,12 +2,13 @@ import discord
 from discord.ext import commands, tasks
 from typing import List
 from datetime import datetime, timedelta, timezone
-import utils
+from internal import utils
 
-RECORD_FILE = utils.JSON_DIR / 'member.json'
+RECORD_FILE = utils.JSON_DIR / "member.json"
 
 NOTIFY_ROLE = None
 NO_MYGO_ROLE = None
+
 
 class MemberPage(discord.ui.View):
     def __init__(self, logger, members, per_page=25):
@@ -62,6 +63,7 @@ class MemberPage(discord.ui.View):
             self.logger.error(f"Error updating member page: {e}")
             await interaction.response.send_message("❌ 發生錯誤，無法更新頁面。", ephemeral=True)
 
+
 class NonMygoMemberPage(MemberPage):
     def __init__(self, bot, logger, ctx, members, per_page=25):
         super().__init__(logger, members, per_page)
@@ -74,8 +76,11 @@ class NonMygoMemberPage(MemberPage):
         end = start + self.per_page
 
         embed.add_field(name="Member", value="\n".join(member.mention for member in self.members[start:end]) or "N/A", inline=True)
-        embed.add_field(name="Join Time", value="\n".join(f"`{member.joined_at.strftime('%Y-%m-%d %H:%M:%S')}`"
-                                                          for member in self.members[start:end]) or "N/A", inline=True)
+        embed.add_field(
+            name="Join Time",
+            value="\n".join(f"`{member.joined_at.strftime('%Y-%m-%d %H:%M:%S')}`" for member in self.members[start:end]) or "N/A",
+            inline=True,
+        )
 
         embed.set_footer(text=f"Page {self.current_page + 1}/{(len(self.members) - 1) // self.per_page + 1}")
         return embed
@@ -90,6 +95,7 @@ class NonMygoMemberPage(MemberPage):
             self.logger.error(f"Error invoking member non-mygo kick command from button: {e}")
             await interaction.response.send_message("❌ 發生錯誤，無法從 UI 執行踢出指令。", ephemeral=True)
 
+
 class KickComfirmPage(MemberPage):
     def __init__(self, logger, days, members, per_page=25):
         super().__init__(logger, members, per_page)
@@ -103,8 +109,11 @@ class KickComfirmPage(MemberPage):
         end = start + self.per_page
 
         embed.add_field(name="Member", value="\n".join(member.mention for member in self.members[start:end]) or "N/A", inline=True)
-        embed.add_field(name="Join Time", value="\n".join(f"`{member.joined_at.strftime('%Y-%m-%d %H:%M:%S')}`"
-                                                        for member in self.members[start:end]) or "N/A", inline=True)
+        embed.add_field(
+            name="Join Time",
+            value="\n".join(f"`{member.joined_at.strftime('%Y-%m-%d %H:%M:%S')}`" for member in self.members[start:end]) or "N/A",
+            inline=True,
+        )
 
         embed.set_footer(text=f"共 {len(self.members)} 名成員")
 
@@ -131,6 +140,7 @@ class KickComfirmPage(MemberPage):
             self.logger.error(f"Error kicking members: {e}")
             await interaction.response.send_message("❌ 發生錯誤，無法執行指令。", ephemeral=True)
 
+
 class KickMemberPage(MemberPage):
     def __init__(self, logger, members, per_page=25):
         super().__init__(logger, members, per_page)
@@ -142,13 +152,17 @@ class KickMemberPage(MemberPage):
         end = start + self.per_page
 
         embed.add_field(name="Member", value="\n".join(member.mention for member in self.members[start:end]) or "N/A", inline=True)
-        embed.add_field(name="Join Time", value="\n".join(f"`{member.joined_at.strftime('%Y-%m-%d %H:%M:%S')}`"
-                                                        for member in self.members[start:end]) or "N/A", inline=True)
+        embed.add_field(
+            name="Join Time",
+            value="\n".join(f"`{member.joined_at.strftime('%Y-%m-%d %H:%M:%S')}`" for member in self.members[start:end]) or "N/A",
+            inline=True,
+        )
 
         embed.set_footer(text=f"共踢出 {len(self.members)} 名成員")
 
         embed.set_footer(text=f"Page {self.current_page + 1}/{(len(self.members) - 1) // self.per_page + 1}")
         return embed
+
 
 class RemoveRolePage(MemberPage):
     def __init__(self, logger, role, members, per_page=25):
@@ -168,6 +182,7 @@ class RemoveRolePage(MemberPage):
         embed.set_footer(text=f"Page {self.current_page + 1}/{(len(self.members) - 1) // self.per_page + 1}")
         return embed
 
+
 class KickMenu(discord.ui.View):
     def __init__(self, logger, members):
         super().__init__(timeout=None)
@@ -181,7 +196,7 @@ class KickMenu(discord.ui.View):
             discord.SelectOption(label="15 天", value="15", description="踢出 15 天未領取身分組的成員"),
             discord.SelectOption(label="30 天", value="30", description="踢出 30 天未領取身分組的成員"),
             discord.SelectOption(label="60 天", value="60", description="踢出 60 天未領取身分組的成員"),
-            discord.SelectOption(label="90 天", value="90", description="踢出 90 天未領取身分組的成員")
+            discord.SelectOption(label="90 天", value="90", description="踢出 90 天未領取身分組的成員"),
         ]
 
         select_menu = discord.ui.Select(placeholder="選擇要踢出的成員條件", options=self._options, min_values=1, max_values=1)
@@ -197,7 +212,7 @@ class KickMenu(discord.ui.View):
             await interaction.response.send_message("❌ 你沒有權限使用此功能。", ephemeral=True)
             return
 
-        selected_days = int(interaction.data['values'][0]) # type: ignore
+        selected_days = int(interaction.data["values"][0])  # type: ignore
 
         threshold_time = datetime.now(timezone.utc) - timedelta(days=selected_days)
         members_to_kick = [member for member in self.members if member.joined_at < threshold_time]
@@ -213,6 +228,7 @@ class KickMenu(discord.ui.View):
         except Exception as e:
             self.logger.error(f"Error creating kick confirmation page: {e}")
             await interaction.response.send_message("❌ 發生錯誤，無法執行指令。")
+
 
 class Member(commands.Cog):
     def __init__(self, bot):
@@ -248,17 +264,17 @@ class Member(commands.Cog):
 
     async def __get_non_mygo_members(self, guild: discord.Guild) -> List[discord.Member]:
         members = guild.members
-        non_mygo_members = [member for member in members if
-                            not any(role.id == utils.MYGO_ROLE_ID or role.id == utils.BOT_ROLE_ID
-                            for role in member.roles)]
+        non_mygo_members = [
+            member for member in members if not any(role.id == utils.MYGO_ROLE_ID or role.id == utils.BOT_ROLE_ID for role in member.roles)
+        ]
         non_mygo_members.sort(key=lambda m: m.joined_at or discord.utils.snowflake_time(m.id))
         return non_mygo_members
 
     async def __get_mygo_members(self, guild: discord.Guild) -> List[discord.Member]:
         members = guild.members
-        mygo_members = [member for member in members if
-                        any(role.id == utils.MYGO_ROLE_ID or role.id == utils.BOT_ROLE_ID
-                        for role in member.roles)]
+        mygo_members = [
+            member for member in members if any(role.id == utils.MYGO_ROLE_ID or role.id == utils.BOT_ROLE_ID for role in member.roles)
+        ]
         mygo_members.sort(key=lambda m: m.joined_at or discord.utils.snowflake_time(m.id))
         return mygo_members
 
@@ -348,8 +364,9 @@ class Member(commands.Cog):
             self.logger.error(f"Error responding to kick_non_mygo_members command: {e}")
             await ctx.respond("❌ 發生錯誤，無法取得成員列表。")
 
-    @non_mygo_command_group.command(name="auto-detect",
-                                    description="開啟或關閉自動偵測未領取「迷失之人」身分組的成員，並將他們加入「未領取必要身份組」身份組")
+    @non_mygo_command_group.command(
+        name="auto-detect", description="開啟或關閉自動偵測未領取「迷失之人」身分組的成員，並將他們加入「未領取必要身份組」身份組"
+    )
     async def detect_non_mygo_member(self, ctx: discord.ApplicationContext, toggle: bool):
         if not utils.is_operator(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
@@ -437,6 +454,7 @@ class Member(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error removing all No MyGO roles: {e}")
             await ctx.respond("❌ 發生錯誤，無法執行指令。")
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Member(bot))

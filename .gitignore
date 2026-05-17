@@ -11,4 +11,8 @@ Anon Taiwan.code-workspace
 .*.*.swp
 
 JSON/
-!JSON/bot.json.sample
+
+config/
+!config/sample-config.yaml
+
+*.db
