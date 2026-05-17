@@ -191,4 +191,3 @@ def write_json(logger: logging.Logger, file: Path, data: dict) -> bool:
 
 def get_tmp_file(filename: str) -> str:
     return str(TMP_DIR / filename)
-return str(TMP_DIR / filename)
