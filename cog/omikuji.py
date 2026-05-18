@@ -18,6 +18,14 @@ daily_reset = time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)  # 每日
 
 OMIKUJI_STATIC_DIR = utils.STATIC_DIR / "omikuji"
 
+exam_days = [
+    (1, 17),
+    (1, 18),
+    (1, 19),
+    (5, 16),
+    (5, 17),
+]
+
 
 class Omikuji(commands.Cog):
     def __init__(self, bot):
@@ -60,8 +68,7 @@ class Omikuji(commands.Cog):
 
     def __is_exam_days(self) -> bool:
         now = datetime.now(utils.TIME_ZONE)
-        gsat_month_days = [(1, 17), (1, 18), (1, 19), (5, 16), (5, 17)]
-        return (now.month, now.day) in gsat_month_days
+        return (now.month, now.day) in exam_days
 
     @commands.Cog.listener()
     async def on_ready(self):
