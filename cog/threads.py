@@ -17,6 +17,26 @@ class Threads(commands.Cog):
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/threads.py: 日誌系統初始化完成")
         self.channel = self.bot.get_channel(utils.THREADS_CHANNEL_ID)
+        # Threads user id：on_ready 會用 /me endpoint 抓真值覆寫；先用 utils 的常數當 fallback
+        self.threads_id = utils.THREADS_ID
+
+    async def _fetch_self_id(self):
+        """用 access token 從 Threads API 抓真實的 user id，避免硬編碼錯誤。"""
+        try:
+            url = f"https://graph.threads.net/v1.0/me?fields=id&access_token={utils.THREADS_TOKEN}"
+            response = await asyncio.to_thread(requests.get, url, timeout=30)
+            data = response.json()
+            fetched = data.get("id")
+            if fetched:
+                if fetched != self.threads_id:
+                    self.logger.warning(f"_fetch_self_id: 從 /me 取得 threads_id={fetched}，與 fallback {self.threads_id} 不同（已覆寫）")
+                else:
+                    self.logger.info(f"_fetch_self_id: threads_id={fetched}（與 fallback 一致）")
+                self.threads_id = fetched
+            else:
+                self.logger.error(f"_fetch_self_id 無法取得 id，response={response.text}；繼續使用 fallback {self.threads_id}")
+        except Exception as e:
+            self.logger.error(f"_fetch_self_id 例外：{e}；繼續使用 fallback {self.threads_id}")
 
     async def __get_video_audio(self, post_id, link):
         headers = {
@@ -155,7 +175,7 @@ class Threads(commands.Cog):
             await message.delete()
 
     async def __text_post(self, post_id, message_id):
-        ID = utils.THREADS_ID
+        ID = self.threads_id
         API = utils.THREADS_TOKEN
         threads_data = self.read_json_file("JSON/threads.json")
         post_info = threads_data[str(message_id)]
@@ -185,7 +205,7 @@ class Threads(commands.Cog):
         return data
 
     async def __single_post(self, post_id, message_id, media_url):
-        ID = utils.THREADS_ID
+        ID = self.threads_id
         API = utils.THREADS_TOKEN
         threads_data = self.read_json_file("JSON/threads.json")
         post_info = threads_data[str(message_id)]
@@ -219,7 +239,7 @@ class Threads(commands.Cog):
         return data
 
     async def __video_post(self, post_id, message_id, media_url):
-        ID = utils.THREADS_ID
+        ID = self.threads_id
         API = utils.THREADS_TOKEN
 
         threads_data = self.read_json_file("JSON/threads.json")
@@ -259,7 +279,7 @@ class Threads(commands.Cog):
         return data
 
     async def __multi_post(self, post_id, message_id, media_urls):
-        ID = utils.THREADS_ID
+        ID = self.threads_id
         API = utils.THREADS_TOKEN
         threads_data = self.read_json_file("JSON/threads.json")
         post_info = threads_data[str(message_id)]
@@ -346,7 +366,7 @@ class Threads(commands.Cog):
 Anon Taiwan x 女團哭迷因（GIRLS BAND CRY Memes）
 各平台帳號與同好聊天社群
 https://www.anontaiwan.meme/"""
-        ID = utils.THREADS_ID
+        ID = self.threads_id
         API = utils.THREADS_TOKEN
         API_URL = f"https://graph.threads.net/v1.0/{ID}/threads"
         payload = {"media_type": "TEXT", "text": text, "reply_to_id": threads_id, "access_token": API}
@@ -405,6 +425,8 @@ https://www.anontaiwan.meme/"""
 
     @commands.Cog.listener()
     async def on_ready(self):
+        # 啟動時用 /me 抓真實 Threads user id，取代可能寫錯的硬編碼常數
+        await self._fetch_self_id()
         # 註冊持久化按鈕 View，並傳入本 Cog 實例供回呼使用
         self.bot.add_view(self.PostButton(self))
         if not self.update_threads.is_running():
