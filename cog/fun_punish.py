@@ -107,6 +107,15 @@ class FunPunish(commands.Cog):
         view = TimeoutRequestView(self.logger, ctx.author, user, duration)
         await ctx.respond(embed=view.build_request_embed(), view=view)
 
+    @discord.slash_command(name="self-timeout-request", description="發出禁言自己的請求")
+    async def self_timeout_request(
+        self,
+        ctx: discord.ApplicationContext,
+        duration: discord.Option(str, description="禁言時間", required=True, choices=TIMEOUT_DURATION_OPTIONS),  # type: ignore
+    ):
+        view = TimeoutRequestView(self.logger, ctx.author, ctx.author, duration)
+        await ctx.respond(embed=view.build_request_embed(), view=view)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(FunPunish(bot))
