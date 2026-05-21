@@ -17,15 +17,7 @@ class DatabaseConfig:
 
 
 @dataclass
-class MetaConfig:
-    facebook_token: str = ""
-    gbc_token: str = ""
-    threads_token: str = ""
-
-
-@dataclass
 class GoogleConfig:
-    gemini_token: str = ""
     google_client_id: str = ""
     google_client_secret: str = ""
     google_refresh_token: str = ""
@@ -35,7 +27,6 @@ class GoogleConfig:
 class Config:
     discord: DiscordConfig = field(default_factory=DiscordConfig)
     database: DatabaseConfig = field(default_factory=DatabaseConfig)
-    meta: MetaConfig = field(default_factory=MetaConfig)
     google: GoogleConfig = field(default_factory=GoogleConfig)
 
 
@@ -65,7 +56,6 @@ def save_config(cfg: Config) -> None:
     out = {
         "discord": data.get("discord", {}),
         "database": data.get("database", {}),
-        "meta": data.get("meta", {}),
         "google": data.get("google", {}),
     }
 

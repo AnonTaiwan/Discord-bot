@@ -20,7 +20,7 @@ class Halt(commands.Cog):
         await ctx.delete()
 
         embed = discord.Embed(title="停止機器人", description=f"機器人將由 {ctx.author.mention} 停止", color=discord.Color.orange())
-        await ctx.send(f'<@&{utils.DEVELOPER_ROLE_ID}>', embed=embed)
+        await ctx.send(f"<@&{utils.DEVELOPER_ROLE_ID}>", embed=embed)
         self.logger.info(f"機器人由 {ctx.author} (ID: {ctx.author.id}) 停止")
         await self.bot.close()
 
