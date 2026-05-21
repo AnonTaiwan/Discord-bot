@@ -108,13 +108,47 @@ class Omikuji(commands.Cog):
                     await ctx.respond(file=pic, content=f"抽到的籤是：{result}")
             else:
                 await ctx.respond(f"抽到的籤是：{result}")
-            omikuji.record_draw(ctx.author.id)
+            omikuji.record_draw(ctx.author.id, result=result)
 
             if result == "Daikyo" and self.commend_cog:
                 await self.commend_cog.send_commendation(ctx.author, "抽到大凶，給予安慰表揚")
         except Exception as e:
             self.logger.error(f"Error responding to omikuji command: {e}")
             await ctx.respond("抽籤失敗，請稍後再試。")
+
+    @omikuji_command_group.command(name="history", description="Show your omikuji results for the last 5 days")
+    async def omikuji_history(self, ctx: discord.ApplicationContext):
+        try:
+            if not self.__is_valid_request(ctx):
+                await self.__send_no_permission_message(ctx)
+                return
+
+            draws = omikuji.recent_draws(ctx.author.id, days=5)
+            if not draws:
+                await ctx.respond("最近 5 天內沒有抽籤紀錄。")
+                return
+
+            embed = discord.Embed(title="最近 5 天抽籤結果", color=discord.Color.blue())
+
+            try:
+                avatar_url = getattr(ctx.author, "avatar.url", None) or getattr(ctx.author, "avatar", None)
+            except Exception:
+                avatar_url = None
+
+            if avatar_url:
+                embed.set_author(name=ctx.author.name, icon_url=avatar_url)
+            else:
+                embed.set_author(name=ctx.author.name)
+
+            for d in draws:
+                date_str = d.draw_date.isoformat() if d.draw_date else "unknown"
+                res = d.result or "(unknown)"
+                embed.add_field(name=date_str, value=res, inline=False)
+
+            await ctx.respond(embed=embed)
+        except Exception as e:
+            self.logger.error(f"Error responding to omikuji history: {e}")
+            await ctx.respond("取得歷史紀錄失敗，請稍後再試。")
 
     @omikuji_admin_command_group.command(name="reset", description="重置指定使用者抽籤")
     async def reset_omikuji(self, ctx: discord.ApplicationContext, user: discord.Member):
