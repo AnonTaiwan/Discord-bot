@@ -111,7 +111,7 @@ class Omikuji(commands.Cog):
             omikuji.record_draw(ctx.author.id, result=result)
 
             if result == "Daikyo" and self.commend_cog:
-                await self.commend_cog.send_commendation(ctx.author, "抽到大凶，給予安慰表揚")
+                await self.commend_cog.send_commendation(ctx, ctx.author, "抽到大凶，給予安慰表揚")
         except Exception as e:
             self.logger.error(f"Error responding to omikuji command: {e}")
             await ctx.respond("抽籤失敗，請稍後再試。")

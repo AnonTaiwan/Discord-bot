@@ -31,9 +31,13 @@ class Commend(commands.Cog):
     async def on_ready(self):
         self.playground_channel = self.bot.get_channel(utils.BOT_PLAYGROUND_CHANNEL_ID)
 
-    async def send_commendation(self, user: discord.Member, reason: str):
-        if user.id not in self.commendation:
-            self.commendation[user.id] = 0
+    async def send_commendation(
+        self,
+        ctx: discord.ApplicationContext,
+        user: discord.Member,
+        reason: str,
+    ):
+        commendation = commend.create_or_update(user.id, increment=1)  # noqa: F841
 
         embed = discord.Embed(title="已表揚成員", color=discord.Color.green())
 
@@ -41,11 +45,10 @@ class Commend(commands.Cog):
         embed.add_field(name="表揚理由", value=reason if reason else "N/A", inline=False)
 
         try:
-            await self.playground_channel.send(embed=embed)
+            await ctx.send(embed=embed)
 
-            # if self.commendation[user.id] == 3:
-            #     self.commendation[user.id] = 0
-            #     await self.__save_commend()
+            # if commendation.amount >= 3:
+            #     commendation = commend.create_or_update(user.id, set_amount=0)
 
             #     if not await self.__timeout_user(ctx, user, timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵"):
             #         return
@@ -76,7 +79,8 @@ class Commend(commands.Cog):
             await ctx.respond("請指定一個使用者來表揚。", ephemeral=True)
             return
 
-        commendation = commend.create_or_update(user.id, increment=1)
+        if record:
+            commendation = commend.create_or_update(user.id, increment=1)
 
         embed = discord.Embed(title="已表揚成員", color=discord.Color.green())
 
@@ -86,7 +90,7 @@ class Commend(commands.Cog):
         try:
             await ctx.respond(embed=embed)
 
-            if commendation.amount >= 3:
+            if record and commendation.amount >= 3:
                 commendation = commend.create_or_update(user.id, set_amount=0)
 
                 if not await self.__timeout_user(ctx, user, timedelta(minutes=1), reason="達成三次表揚，獲得 60 秒的禁言獎勵"):
