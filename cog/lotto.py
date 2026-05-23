@@ -13,7 +13,7 @@ class Lotto(commands.Cog):
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/lotto.py: 日誌系統初始化完成")
 
-        self.rate_limiter = SlidingWindowRateLimiter(limit=3, window_seconds=60)
+        self.rate_limiter = SlidingWindowRateLimiter(limit=1, window_seconds=5)
 
     lotto_command_group = discord.SlashCommandGroup(name="lotto", description="樂透相關指令")
 
