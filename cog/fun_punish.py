@@ -3,6 +3,7 @@ import logging
 import discord
 from discord.ext import commands
 from internal import utils
+from internal.rate_limit import SlidingWindowRateLimiter
 
 
 TIMEOUT_DURATION_OPTIONS = [
@@ -90,8 +91,11 @@ class TimeoutRequestView(discord.ui.View):
 class FunPunish(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/fun_punish.py: 日誌系統初始化完成")
+
+        self.rate_limiter = SlidingWindowRateLimiter(limit=3, window_seconds=60)
 
     @discord.slash_command(name="timeout-request", description="向指定成員發出禁言請求")
     async def timeout_request(
@@ -101,8 +105,11 @@ class FunPunish(commands.Cog):
         duration: discord.Option(str, description="禁言時間", required=True, choices=TIMEOUT_DURATION_OPTIONS),  # type: ignore
     ):
         if not utils.is_operator(ctx.author):
-            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
-            return
+            allowed, retry_after = self.rate_limiter.allow((ctx.author.id, "timeout-request"))
+
+            if not allowed:
+                await ctx.respond(f"❌ 操作過於頻繁，請在 {retry_after:.0f} 秒後再試。", ephemeral=True)
+                return
 
         view = TimeoutRequestView(self.logger, ctx.author, user, duration)
         await ctx.respond(embed=view.build_request_embed(), view=view)

@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import random
 from internal import utils
+from internal.rate_limit import SlidingWindowRateLimiter
 from model import lotto
 
 
@@ -12,6 +13,8 @@ class Lotto(commands.Cog):
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/lotto.py: 日誌系統初始化完成")
 
+        self.rate_limiter = SlidingWindowRateLimiter(limit=3, window_seconds=60)
+
     lotto_command_group = discord.SlashCommandGroup(name="lotto", description="樂透相關指令")
 
     @commands.Cog.listener()
@@ -21,6 +24,13 @@ class Lotto(commands.Cog):
     @lotto_command_group.command(name="draw", description="隨機抽選成員")
     async def draw(self, ctx: discord.ApplicationContext):  # type: ignore
         try:
+            if not utils.is_operator(ctx.author):
+                allowed, retry_after = self.rate_limiter.allow((ctx.author.id, "lotto:draw"))
+
+                if not allowed:
+                    await ctx.respond(f"❌ 操作過於頻繁，請在 {retry_after:.0f} 秒後再試。", ephemeral=True)
+                    return
+
             pool = lotto.list_pool()
             if not pool:
                 await ctx.respond("抽選池目前沒有成員")
