@@ -66,7 +66,11 @@ class TimeoutRequestView(discord.ui.View):
             )
             await self._finalize(interaction, embed)
         except discord.Forbidden:
-            await interaction.response.send_message("❌ 我沒有權限對這位成員進行禁言。", ephemeral=True)
+            embed = self.build_result_embed(
+                f"❌ 我沒有權限禁言 {self.target.mention}",
+                discord.Color.red(),
+            )
+            await self._finalize(interaction, embed)
         except Exception as e:
             self.logger.error(f"Timeout request approve failed: {e}")
             await interaction.response.send_message("❌ 執行禁言時發生錯誤。", ephemeral=True)
