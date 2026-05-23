@@ -108,7 +108,7 @@ class FunPunish(commands.Cog):
         user: discord.Option(discord.Member, description="要請求禁言的成員", required=True),  # type: ignore
         duration: discord.Option(str, description="禁言時間", required=True, choices=TIMEOUT_DURATION_OPTIONS),  # type: ignore
     ):
-        if not utils.is_operator(ctx.author):
+        if not utils.is_unlimited(ctx.author, ctx.channel):
             allowed, retry_after = self.rate_limiter.allow((ctx.author.id, "timeout-request"))
 
             if not allowed:

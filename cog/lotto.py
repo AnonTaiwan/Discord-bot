@@ -24,7 +24,7 @@ class Lotto(commands.Cog):
     @lotto_command_group.command(name="draw", description="隨機抽選成員")
     async def draw(self, ctx: discord.ApplicationContext):  # type: ignore
         try:
-            if not utils.is_operator(ctx.author):
+            if not utils.is_unlimited(ctx.author, ctx.channel):
                 allowed, retry_after = self.rate_limiter.allow((ctx.author.id, "lotto:draw"))
 
                 if not allowed:

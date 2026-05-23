@@ -82,7 +82,7 @@ def is_developer(user: discord.Member | discord.User) -> bool:
 
 
 def is_operator(user: discord.Member | discord.User) -> bool:
-    """檢查使用者是否為開發者或管理員"""
+    """檢查使用者是否為開發者、管理員或小編"""
     if not isinstance(user, discord.Member):
         return False
     if user.id in DEVELOPER:
@@ -113,6 +113,11 @@ def is_worker(user: discord.Member | discord.User) -> bool:
 def is_in_bot_playground(channel: discord.TextChannel) -> bool:
     """檢查使用者是否在 Bot Playground 頻道"""
     return channel.id == BOT_PLAYGROUND_CHANNEL_ID
+
+
+def is_unlimited(user: discord.Member | discord.User, channel: discord.TextChannel) -> bool:
+    """檢查使用者是否為無限權限（開發者、管理員）"""
+    return is_developer(user) or is_admin(user) or is_in_bot_playground(channel)
 
 
 def check_exist_or_create_json(logger: logging.Logger, file: Path, default_content: dict = {}):
