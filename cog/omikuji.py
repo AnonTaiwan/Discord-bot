@@ -116,7 +116,7 @@ class Omikuji(commands.Cog):
             self.logger.error(f"Error responding to omikuji command: {e}")
             await ctx.respond("抽籤失敗，請稍後再試。")
 
-    @omikuji_command_group.command(name="history", description="Show your omikuji results for the last 5 days")
+    @omikuji_command_group.command(name="history", description="查看最近 5 天的抽籤紀錄")
     async def omikuji_history(self, ctx: discord.ApplicationContext):
         try:
             if not self.__is_valid_request(ctx):
