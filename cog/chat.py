@@ -4,6 +4,7 @@ from discord.ext import commands
 import discord
 from internal import utils
 import model.chat as chat_db
+from internal.rate_limit import SlidingWindowRateLimiter
 
 API_URL = "http://gemma:11434/v1/chat/completions"
 METRICS_URL = "http://gemma:11434/metrics"
@@ -18,6 +19,7 @@ class Chat(commands.Cog):
         self.lock = asyncio.Lock()
         self.system_prompt = self.load_system_prompt()
         self.cached_model_name = None
+        self.rate_limiter = SlidingWindowRateLimiter(limit=1, window_seconds=180)
 
     def load_system_prompt(self) -> str:
         """從 static/Anora.md 動態載入系統提示詞"""
@@ -186,9 +188,28 @@ class Chat(commands.Cog):
             except Exception as e:
                 self.logger.debug(f"無法取得引用訊息: {e}")
 
-        # 若非提及或回覆此 Bot，或發言者不是管理員，直接略過
-        if not (is_mentioned or is_reply_to_bot) or not utils.is_admin(message.author):
+        # 若非提及或回覆此 Bot，直接略過
+        if not (is_mentioned or is_reply_to_bot):
             return
+
+        # 若非管理員，檢查 3 分鐘最多一次的 Rate Limit
+        if not utils.is_admin(message.author):
+            allowed, retry_after = self.rate_limiter.allow(message.author.id)
+            if not allowed:
+                minutes = int(retry_after // 60)
+                seconds = int(retry_after % 60)
+                time_str = f"{minutes}分{seconds}秒" if minutes > 0 else f"{seconds}秒"
+
+                warning_msg = await message.author.send(
+                    f"*光環變成黃色閃電形* 「老師，系統運算資源有限，老師每 3 分鐘只能與彩奈對話一次唷！\n"
+                    f"請等待 {time_str} 後再投遞請求吧~ 💢」"
+                )
+                await asyncio.sleep(10)
+                try:
+                    await warning_msg.delete()
+                except Exception:
+                    pass
+                return
 
         # 清理使用者訊息中的提及標籤
         content = message.content
