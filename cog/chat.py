@@ -200,11 +200,11 @@ class Chat(commands.Cog):
                 seconds = int(retry_after % 60)
                 time_str = f"{minutes}分{seconds}秒" if minutes > 0 else f"{seconds}秒"
 
-                warning_msg = await message.author.send(
+                warning_msg = await message.reply(
                     f"*光環變成黃色閃電形* 「老師，系統運算資源有限，老師每 3 分鐘只能與彩奈對話一次唷！\n"
                     f"請等待 {time_str} 後再投遞請求吧~ 💢」"
                 )
-                await asyncio.sleep(10)
+                await asyncio.sleep(3)
                 try:
                     await warning_msg.delete()
                 except Exception:
