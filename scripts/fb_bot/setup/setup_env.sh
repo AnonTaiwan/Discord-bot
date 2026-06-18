@@ -11,13 +11,13 @@ check_venv() {
     if [ -n "${VIRTUAL_ENV}" ]; then
         echo "✅ 檢測到虛擬環境: ${VIRTUAL_ENV}"
         return 0
-    elif [ -f "venv/bin/activate" ]; then
+    elif [ -f "venv/bin/activate" ] || [ -f "venv/Scripts/activate" ]; then
         echo "✅ 檢測到本地虛擬環境: ./venv"
         return 0
-    elif [ -f ".venv/bin/activate" ]; then
+    elif [ -f ".venv/bin/activate" ] || [ -f ".venv/Scripts/activate" ]; then
         echo "✅ 檢測到本地虛擬環境: ./.venv"
         return 0
-    elif [ -f "env/bin/activate" ]; then
+    elif [ -f "env/bin/activate" ] || [ -f "env/Scripts/activate" ]; then
         echo "✅ 檢測到本地虛擬環境: ./env"
         return 0
     else
@@ -59,10 +59,16 @@ install_dependencies() {
     # 激活虛擬環境
     if [ -f "venv/bin/activate" ]; then
         source venv/bin/activate
+    elif [ -f "venv/Scripts/activate" ]; then
+        source venv/Scripts/activate
     elif [ -f ".venv/bin/activate" ]; then
         source .venv/bin/activate
+    elif [ -f ".venv/Scripts/activate" ]; then
+        source .venv/Scripts/activate
     elif [ -f "env/bin/activate" ]; then
         source env/bin/activate
+    elif [ -f "env/Scripts/activate" ]; then
+        source env/Scripts/activate
     else
         echo "❌ 無法找到虛擬環境"
         return 1
@@ -97,10 +103,22 @@ generate_env_config() {
     # 檢測 Python 路徑
     if [ -f "venv/bin/python" ]; then
         PYTHON_PATH="./venv/bin/python"
+    elif [ -f "venv/Scripts/python.exe" ]; then
+        PYTHON_PATH="./venv/Scripts/python.exe"
+    elif [ -f "venv/Scripts/python" ]; then
+        PYTHON_PATH="./venv/Scripts/python"
     elif [ -f ".venv/bin/python" ]; then
         PYTHON_PATH="./.venv/bin/python"
+    elif [ -f ".venv/Scripts/python.exe" ]; then
+        PYTHON_PATH="./.venv/Scripts/python.exe"
+    elif [ -f ".venv/Scripts/python" ]; then
+        PYTHON_PATH="./.venv/Scripts/python"
     elif [ -f "env/bin/python" ]; then
         PYTHON_PATH="./env/bin/python"
+    elif [ -f "env/Scripts/python.exe" ]; then
+        PYTHON_PATH="./env/Scripts/python.exe"
+    elif [ -f "env/Scripts/python" ]; then
+        PYTHON_PATH="./env/Scripts/python"
     else
         PYTHON_PATH="python3"
     fi
@@ -117,10 +135,16 @@ PYTHON_PATH="${PYTHON_PATH}"
 VENV_ACTIVATE=""
 if [ -f "venv/bin/activate" ]; then
     VENV_ACTIVATE="venv/bin/activate"
+elif [ -f "venv/Scripts/activate" ]; then
+    VENV_ACTIVATE="venv/Scripts/activate"
 elif [ -f ".venv/bin/activate" ]; then
     VENV_ACTIVATE=".venv/bin/activate"
+elif [ -f ".venv/Scripts/activate" ]; then
+    VENV_ACTIVATE=".venv/Scripts/activate"
 elif [ -f "env/bin/activate" ]; then
     VENV_ACTIVATE="env/bin/activate"
+elif [ -f "env/Scripts/activate" ]; then
+    VENV_ACTIVATE="env/Scripts/activate"
 fi
 
 # 檢查是否在虛擬環境中

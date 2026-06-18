@@ -22,11 +22,29 @@ get_python_path() {
     if [ -f "venv/bin/python" ]; then
         echo "./venv/bin/python"
         return 0
+    elif [ -f "venv/Scripts/python.exe" ]; then
+        echo "./venv/Scripts/python.exe"
+        return 0
+    elif [ -f "venv/Scripts/python" ]; then
+        echo "./venv/Scripts/python"
+        return 0
     elif [ -f ".venv/bin/python" ]; then
         echo ./.venv/bin/python
         return 0
+    elif [ -f ".venv/Scripts/python.exe" ]; then
+        echo "./.venv/Scripts/python.exe"
+        return 0
+    elif [ -f ".venv/Scripts/python" ]; then
+        echo "./.venv/Scripts/python"
+        return 0
     elif [ -f "env/bin/python" ]; then
         echo "./env/bin/python"
+        return 0
+    elif [ -f "env/Scripts/python.exe" ]; then
+        echo "./env/Scripts/python.exe"
+        return 0
+    elif [ -f "env/Scripts/python" ]; then
+        echo "./env/Scripts/python"
         return 0
     fi
     
@@ -61,7 +79,8 @@ run_python() {
 check_venv_status() {
     if [ -n "${VIRTUAL_ENV}" ]; then
         echo "✅ 當前在虛擬環境中: ${VIRTUAL_ENV}"
-    elif [ -f "venv/bin/activate" ] || [ -f ".venv/bin/activate" ] || [ -f "env/bin/activate" ]; then
+    elif [ -f "venv/bin/activate" ] || [ -f ".venv/bin/activate" ] || [ -f "env/bin/activate" ] || \
+         [ -f "venv/Scripts/activate" ] || [ -f ".venv/Scripts/activate" ] || [ -f "env/Scripts/activate" ]; then
         echo "✅ 檢測到本地虛擬環境"
     else
         echo "⚠️  未檢測到虛擬環境，使用系統 Python"
