@@ -255,7 +255,13 @@ class Chat(commands.Cog):
                     is_busy = await self.check_ollama_busy()
 
                 # 先將使用者訊息寫入 SQLite
-                chat_db.add_message(channel_id, "user", content)
+                chat_db.add_message(
+                    channel_id,
+                    "user",
+                    content,
+                    user_id=message.author.id,
+                    user_name=message.author.name
+                )
 
                 # 檢查是否需要執行對話歷史壓縮 (估算目前的 Context Token 數)
                 active_messages = chat_db.get_messages(channel_id)
@@ -312,7 +318,13 @@ class Chat(commands.Cog):
                             reply_text = res_data["choices"][0]["message"]["content"]
 
                             # 將機器人回覆寫入 SQLite
-                            chat_db.add_message(channel_id, "assistant", reply_text)
+                            chat_db.add_message(
+                                channel_id,
+                                "assistant",
+                                reply_text,
+                                user_id=self.bot.user.id,
+                                user_name=self.bot.user.display_name
+                            )
 
                             # 回覆使用者
                             await message.reply(reply_text)

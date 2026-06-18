@@ -9,6 +9,8 @@ class ChatMessage(SQLModel, table=True):
     channel_id: int = Field(index=True)
     role: str  # 'user' or 'assistant'
     content: str
+    user_id: Optional[int] = Field(default=None, index=True)
+    user_name: Optional[str] = Field(default=None)
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(utils.TIME_ZONE),
         index=True
@@ -21,9 +23,9 @@ class ChatState(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(utils.TIME_ZONE))
 
 
-def add_message(channel_id: int, role: str, content: str) -> ChatMessage:
+def add_message(channel_id: int, role: str, content: str, user_id: Optional[int] = None, user_name: Optional[str] = None) -> ChatMessage:
     with db.get_session() as session:
-        msg = ChatMessage(channel_id=channel_id, role=role, content=content)
+        msg = ChatMessage(channel_id=channel_id, role=role, content=content, user_id=user_id, user_name=user_name)
         session.add(msg)
         return msg
 
