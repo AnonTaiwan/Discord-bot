@@ -17,6 +17,7 @@ class Chat(commands.Cog):
         self.logger.info("cog/chat.py: 日誌系統初始化完成")
         self.lock = asyncio.Lock()
         self.system_prompt = self.load_system_prompt()
+        self.cached_model_name = None
 
     def load_system_prompt(self) -> str:
         """從 static/Anora.md 動態載入系統提示詞"""
@@ -54,6 +55,24 @@ class Chat(commands.Cog):
             else:
                 tokens += 0.4
         return int(tokens)
+
+    async def get_model_name(self) -> str:
+        """動態偵測並快取 Ollama 當前可用的模型名稱"""
+        if self.cached_model_name:
+            return self.cached_model_name
+        try:
+            async with httpx.AsyncClient(timeout=3.0) as client:
+                res = await client.get("http://gemma:11434/api/tags")
+                if res.status_code == 200:
+                    data = res.json()
+                    models = data.get("models", [])
+                    if models:
+                        self.cached_model_name = models[0]["name"]
+                        self.logger.info(f"成功自動偵測 Ollama 模型名稱: {self.cached_model_name}")
+                        return self.cached_model_name
+        except Exception as e:
+            self.logger.warning(f"無法取得 Ollama 模型名稱，將使用預設值 qwen-test:latest: {e}")
+        return "qwen-test:latest"
 
     async def check_ollama_busy(self) -> bool:
         """讀取 /metrics 指標確認 Ollama 目前是否正在執行其他運算"""
@@ -115,10 +134,11 @@ class Chat(commands.Cog):
         new_summary = old_summary
 
         try:
+            model_name = await self.get_model_name()
             # 發送 API 請求進行對話壓縮
             async with httpx.AsyncClient(timeout=30.0) as client:
                 payload = {
-                    "model": "gemma",
+                    "model": model_name,
                     "messages": [{"role": "user", "content": merge_prompt}],
                 }
                 res = await client.post(API_URL, json=payload)
@@ -253,9 +273,10 @@ class Chat(commands.Cog):
                     for m in active_messages:
                         messages_payload.append({"role": m.role, "content": m.content})
 
+                    model_name = await self.get_model_name()
                     # 發送 API 請求
                     async with httpx.AsyncClient(timeout=45.0) as client:
-                        payload = {"model": "gemma", "messages": messages_payload}
+                        payload = {"model": model_name, "messages": messages_payload}
                         response = await client.post(API_URL, json=payload)
 
                         # 清除排隊訊息
