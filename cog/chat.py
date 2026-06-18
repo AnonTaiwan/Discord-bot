@@ -136,7 +136,7 @@ class Chat(commands.Cog):
         try:
             model_name = await self.get_model_name()
             # 發送 API 請求進行對話壓縮
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=120.0) as client:
                 payload = {
                     "model": model_name,
                     "messages": [{"role": "user", "content": merge_prompt}],
@@ -275,7 +275,7 @@ class Chat(commands.Cog):
 
                     model_name = await self.get_model_name()
                     # 發送 API 請求
-                    async with httpx.AsyncClient(timeout=45.0) as client:
+                    async with httpx.AsyncClient(timeout=180.0) as client:
                         payload = {"model": model_name, "messages": messages_payload}
                         response = await client.post(API_URL, json=payload)
 
@@ -334,6 +334,12 @@ class Chat(commands.Cog):
         await ctx.respond(
             "*光環變為粉色愛心形* 「已經為您重置與彩奈的對話記憶囉！希迪姆的箱子運算資源已完全釋放~ ✨」"
         )
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx: commands.Context, error: Exception):
+        if isinstance(error, commands.CommandNotFound):
+            return
+
 
 
 def setup(bot: commands.Bot):
