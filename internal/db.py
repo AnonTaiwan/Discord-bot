@@ -21,6 +21,32 @@ def init_db() -> None:
 
 
 def run_migrations() -> None:
+    # Resolve any legacy chat migrations in the database
+    if DATABASE_PATH.exists():
+        import sqlite3
+        try:
+            conn = sqlite3.connect(DATABASE_PATH)
+            cursor = conn.cursor()
+            # Check if alembic_version table exists and get its value
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='alembic_version'")
+            if cursor.fetchone():
+                cursor.execute("SELECT version_num FROM alembic_version")
+                row = cursor.fetchone()
+                if row:
+                    current_ver = row[0]
+                    # If the database is on one of the reverted/removed chat migrations, reset it to the last stable migration
+                    if current_ver in ("3516d5f513d1", "b02ad4dee518"):
+                        print(f"Detected reverted migration version '{current_ver}' in database. Performing self-healing clean up...")
+                        # Drop the chatmessage table if it exists
+                        cursor.execute("DROP TABLE IF EXISTS chatmessage")
+                        # Update the alembic version to the last known stable version (afd97277f96b)
+                        cursor.execute("UPDATE alembic_version SET version_num = 'afd97277f96b'")
+                        conn.commit()
+                        print("Self-healing clean up completed successfully.")
+            conn.close()
+        except Exception as e:
+            print(f"Warning: Failed to perform database self-healing checks: {e}")
+
     ini_path = os.path.join(utils.ROOT_DIR, "alembic.ini")
 
     alembic_cfg = Config(ini_path)
