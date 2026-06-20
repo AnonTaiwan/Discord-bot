@@ -2,7 +2,6 @@
 # 核心套件
 py-cord>=2.4.0
 curl_cffi>=0.9.0
-httpx>=0.27.0
 chat_exporter>=2.8.4
 pypinyin>=0.55.0
 pydub>=0.25.1
