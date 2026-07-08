@@ -18,7 +18,7 @@ class Commend(commands.Cog):
         try:
             await user.timeout_for(duration, reason=reason)
         except discord.Forbidden:
-            await ctx.send(f"❌ Cannot timeout {user.mention}")
+            await ctx.send(f"❌ 我沒有權限禁言 {user.mention}")
             return False
         except Exception as e:
             self.logger.error(f"禁言成員 {user} 時發生錯誤：{e}")
@@ -104,7 +104,7 @@ class Commend(commands.Cog):
                 await ctx.send(embed=embed)
         except Exception as e:
             self.logger.error(f"表揚成員時發生錯誤：{e}")
-            await ctx.respond("❌ 發生錯誤，無法完成表揚。")
+            await ctx.send("❌ 發生錯誤，無法完成表揚。")
 
     @commend_command_group.command(name="list", description="查看成員的表揚次數")
     async def show_commendations(self, ctx: discord.ApplicationContext):  # type: ignore
