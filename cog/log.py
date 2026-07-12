@@ -4,7 +4,7 @@ import os
 import asyncio
 import sys
 from datetime import datetime
-from model.log import CommandLog, record_log, log_task
+from model.log import CommandLog, record_log
 from internal import utils
 
 
@@ -101,6 +101,75 @@ class Log(commands.Cog):
         else:
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             self.logger.warning(f"❌ {ctx.author.name} 嘗試使用重啟指令，但沒有權限。")
+
+    @discord.slash_command(name="command_history", description="查看指令與任務的執行歷史紀錄")
+    async def command_history(
+        self,
+        ctx: discord.ApplicationContext,
+        limit: discord.Option(int, description="顯示筆數 (1-50)", min_value=1, max_value=50, default=10),  # type: ignore
+        filter_type: discord.Option(
+            str,
+            description="篩選紀錄類型",
+            choices=["All", "Slash Command", "Text Command", "Background Task"],
+            default="All"
+        ),  # type: ignore
+        user: discord.Option(discord.User, description="篩選特定使用者", default=None, required=False),  # type: ignore
+    ):
+        if not utils.is_developer(ctx.author):
+            await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
+            return
+
+        from internal import db
+        from sqlmodel import select
+
+        try:
+            await ctx.defer(ephemeral=True)
+        except Exception:
+            pass
+
+        try:
+            with db.get_session() as session:
+                sql = select(CommandLog)
+                if user:
+                    sql = sql.where(CommandLog.user_id == user.id)
+
+                if filter_type == "Slash Command":
+                    sql = sql.where(CommandLog.command_content.like("/%"))
+                elif filter_type == "Text Command":
+                    sql = sql.where(CommandLog.command_content.like("!%"))
+                elif filter_type == "Background Task":
+                    sql = sql.where(CommandLog.command_content.like("Task:%"))
+
+                sql = sql.order_by(CommandLog.id.desc()).limit(limit)
+                results = session.exec(sql).all()
+
+            if not results:
+                await ctx.respond("沒有找到任何符合的紀錄。", ephemeral=True)
+                return
+
+            embed = discord.Embed(
+                title=f"📋 指令與任務執行歷史紀錄 (最新 {len(results)} 筆)",
+                color=discord.Color.blue(),
+                timestamp=datetime.now(utils.TIME_ZONE)
+            )
+
+            lines = []
+            for r in results:
+                time_str = r.time.strftime("%m-%d %H:%M:%S")
+                user_info = f"**{r.user_name}**"
+                if r.user_id:
+                    user_info += f" ({r.user_id})"
+
+                lines.append(f"`[{time_str}]` {user_info}: `{r.command_content}`")
+
+            embed.description = "\n".join(lines)
+            if len(embed.description) > 4096:
+                embed.description = embed.description[:4000] + "\n... (內容過長已截斷)"
+
+            await ctx.respond(embed=embed, ephemeral=True)
+        except Exception as e:
+            self.logger.error(f"Error querying command history: {e}")
+            await ctx.respond(f"❌ 查詢時發生錯誤: {e}", ephemeral=True)
 
 
 def setup(bot: commands.Bot):
