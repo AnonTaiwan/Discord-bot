@@ -20,7 +20,7 @@ midnight = [time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)]
 GSAT_day = datetime(year=2026, month=1, day=17, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
 AST_day = datetime(year=2026, month=7, day=13, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
 
-GSAT_AST_candidates = [844613477485772822]
+GSAT_AST_candidates = [844613477485772822, 838291392047743016]
 
 CAP_day = datetime(year=2026, month=5, day=16, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
 
