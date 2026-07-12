@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 from internal import utils
-from cog.log import log_task
+from model.log import log_task
 from datetime import datetime
 from model import say
 

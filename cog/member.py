@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 from typing import List
 from datetime import datetime, timedelta, timezone
 from internal import utils
-from cog.log import log_task
+from model.log import log_task
 
 RECORD_FILE = utils.JSON_DIR / "member.json"
 

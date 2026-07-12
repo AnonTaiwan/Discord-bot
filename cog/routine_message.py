@@ -1,7 +1,7 @@
 from discord.ext import commands, tasks
 from datetime import datetime, time
 from internal import utils
-from cog.log import log_task
+from model.log import log_task
 
 retouch_picture_remind_time = [
     time(hour=14, minute=0, second=0, tzinfo=utils.TIME_ZONE),

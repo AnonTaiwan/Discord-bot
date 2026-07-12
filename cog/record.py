@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 from discord import sinks
 from datetime import datetime
 from internal import utils
-from cog.log import log_task
+from model.log import log_task
 import os
 import shutil
 from pydub import AudioSegment

@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 from datetime import datetime, time
 import random
 from internal import utils
-from cog.log import log_task
+from model.log import log_task
 from model import omikuji
 
 # "大吉" Daikichi

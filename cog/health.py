@@ -4,7 +4,7 @@ from curl_cffi import requests
 from datetime import time
 import asyncio
 from internal import utils
-from cog.log import log_task
+from model.log import log_task
 
 health_message_time = [
     time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE),
