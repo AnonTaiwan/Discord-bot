@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from datetime import datetime, timedelta
 from internal import utils
+from cog.log import log_task
 from model import voice
 
 
@@ -38,6 +39,7 @@ class Voice(commands.Cog):
             self.check_kick_reservation.start()
 
     @tasks.loop(minutes=1)
+    @log_task("check_kick_reservation")
     async def check_kick_reservation(self):
         now = datetime.now(utils.TIME_ZONE)
         due = voice.get_due_kick_reservations(now)

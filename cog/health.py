@@ -4,6 +4,7 @@ from curl_cffi import requests
 from datetime import time
 import asyncio
 from internal import utils
+from cog.log import log_task
 
 health_message_time = [
     time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE),
@@ -32,6 +33,7 @@ class Health(commands.Cog):
             self.health_message.start()
 
     @tasks.loop(time=health_message_time)
+    @log_task("health_message")
     async def health_message(self):
         try:
             message = await self.channel.send("正在確認服務運作狀態...")

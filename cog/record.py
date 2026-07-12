@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from discord import sinks
 from datetime import datetime
 from internal import utils
+from cog.log import log_task
 import os
 import shutil
 from pydub import AudioSegment
@@ -336,6 +337,7 @@ class Record(commands.Cog):
                 pass
 
     @tasks.loop(hours=1)
+    @log_task("restart_recording")
     async def restart_recording(self):
         """定時重啟錄音以防止長時間錄音導致的問題"""
         vc = self.connections.get(self.record_guild.id) if self.record_guild else None

@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 from internal import utils
+from cog.log import log_task
 from datetime import datetime
 from model import say
 
@@ -108,6 +109,7 @@ class Say(commands.Cog):
         await ctx.respond(f"✅ 已成功排程訊息將於 {time} 在 {channel.mention} 傳送。", ephemeral=True)
 
     @tasks.loop(minutes=1)
+    @log_task("check_scheduled_messages")
     async def check_scheduled_messages(self):
         now = datetime.now()
         due = say.get_due_scheduled(now)

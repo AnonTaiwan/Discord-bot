@@ -1,6 +1,7 @@
 from discord.ext import commands, tasks
 from datetime import datetime, time
 from internal import utils
+from cog.log import log_task
 
 retouch_picture_remind_time = [
     time(hour=14, minute=0, second=0, tzinfo=utils.TIME_ZONE),
@@ -53,6 +54,7 @@ class RoutineMessage(commands.Cog):
             self.anon_taiwan_anniversary_remind.start()
 
     @tasks.loop(time=retouch_picture_remind_time)
+    @log_task("retouch_picture_remind")
     async def retouch_picture_remind(self):
         channel = self.bot.get_channel(utils.COSPLAY_CHANNEL_ID)
 
@@ -68,6 +70,7 @@ class RoutineMessage(commands.Cog):
             self.logger.error(f"Error sending retouch picture remind message: {e}")
 
     @tasks.loop(time=fall_remind_time)
+    @log_task("fall_remind")
     async def fall_remind(self):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 
@@ -83,6 +86,7 @@ class RoutineMessage(commands.Cog):
             self.logger.error(f"Error sending fall remind message: {e}")
 
     @tasks.loop(time=GSAT_AST_CAP_remind_time)
+    @log_task("GSAT_AST_remind")
     async def GSAT_AST_remind(self):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 
@@ -108,6 +112,7 @@ class RoutineMessage(commands.Cog):
             self.logger.error(f"Error reminding GSAT_AST candidates: {e}")
 
     @tasks.loop(time=GSAT_AST_CAP_remind_time)
+    @log_task("CAP_remind")
     async def CAP_remind(self):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 
@@ -132,6 +137,7 @@ class RoutineMessage(commands.Cog):
             self.logger.error(f"Error reminding CAP candidates: {e}")
 
     @tasks.loop(time=midnight)
+    @log_task("anon_taiwan_anniversary_remind")
     async def anon_taiwan_anniversary_remind(self):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 
@@ -147,6 +153,7 @@ class RoutineMessage(commands.Cog):
             self.logger.error(f"Error sending anon taiwan anniversary message: {e}")
 
     @tasks.loop(time=midnight)
+    @log_task("lunar_new_year_remind")
     async def lunar_new_year_remind(self):
         channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
 

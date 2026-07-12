@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from datetime import datetime, time
 import random
 from internal import utils
+from cog.log import log_task
 from model import omikuji
 
 # "大吉" Daikichi
@@ -182,6 +183,7 @@ class Omikuji(commands.Cog):
             self.logger.error(f"Error responding to reset-omikuji-all command: {e}")
 
     @tasks.loop(time=daily_reset)
+    @log_task("daily_message")
     async def daily_message(self):
         omikuji.reset_all()
 

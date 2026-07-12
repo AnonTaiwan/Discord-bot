@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from typing import List
 from datetime import datetime, timedelta, timezone
 from internal import utils
+from cog.log import log_task
 
 RECORD_FILE = utils.JSON_DIR / "member.json"
 
@@ -291,6 +292,7 @@ class Member(commands.Cog):
         return no_mygo_members
 
     @tasks.loop(minutes=1)
+    @log_task("auto_detect_non_mygo_members")
     async def auto_detect_non_mygo_members(self):
         if not self.auto_detect:
             return

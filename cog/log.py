@@ -4,7 +4,48 @@ import os
 import asyncio
 import sys
 from datetime import datetime
-from internal import utils
+from typing import Optional
+from functools import wraps
+from sqlmodel import SQLModel, Field
+from internal import utils, db
+
+
+class CommandLog(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    time: datetime = Field(
+        default_factory=lambda: datetime.now(utils.TIME_ZONE),
+        nullable=False
+    )
+    user_name: str = Field(nullable=False)
+    command_content: str = Field(nullable=False)
+    user_id: Optional[int] = Field(default=None, index=True)
+
+
+def record_log(user_name: str, command_content: str, user_id: Optional[int] = None) -> None:
+    try:
+        with db.get_session() as session:
+            log_entry = CommandLog(
+                user_name=user_name,
+                command_content=command_content,
+                user_id=user_id
+            )
+            session.add(log_entry)
+    except Exception as e:
+        utils.get_logger("cog.log").error(f"Failed to record command log to database: {e}")
+
+
+def log_task(task_name: str):
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            record_log(
+                user_name="System",
+                command_content=f"Task: {task_name}",
+                user_id=None
+            )
+            return await func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 class Log(commands.Cog):
@@ -12,6 +53,23 @@ class Log(commands.Cog):
         self.bot = bot
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/log.py: 日誌系統初始化完成")
+
+    @commands.Cog.listener()
+    async def on_application_command(self, ctx: discord.ApplicationContext):
+        options = []
+        if ctx.selected_options:
+            for opt in ctx.selected_options:
+                options.append(f"{opt['name']}={opt['value']}")
+        opt_str = " ".join(options)
+        command_content = f"/{ctx.command.qualified_name}"
+        if opt_str:
+            command_content += f" {opt_str}"
+
+        record_log(
+            user_name=ctx.author.name,
+            command_content=command_content,
+            user_id=ctx.author.id
+        )
 
     @discord.slash_command(name="record_channel", description="記錄指定頻道的訊息")
     async def record_channel(
