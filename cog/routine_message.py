@@ -93,16 +93,13 @@ class RoutineMessage(commands.Cog):
         now = datetime.now(utils.TIME_ZONE)
         today = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
-        days = (GSAT_day - today).days
+        days = (AST_day - today).days
 
         message = ""
         if days > 0:
-            message = f"距離 2026 大學學科能力測驗還有 {days} 天，考生加油！"
+            message = f"距離 2026 大學分科測驗還有 {days} 天，考生加油！"
         elif -2 <= days <= 0:
-            message = f"今天是 2026 大學學科能力測驗 Day {1 - days}，考生加油！"
-        else:
-            days = (AST_day - today).days
-            message = f"距離 2026 大學入學分科測驗還有 {days} 天，考生加油！"
+            message = f"今天是 2026 大學分科測驗 Day {1 - days}，考生加油！"
 
         try:
             candidates_mentions = "\n".join([f"<@{candidate_id}>" for candidate_id in GSAT_AST_candidates])
