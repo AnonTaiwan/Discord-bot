@@ -16,6 +16,7 @@ fall_remind_time = [
 GSAT_AST_CAP_remind_time = [time(hour=8, minute=0, second=0, tzinfo=utils.TIME_ZONE)]
 
 midnight = [time(hour=0, minute=0, second=0, tzinfo=utils.TIME_ZONE)]
+morning = [time(hour=9, minute=0, second=0, tzinfo=utils.TIME_ZONE)]
 
 GSAT_day = datetime(year=2026, month=1, day=17, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
 AST_day = datetime(year=2026, month=7, day=13, hour=0, minute=0, second=0, microsecond=0, tzinfo=utils.TIME_ZONE)
@@ -163,6 +164,18 @@ class RoutineMessage(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error sending lunar new year message: {e}")
 
+    @tasks.loop(time=morning)
+    @log_task("greeting_message")
+    async def greeting_message(self):
+        channel = self.bot.get_channel(utils.OFFTOPIC_CHANNEL_ID)
+
+        now = datetime.now(utils.TIME_ZONE).weekday()
+        weeks = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
+
+        try:
+            await channel.send(f"早安 {weeks[now]}")
+        except Exception as e:
+            self.logger.error(f"Error sending greeting message: {e}")
 
 def setup(bot: commands.Bot):
     bot.add_cog(RoutineMessage(bot))
