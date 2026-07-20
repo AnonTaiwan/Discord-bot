@@ -54,6 +54,11 @@ class RoutineMessage(commands.Cog):
         if not self.anon_taiwan_anniversary_remind.is_running():
             self.anon_taiwan_anniversary_remind.start()
 
+        if not self.greeting_message.is_running():
+            self.greeting_message.start()
+
+
+
     @tasks.loop(time=retouch_picture_remind_time)
     @log_task("retouch_picture_remind")
     async def retouch_picture_remind(self):
