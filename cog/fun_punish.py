@@ -26,12 +26,15 @@ TIMEOUT_DURATION_MAP = {
 
 
 class TimeoutRequestView(discord.ui.View):
-    def __init__(self, logger: logging.Logger, requester: discord.Member | discord.User, target: discord.Member, duration_label: str):
+    def __init__(
+        self, logger: logging.Logger, requester: discord.Member | discord.User, target: discord.Member, duration_label: str, reason: str
+    ):
         super().__init__(timeout=None)
         self.logger = logger
         self.requester = requester
         self.target = target
         self.duration_label = duration_label
+        self.reason = reason
 
     def build_request_embed(self) -> discord.Embed:
         embed = discord.Embed(
@@ -39,6 +42,10 @@ class TimeoutRequestView(discord.ui.View):
             color=discord.Color.orange(),
         )
         embed.add_field(name="Requester", value=self.requester.mention, inline=False)
+
+        if self.reason:
+            embed.add_field(name="Reason", value=self.reason, inline=False)
+
         return embed
 
     def build_result_embed(self, message: str, color: discord.Color) -> discord.Embed:
@@ -107,6 +114,7 @@ class FunPunish(commands.Cog):
         ctx: discord.ApplicationContext,
         user: discord.Option(discord.Member, description="要請求禁言的成員", required=True),  # type: ignore
         duration: discord.Option(str, description="禁言時間", required=True, choices=TIMEOUT_DURATION_OPTIONS),  # type: ignore
+        reason: discord.Option(str, description="禁言原因", required=False, default=""),  # type: ignore
     ):
         if not utils.is_unlimited(ctx.author, ctx.channel):
             allowed, retry_after = self.rate_limiter.allow((ctx.author.id, "timeout-request"))
@@ -115,7 +123,7 @@ class FunPunish(commands.Cog):
                 await ctx.respond(f"❌ 操作過於頻繁，請在 {retry_after:.0f} 秒後再試。", ephemeral=True)
                 return
 
-        view = TimeoutRequestView(self.logger, ctx.author, user, duration)
+        view = TimeoutRequestView(self.logger, ctx.author, user, duration, reason)
         await ctx.respond(embed=view.build_request_embed(), view=view)
 
     @discord.slash_command(name="self-timeout-request", description="發出禁言自己的請求")
