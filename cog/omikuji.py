@@ -28,12 +28,18 @@ exam_days = [
 ]
 
 events = [{
-    "date": datetime(month=1, day=8, tzinfo=utils.TIME_ZONE),
+    "date": {
+        "month" : 1,
+        "day" : 8,
+    },
     "pic_path" : OMIKUJI_STATIC_DIR / "female_suit.png",
     "message" : "抽到的籤是：大吉\n祝長期素食生日快樂",
     "users" : [838291392047743016, 1083753847220076574, 741308613993300058, 776808814455685120, 654273506921414656]
 },{
-    "date": datetime(month=10, day=1, tzinfo=utils.TIME_ZONE),
+    "date":{
+        "month" : 10,
+        "day" : 1,
+    },
     "pic_path" : OMIKUJI_STATIC_DIR / "fabao.jpeg",
     "message" : "抽到的籤是：大吉\n祝法堡店長生日快樂"
 }]
@@ -59,7 +65,7 @@ class Omikuji(commands.Cog):
     async def __fun_event(self, ctx: discord.ApplicationContext) -> bool:
         now = datetime.now(utils.TIME_ZONE)
         for e in events:
-            if e["date"].month == now.month and e["date"].day == now.day:
+            if e["date"]["month"] == now.month and e["date"]["day"] == now.day:
                 if "users" in e and ctx.author.id not in e["users"]:
                     return False
                 
