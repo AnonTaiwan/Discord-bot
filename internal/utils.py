@@ -1,5 +1,5 @@
 import discord
-from datetime import timedelta, timezone
+from datetime import time, timedelta, timezone
 import json
 import logging
 from pathlib import Path
@@ -8,6 +8,11 @@ from internal import config
 # 時區設定
 
 TIME_ZONE = timezone(timedelta(hours=8))
+
+# 常用排程時間設定
+
+MIDNIGHT = [time(hour=0, minute=0, second=0, tzinfo=TIME_ZONE)]
+MORNING = [time(hour=9, minute=0, second=0, tzinfo=TIME_ZONE)]
 
 # 專案路徑
 
