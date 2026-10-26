@@ -1,4 +1,5 @@
 import os
+import sqlite3
 from contextlib import contextmanager
 from typing import Iterator
 from sqlmodel import SQLModel, Session, create_engine
@@ -23,7 +24,6 @@ def init_db() -> None:
 def run_migrations() -> None:
     # Resolve any legacy chat migrations in the database
     if DATABASE_PATH.exists():
-        import sqlite3
         try:
             conn = sqlite3.connect(DATABASE_PATH)
             cursor = conn.cursor()

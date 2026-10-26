@@ -28,7 +28,7 @@ class Log(commands.Cog):
         record_log(
             user_name=ctx.author.name,
             command_content=command_content,
-            user_id=ctx.author.id
+            user_id=ctx.author.id,
         )
 
     @commands.Cog.listener()
@@ -41,7 +41,7 @@ class Log(commands.Cog):
                 record_log(
                     user_name=message.author.name,
                     command_content=message.content,
-                    user_id=message.author.id
+                    user_id=message.author.id,
                 )
 
     @discord.slash_command(name="record_channel", description="記錄指定頻道的訊息")
@@ -111,7 +111,7 @@ class Log(commands.Cog):
             str,
             description="篩選紀錄類型",
             choices=["All", "Slash Command", "Text Command", "Background Task"],
-            default="All"
+            default="All",
         ),  # type: ignore
         user: discord.Option(discord.User, description="篩選特定使用者", default=None, required=False),  # type: ignore
     ):
@@ -150,7 +150,7 @@ class Log(commands.Cog):
             embed = discord.Embed(
                 title=f"📋 指令與任務執行歷史紀錄 (最新 {len(results)} 筆)",
                 color=discord.Color.blue(),
-                timestamp=datetime.now(utils.TIME_ZONE)
+                timestamp=datetime.now(utils.TIME_ZONE),
             )
 
             lines = []
