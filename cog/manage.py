@@ -1,8 +1,10 @@
+import io
+
+import chat_exporter
 import discord
 from discord.ext import commands
+
 from internal import utils
-import chat_exporter
-import io
 
 
 class ManageCog(commands.Cog):

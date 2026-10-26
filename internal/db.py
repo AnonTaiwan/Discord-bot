@@ -2,11 +2,13 @@ import os
 import sqlite3
 from contextlib import contextmanager
 from typing import Iterator
-from sqlmodel import SQLModel, Session, create_engine
-from alembic.config import Config
+
 from alembic import command
-from internal.config import CONFIG
+from alembic.config import Config
+from sqlmodel import Session, SQLModel, create_engine
+
 from internal import utils
+from internal.config import CONFIG
 
 DB_FILENAME = CONFIG.database.filename
 DATABASE_PATH = utils.ROOT_DIR / DB_FILENAME

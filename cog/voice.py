@@ -1,9 +1,11 @@
+from datetime import datetime, timedelta
+
 import discord
 from discord.ext import commands, tasks
-from datetime import datetime, timedelta
+
 from internal import utils
-from model.log import log_task
 from model import voice
+from model.log import log_task
 
 
 class Voice(commands.Cog):

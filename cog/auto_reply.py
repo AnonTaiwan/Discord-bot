@@ -1,8 +1,10 @@
+import random
+
 import discord
 from discord.ext import commands
+from pypinyin import Style, lazy_pinyin
+
 from internal import utils
-import random
-from pypinyin import lazy_pinyin, Style
 
 LLAMA_ID = 870191937913774091
 

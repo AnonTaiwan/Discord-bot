@@ -1,6 +1,8 @@
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
+
 from sqlmodel import Field, SQLModel, select
+
 from internal import db
 
 

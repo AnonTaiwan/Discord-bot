@@ -1,6 +1,8 @@
+import random
+
 import discord
 from discord.ext import commands
-import random
+
 from internal import utils
 
 gacha_rate = [785, 185, 30]  # 各稀有度的抽中機率 N, R, SR

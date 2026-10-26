@@ -1,15 +1,17 @@
-import discord
-from discord.ext import commands, tasks
-from discord import sinks
-from datetime import datetime
-from internal import utils
-from model.log import log_task
+import asyncio
 import os
 import shutil
-from pydub import AudioSegment
 import time
-import asyncio
+from datetime import datetime
+
+import discord
+from discord import sinks
+from discord.ext import commands, tasks
+from pydub import AudioSegment
+
 import internal.GoogleDrive as gdrive
+from internal import utils
+from model.log import log_task
 
 
 class TimedWaveSink(sinks.WaveSink):

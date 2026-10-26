@@ -1,8 +1,10 @@
-from typing import Optional
 from datetime import datetime
-from sqlmodel import Field, SQLModel
-from internal import db, utils
 from functools import wraps
+from typing import Optional
+
+from sqlmodel import Field, SQLModel
+
+from internal import db, utils
 
 
 class CommandLog(SQLModel, table=True):

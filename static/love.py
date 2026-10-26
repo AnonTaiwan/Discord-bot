@@ -1,7 +1,9 @@
+import random
+
 import discord
 from discord.ext import commands
+
 from internal import utils
-import random
 
 
 class Love(commands.Cog):

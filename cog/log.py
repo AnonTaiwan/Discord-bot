@@ -1,11 +1,13 @@
-import discord
-from discord.ext import commands
-import os
 import asyncio
+import os
 import sys
 from datetime import datetime
-from model.log import CommandLog, record_log
+
+import discord
+from discord.ext import commands
+
 from internal import utils
+from model.log import CommandLog, record_log
 
 
 class Log(commands.Cog):
@@ -119,8 +121,9 @@ class Log(commands.Cog):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             return
 
-        from internal import db
         from sqlmodel import select
+
+        from internal import db
 
         try:
             await ctx.defer(ephemeral=True)
