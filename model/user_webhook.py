@@ -1,14 +1,15 @@
-from sqlmodel import SQLModel, Field, select
+from sqlmodel import SQLModel, Field, select, UniqueConstraint
 
 from internal import db
 
 class UserWebhookData(SQLModel, table=True):
-    __tablename__ = "user_webhooks"
+    __table_args__ = (UniqueConstraint("user_id", "channel_id", name="uq_user_channel",),)
 
-    user_id: int = Field(primary_key=True)
-    channel_id: int = Field(primary_key=True)
-    webhook_id: int = Field(nullable=False)
-    webhook_token: str = Field(nullable=False)
+    id: int | None = Field(default=None, primary_key=True,)
+    user_id: int = Field(nullable=False,)
+    channel_id: int = Field(nullable=False,)
+    webhook_id: int = Field(nullable=False,)
+    webhook_token: str = Field(nullable=False,)
 
 def get_webhook_data(user_id: int, channel_id: int) -> UserWebhookData | None:
     with db.get_session() as session:

@@ -188,7 +188,7 @@ async def create_webhook(channel: discord.TextChannel, member_id:int):
         member_data = channel.guild.get_member(member_id)
         if member_data is None:
             return None, None
-        
+
         name = member_data.display_name
         avatar_bytes = await member_data.avatar.read()
         webhook = await channel.create_webhook(name=name, avatar=avatar_bytes)

@@ -1,6 +1,5 @@
 import random
 
-import random
 
 import discord
 from discord.ext import commands
@@ -76,7 +75,7 @@ class AutoReply(commands.Cog):
         try:
             if webhook_user_id is not None and not message.author.bot:
                 webhook_data = user_webhook.get_webhook_data(webhook_user_id, message.channel.id)
-                
+
                 if webhook_data is None or not await utils.is_webhook_avaliable(webhook_data.webhook_id, self.bot):
                     webhook_id, webhook_token = await utils.create_webhook(message.channel,webhook_user_id)
                     if webhook_id is None or webhook_token is None:
@@ -84,7 +83,7 @@ class AutoReply(commands.Cog):
                     await user_webhook.update_user_webhook(webhook_user_id, message.channel.id, webhook_id, webhook_token)
                 else:
                     webhook_id, webhook_token = webhook_data.webhook_id, webhook_data.webhook_token
-                
+
                 async with aiohttp.ClientSession() as session:
                     webhook = Webhook.partial(webhook_id, webhook_token, session=session)
                     await webhook.fetch()
@@ -151,11 +150,11 @@ class AutoReply(commands.Cog):
 
         for sticker_id, probability, match_strings in self.sticker_reply:
             for match_str in match_strings:
-                if (match_str in content_pinyin or match_str in message.content) and random.random() <= probability:    
+                if (match_str in content_pinyin or match_str in message.content) and random.random() <= probability:
                     await self.__send_message(message, sticker_id, replied, is_sticker=True)
                     replied = True
                     break
-                
+
         for webhook_user_id, channel_id, reply_msg, probability, ignore_user_id in self.user_webhook_reply:
             if message.channel.id == channel_id and random.random() <= probability and message.author.id not in ignore_user_id:
                 await self.__send_message(message, reply_msg, True, webhook_user_id=webhook_user_id)
