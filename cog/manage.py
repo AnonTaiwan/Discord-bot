@@ -1,19 +1,24 @@
-import discord
-from discord.ext import commands
-from internal import utils
 import chat_exporter
 import io
+import asyncio
+
+import discord
+from discord.ext import commands
+
+from internal import utils
 
 
 class ManageCog(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot:commands.Bot):
         self.bot = bot
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/manage.py: 管理系統初始化完成")
 
+
     @commands.Cog.listener()
     async def on_ready(self):
         utils.get_logger(__name__).info("ManageCog 已準備就緒")
+        pass
 
     command_group = discord.SlashCommandGroup("delete", "刪除相關指令")
 

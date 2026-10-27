@@ -1,8 +1,16 @@
+import random
+
 import discord
 from discord.ext import commands
-from internal import utils
-import random
+from discord import Webhook
+import aiohttp
 from pypinyin import lazy_pinyin, Style
+
+from internal import utils
+
+from model import user_webhook
+
+
 
 LLAMA_ID = 870191937913774091
 
@@ -38,12 +46,15 @@ class AutoReply(commands.Cog):
             (271297517432340480, "漢堡煎完沒，沒有還不趕快去煎", False, 0.003),  # memelord
             (417680398211088384, "static/xiaoan_spam.png", True, 0.003),  # 小安
         ]
+        self.user_webhook_reply = [ # (WEBHOOK USER ID, CHANNEL ID, reply_msg, probability, IGNORE USER ID)
+            (1481816232712736810, utils.WORKER_CHANNEL_ID, "<:mo_what:1369323410521456662>", 0.002, []), #小安
+        ]
 
     def __ignore_message(self, message: discord.Message) -> bool:
         return message.author.id == self.bot.user.id or message.channel.id == utils.TTS_CHANNEL_ID
 
-    async def __send_message(self, message: discord.Message, reply_msg: str, replied=False, is_sticker=False):
-        if message.reference is not None and not replied:
+    async def __send_message(self, message: discord.Message, reply_msg: str, replied=False, is_sticker=False, webhook_user_id=None):
+        if message.reference is not None and not replied and webhook_user_id is None:
             try:
                 ref_msg = await message.channel.fetch_message(message.reference.message_id)
                 if ref_msg.author.id == self.bot.user.id:
@@ -61,11 +72,31 @@ class AutoReply(commands.Cog):
                 self.logger.error(f"無法取得引用訊息：{e}")
 
         try:
+            if webhook_user_id is not None and not message.author.bot:
+                webhook_data = user_webhook.get_webhook_data(webhook_user_id, message.channel.id)
+                
+                if webhook_data is None or not await utils.is_webhook_avaliable(webhook_data.webhook_id, self.bot):
+                    webhook_id, webhook_token = await utils.create_webhook(message.channel,webhook_user_id)
+                    if webhook_id is None or webhook_token is None:
+                        return
+                    await user_webhook.update_user_webhook(webhook_user_id, message.channel.id, webhook_id, webhook_token)
+                else:
+                    webhook_id, webhook_token = webhook_data.webhook_id, webhook_data.webhook_token
+                
+                async with aiohttp.ClientSession() as session:
+                    webhook = Webhook.partial(webhook_id, webhook_token, session=session)
+                    await webhook.fetch()
+                    await webhook.send(content=reply_msg)
+                return
+        except Exception as e:
+            self.logger.error(f"無法發送 Webhook 訊息：{e}")
+
+        try:
             if is_sticker:
                 sticker_id = int(reply_msg)
                 sticker = self.bot.get_sticker(sticker_id) or await message.guild.fetch_sticker(sticker_id)
                 await message.channel.send(stickers=[sticker])
-            else:
+            elif webhook_user_id is None:
                 await message.channel.send(reply_msg)
         except Exception as e:
             self.logger.error(f"無法發送訊息：{e}")
@@ -111,19 +142,23 @@ class AutoReply(commands.Cog):
                         if message.reference is None
                         else (await message.channel.fetch_message(message.reference.message_id)).author.mention
                     )
-
-                    await self.__send_message(message, reply_msg, replied)
+                    await self.__send_message(message, reply_msg, True)
                     replied = True
 
                     break
 
         for sticker_id, probability, match_strings in self.sticker_reply:
             for match_str in match_strings:
-                if (match_str in content_pinyin or match_str in message.content) and random.random() <= probability:
+                if (match_str in content_pinyin or match_str in message.content) and random.random() <= probability:    
                     await self.__send_message(message, sticker_id, replied, is_sticker=True)
                     replied = True
-
                     break
+                
+        for webhook_user_id, channel_id, reply_msg, probability, ignore_user_id in self.user_webhook_reply:
+            if message.channel.id == channel_id and random.random() <= probability and message.author.id not in ignore_user_id:
+                await self.__send_message(message, reply_msg, True, webhook_user_id=webhook_user_id)
+                replied = True
+                break
 
 
 def setup(bot: commands.Bot):

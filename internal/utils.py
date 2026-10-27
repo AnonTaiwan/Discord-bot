@@ -1,9 +1,13 @@
-import discord
 from datetime import time, timedelta, timezone
 import json
 import logging
 from pathlib import Path
+
+import discord
+from discord.ext import commands
+
 from internal import config
+
 
 # 時區設定
 
@@ -155,3 +159,40 @@ def write_json(logger: logging.Logger, file: Path, data: dict) -> bool:
         except Exception as e:
             logger.error(f"寫入 {file} 時發生錯誤：{e}")
             return False
+
+async def is_webhook_avaliable(webhook_id:int, bot: commands.Bot):
+    try:
+        _ = await bot.fetch_webhook(webhook_id)
+        return True
+    except Exception:
+        return False
+
+
+async def __clean_webhook(channel):
+    webhooks = await channel.webhooks()
+    if len(webhooks) <= 9:
+        return
+    # 選擇要刪除的（例如：保留最新的 9 個）
+    webhooks_to_delete = sorted(webhooks, key=lambda w: w.created_at)[:-9]  # 刪最舊的
+
+    for webhook in webhooks_to_delete:
+        try:
+            await webhook.delete(reason="超過 Discord 限制，自動清除")
+        except Exception:
+            continue
+
+
+async def create_webhook(channel: discord.TextChannel, member_id:int):
+    try:
+        await __clean_webhook(channel)
+        member_data = channel.guild.get_member(member_id)
+        if member_data is None:
+            return None, None
+        
+        name = member_data.display_name
+        avatar_bytes = await member_data.avatar.read()
+        webhook = await channel.create_webhook(name=name, avatar=avatar_bytes)
+        return webhook.id, webhook.token
+    except Exception as e:
+        print(e)
+        return None, None
