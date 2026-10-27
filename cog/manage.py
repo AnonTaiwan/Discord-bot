@@ -1,7 +1,6 @@
-import chat_exporter
 import io
-import asyncio
 
+import chat_exporter
 import discord
 from discord.ext import commands
 

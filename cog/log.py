@@ -1,11 +1,13 @@
-import discord
-from discord.ext import commands
-import os
 import asyncio
+import os
 import sys
 from datetime import datetime
-from model.log import CommandLog, record_log
+
+import discord
+from discord.ext import commands
+
 from internal import utils
+from model.log import CommandLog, record_log
 
 
 class Log(commands.Cog):
@@ -28,7 +30,7 @@ class Log(commands.Cog):
         record_log(
             user_name=ctx.author.name,
             command_content=command_content,
-            user_id=ctx.author.id
+            user_id=ctx.author.id,
         )
 
     @commands.Cog.listener()
@@ -41,7 +43,7 @@ class Log(commands.Cog):
                 record_log(
                     user_name=message.author.name,
                     command_content=message.content,
-                    user_id=message.author.id
+                    user_id=message.author.id,
                 )
 
     @discord.slash_command(name="record_channel", description="記錄指定頻道的訊息")
@@ -111,7 +113,7 @@ class Log(commands.Cog):
             str,
             description="篩選紀錄類型",
             choices=["All", "Slash Command", "Text Command", "Background Task"],
-            default="All"
+            default="All",
         ),  # type: ignore
         user: discord.Option(discord.User, description="篩選特定使用者", default=None, required=False),  # type: ignore
     ):
@@ -119,8 +121,9 @@ class Log(commands.Cog):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
             return
 
-        from internal import db
         from sqlmodel import select
+
+        from internal import db
 
         try:
             await ctx.defer(ephemeral=True)
@@ -150,7 +153,7 @@ class Log(commands.Cog):
             embed = discord.Embed(
                 title=f"📋 指令與任務執行歷史紀錄 (最新 {len(results)} 筆)",
                 color=discord.Color.blue(),
-                timestamp=datetime.now(utils.TIME_ZONE)
+                timestamp=datetime.now(utils.TIME_ZONE),
             )
 
             lines = []

@@ -51,9 +51,11 @@ jobs:
         CI_RUNNING: true
 
     - name: Set Discord Bot Config
+      env:
+        DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_FOR_CI_TOKEN }}
       run: |
         cp config/sample-config.yaml config/config.yaml
-        sed -i 's/Put your discord bot token here/MTUwNTYxNzUxODQxMTM4NzA2Mg.G3gD08.F9HWhvzQXr4WRD14wjFeBiy_nH-3LHHzkcrN4o/' config/config.yaml
+        sed -i "s/Put your discord bot token here/${DISCORD_BOT_TOKEN}/" config/config.yaml
         sed -i 's/discord_id_1/123456789012345678/' config/config.yaml
         sed -i 's/discord_id_2/123456789012345678/' config/config.yaml
         sed -i 's/discord_id_3/123456789012345678/' config/config.yaml

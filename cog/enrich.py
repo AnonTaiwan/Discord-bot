@@ -1,12 +1,14 @@
-import discord
-from discord.ext import commands
-from internal import utils
-import random
-import json
 import base64
-import aiohttp
 import io
+import json
+import random
+
+import aiohttp
+import discord
 from discord import Webhook
+from discord.ext import commands
+
+from internal import utils
 
 
 class EnrichCog(commands.Cog):

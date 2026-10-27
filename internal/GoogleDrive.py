@@ -1,7 +1,8 @@
-from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request
 from pathlib import Path
-from googleapiclient.discovery import build, MediaFileUpload
+
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import MediaFileUpload, build
 
 current_dir = Path(__file__).parent
 

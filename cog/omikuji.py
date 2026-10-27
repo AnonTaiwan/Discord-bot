@@ -1,10 +1,12 @@
+import random
+from datetime import datetime, time
+
 import discord
 from discord.ext import commands, tasks
-from datetime import datetime, time
-import random
+
 from internal import utils
-from model.log import log_task
 from model import omikuji
+from model.log import log_task
 
 # "大吉" Daikichi
 # "吉"   Kichi
@@ -27,22 +29,26 @@ exam_days = [
     (5, 17),
 ]
 
-events = [{
-    "date": {
-        "month" : 1,
-        "day" : 8,
+events = [
+    {
+        "date": {
+            "month": 1,
+            "day": 8,
+        },
+        "pic_path": OMIKUJI_STATIC_DIR / "female_suit.png",
+        "message": "抽到的籤是：大吉\n祝長期素食生日快樂",
+        "users": [838291392047743016, 1083753847220076574, 741308613993300058, 776808814455685120, 654273506921414656],
     },
-    "pic_path" : OMIKUJI_STATIC_DIR / "female_suit.png",
-    "message" : "抽到的籤是：大吉\n祝長期素食生日快樂",
-    "users" : [838291392047743016, 1083753847220076574, 741308613993300058, 776808814455685120, 654273506921414656]
-},{
-    "date":{
-        "month" : 10,
-        "day" : 1,
+    {
+        "date": {
+            "month": 10,
+            "day": 1,
+        },
+        "pic_path": OMIKUJI_STATIC_DIR / "fabao.jpeg",
+        "message": "抽到的籤是：大吉\n祝法堡店長生日快樂",
     },
-    "pic_path" : OMIKUJI_STATIC_DIR / "fabao.jpeg",
-    "message" : "抽到的籤是：大吉\n祝法堡店長生日快樂"
-}]
+]
+
 
 class Omikuji(commands.Cog):
     def __init__(self, bot):
@@ -68,7 +74,7 @@ class Omikuji(commands.Cog):
             if e["date"]["month"] == now.month and e["date"]["day"] == now.day:
                 if "users" in e and ctx.author.id not in e["users"]:
                     return False
-                
+
                 try:
                     if e["pic_path"] and e["pic_path"].exists():
                         pic = discord.File(str(e["pic_path"]))
@@ -80,7 +86,6 @@ class Omikuji(commands.Cog):
                     self.logger.error(f"Error sending sticker: {e}")
                     return True
         return False
-        
 
     def __is_exam_days(self) -> bool:
         now = datetime.now(utils.TIME_ZONE)

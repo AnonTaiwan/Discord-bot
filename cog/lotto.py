@@ -1,6 +1,8 @@
+import random
+
 import discord
 from discord.ext import commands
-import random
+
 from internal import utils
 from internal.rate_limit import SlidingWindowRateLimiter
 from model import lotto
