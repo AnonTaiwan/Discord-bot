@@ -8,11 +8,10 @@ from internal import utils
 
 
 class ManageCog(commands.Cog):
-    def __init__(self, bot:commands.Bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.logger = utils.get_logger(__name__)
         self.logger.info("cog/manage.py: 管理系統初始化完成")
-
 
     @commands.Cog.listener()
     async def on_ready(self):

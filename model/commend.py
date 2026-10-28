@@ -6,7 +6,7 @@ from internal import db
 
 
 class Commendation(SQLModel, table=True):
-    id: int = Field(primary_key=True, default=None)
+    id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(index=True)
     amount: int = Field(default=0, nullable=False)
 

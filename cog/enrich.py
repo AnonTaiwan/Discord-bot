@@ -377,7 +377,5 @@ class EnrichCog(commands.Cog):
             await ctx.respond(f"❌ <@{member.id}> 的 Enrich 功能尚未啟用。", ephemeral=True)
 
 
-
-
 def setup(bot: commands.Bot):
     bot.add_cog(EnrichCog(bot))

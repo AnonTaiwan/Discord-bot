@@ -1,17 +1,13 @@
 import random
 
-
-import discord
-from discord.ext import commands
-from discord import Webhook
 import aiohttp
-from pypinyin import lazy_pinyin, Style
+import discord
+from discord import Webhook
+from discord.ext import commands
+from pypinyin import Style, lazy_pinyin
 
 from internal import utils
-
 from model import user_webhook
-
-
 
 LLAMA_ID = 870191937913774091
 
@@ -47,8 +43,8 @@ class AutoReply(commands.Cog):
             (271297517432340480, "漢堡煎完沒，沒有還不趕快去煎", False, 0.003),  # memelord
             (417680398211088384, "static/xiaoan_spam.png", True, 0.003),  # 小安
         ]
-        self.user_webhook_reply = [ # (WEBHOOK USER ID, CHANNEL ID, reply_msg, probability, IGNORE USER ID)
-            (1481816232712736810, utils.WORKER_CHANNEL_ID, "<:mo_what:1369323410521456662>", 0.002, []), #小安
+        self.user_webhook_reply = [  # (WEBHOOK USER ID, CHANNEL ID, reply_msg, probability, IGNORE USER ID)
+            (1481816232712736810, utils.WORKER_CHANNEL_ID, "<:mo_what:1369323410521456662>", 0.002, []),  # 小安
         ]
 
     def __ignore_message(self, message: discord.Message) -> bool:
@@ -77,7 +73,7 @@ class AutoReply(commands.Cog):
                 webhook_data = user_webhook.get_webhook_data(webhook_user_id, message.channel.id)
 
                 if webhook_data is None or not await utils.is_webhook_avaliable(webhook_data.webhook_id, self.bot):
-                    webhook_id, webhook_token = await utils.create_webhook(message.channel,webhook_user_id)
+                    webhook_id, webhook_token = await utils.create_webhook(message.channel, webhook_user_id)
                     if webhook_id is None or webhook_token is None:
                         return
                     await user_webhook.update_user_webhook(webhook_user_id, message.channel.id, webhook_id, webhook_token)

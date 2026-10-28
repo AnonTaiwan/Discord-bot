@@ -8,7 +8,6 @@ from discord.ext import commands
 
 from internal import config
 
-
 # 時區設定
 
 TIME_ZONE = timezone(timedelta(hours=8))
@@ -160,7 +159,8 @@ def write_json(logger: logging.Logger, file: Path, data: dict) -> bool:
             logger.error(f"寫入 {file} 時發生錯誤：{e}")
             return False
 
-async def is_webhook_avaliable(webhook_id:int, bot: commands.Bot):
+
+async def is_webhook_avaliable(webhook_id: int, bot: commands.Bot):
     try:
         _ = await bot.fetch_webhook(webhook_id)
         return True
@@ -182,7 +182,7 @@ async def __clean_webhook(channel):
             continue
 
 
-async def create_webhook(channel: discord.TextChannel, member_id:int):
+async def create_webhook(channel: discord.TextChannel, member_id: int):
     try:
         await __clean_webhook(channel)
         member_data = channel.guild.get_member(member_id)

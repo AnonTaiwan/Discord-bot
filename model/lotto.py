@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from sqlmodel import Field, SQLModel, select
 
@@ -6,7 +6,7 @@ from internal import db
 
 
 class Lotto(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(index=True, unique=True)
 
 
