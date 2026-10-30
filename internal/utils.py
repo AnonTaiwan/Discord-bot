@@ -190,7 +190,7 @@ async def create_webhook(channel: discord.TextChannel, member_id: int):
             return None, None
 
         name = member_data.display_name
-        avatar_bytes = await member_data.avatar.read()
+        avatar_bytes = await member_data.display_avatar.read()
         webhook = await channel.create_webhook(name=name, avatar=avatar_bytes)
         return webhook.id, webhook.token
     except Exception as e:
