@@ -31,7 +31,7 @@
 ### 3. 設置 Discord Token
 在 `bot.py` 中設置您的 Discord Token：
 ```python
-bot.run('your_discord_token_here')
+bot.run("your_discord_token_here")
 ```
 
 ### 4. 檢查設置
