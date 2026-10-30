@@ -3,9 +3,8 @@ import discord
 from discord import Webhook
 from discord.ext import commands
 
-from model import user_webhook
-
 from internal import utils
+from model import user_webhook
 
 
 class PretendCog(commands.Cog):
