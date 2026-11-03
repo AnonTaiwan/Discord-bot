@@ -1,10 +1,12 @@
 from datetime import datetime
 
+import aiohttp
 import discord
+from discord import Webhook
 from discord.ext import commands, tasks
 
 from internal import utils
-from model import say
+from model import say, user_webhook
 from model.log import log_task
 
 # 預設訊息選項
@@ -31,6 +33,7 @@ class Say(commands.Cog):
         reply: discord.Option(str, description="選擇要回覆的訊息 ID", required=False, default=None),  # type: ignore
         channel: discord.Option(discord.TextChannel, description="選擇頻道", required=False),  # type: ignore
         quick_message: discord.Option(str, description="選擇預設訊息", required=False, choices=QUICK_MESSAGE_OPTIONS),
+        member: discord.Option(discord.Member, description="選擇發言的人", required=False), # type: ignore
     ):  # type: ignore
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
@@ -46,6 +49,10 @@ class Say(commands.Cog):
 
         if not (quick_message or message):
             await ctx.respond("❌ 請至少選擇預設訊息或自訂訊息其中一個。", ephemeral=True)
+            return
+
+        if reply is not None and member is not None:
+            await ctx.respond("❌ 只能選擇 reply 或者 member 其中一個", ephemeral=True)
             return
 
         try:
@@ -68,6 +75,30 @@ class Say(commands.Cog):
 
             if channel is None:
                 channel = ctx.channel
+
+            if member is not None:
+                await ctx.defer(ephemeral=True)
+                webhook_data = user_webhook.get_webhook_data(member.id, channel.id)
+
+                name = member.display_name
+                avatar_bytes = await member.display_avatar.read()
+
+                if webhook_data is None or not await utils.is_webhook_avaliable(webhook_data.webhook_id, self.bot) or webhook_data.name != name or webhook_data.icon != avatar_bytes:
+                    webhook_id, webhook_token = await utils.create_webhook(channel, member.id)
+                    if webhook_id is None or webhook_token is None:
+                        await ctx.respond("❌ 無法建立 Webhook，請確認權限或成員設定。", ephemeral=True)
+                        return
+                    await user_webhook.update_user_webhook(member.id, channel.id, webhook_id, webhook_token, name, avatar_bytes)
+                else:
+                    webhook_id, webhook_token = webhook_data.webhook_id, webhook_data.webhook_token
+
+                async with aiohttp.ClientSession() as session:
+                    webhook = Webhook.partial(webhook_id, webhook_token, session=session)
+                    await webhook.fetch()
+                    await webhook.send(content=message if message else quick_message)
+
+                await ctx.respond(f"✅ 已成功在 {channel.mention} 傳送訊息。", ephemeral=True)
+                return
 
             await channel.send(message if message else quick_message)
             if channel != ctx.channel:
