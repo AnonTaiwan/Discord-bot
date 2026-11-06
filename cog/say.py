@@ -33,7 +33,7 @@ class Say(commands.Cog):
         reply: discord.Option(str, description="選擇要回覆的訊息 ID", required=False, default=None),  # type: ignore
         channel: discord.Option(discord.TextChannel, description="選擇頻道", required=False),  # type: ignore
         quick_message: discord.Option(str, description="選擇預設訊息", required=False, choices=QUICK_MESSAGE_OPTIONS),
-        member: discord.Option(discord.Member, description="選擇發言的人", required=False), # type: ignore
+        member: discord.Option(discord.Member, description="選擇發言的人", required=False),  # type: ignore
     ):  # type: ignore
         if not utils.is_developer(ctx.author):
             await ctx.respond("❌ 你沒有權限使用此指令。", ephemeral=True)
@@ -83,7 +83,12 @@ class Say(commands.Cog):
                 name = member.display_name
                 avatar_bytes = await member.display_avatar.read()
 
-                if webhook_data is None or not await utils.is_webhook_avaliable(webhook_data.webhook_id, self.bot) or webhook_data.name != name or webhook_data.icon != avatar_bytes:
+                if (
+                    webhook_data is None
+                    or not await utils.is_webhook_avaliable(webhook_data.webhook_id, self.bot)
+                    or webhook_data.name != name
+                    or webhook_data.icon != avatar_bytes
+                ):
                     webhook_id, webhook_token = await utils.create_webhook(channel, member.id)
                     if webhook_id is None or webhook_token is None:
                         await ctx.respond("❌ 無法建立 Webhook，請確認權限或成員設定。", ephemeral=True)
